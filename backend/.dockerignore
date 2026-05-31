@@ -1,0 +1,10 @@
+# Ne pas copier dans l'image Docker
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/*.user
+appsettings.Development.json
+.git
+.gitignore
+README.md

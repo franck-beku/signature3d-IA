@@ -1,0 +1,20 @@
+namespace Signature3D.Domain.ValueObjects;
+
+public record Slug
+{
+    public string Value { get; }
+
+    public Slug(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentException("Slug cannot be empty.");
+
+        Value = value.ToLower()
+            .Replace(" ", "-")
+            .Replace("'", "")
+            .Replace("'", "");
+    }
+
+    public static implicit operator string(Slug slug) => slug.Value;
+    public override string ToString() => Value;
+}

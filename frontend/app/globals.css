@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold:        #D4881E;
+  --color-gold-light:  #E09420;
+  --color-gold-dark:   #B8720F;
+  --color-gold-muted:  rgba(212,136,30,0.1);
+  --color-bg:          #FFFFFF;
+  --color-bg-soft:     #FAFAF8;
+  --color-text:        #1A1400;
+  --color-text-soft:   #5A4E3A;
+  --color-text-muted:  #8A7A5A;
+  --color-border:      #E8E2D4;
+  --font-display:      var(--font-cormorant);
+  --font-body:         var(--font-inter);
+}
+
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #FFFFFF;
+  color: #1A1400;
+  font-family: var(--font-body), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  width: 100%;
+  line-height: 1.6;
+}
+
+a, button {
+  transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* ─── Inputs ─── */
+input, textarea, select {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1.5px solid #E8E2D4;
+  border-radius: 10px;
+  padding: 13px 16px;
+  color: #1A1400;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: var(--font-body), sans-serif;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #D4881E;
+  box-shadow: 0 0 0 3px rgba(212,136,30,0.1);
+}
+
+input::placeholder, textarea::placeholder { color: #B0AA9E; }
+select option { background-color: #FFFFFF; color: #1A1400; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: #FAFAF8; }
+::-webkit-scrollbar-thumb { background: #D4881E; border-radius: 4px; }
+
+/* ─── Selection ─── */
+::selection { background: rgba(212,136,30,0.15); color: #B8720F; }
+
+/* ─── Section — sans padding global, géré par chaque section ─── */
+section {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ─── Container — plus large pour respirer ─── */
+.container-main {
+  width: 100%;
+  max-width: 1500px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 56px;
+  padding-right: 56px;
+}
+
+@media (max-width: 900px) {
+  .container-main {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* ─── Eyebrow ─── */
+.section-eyebrow {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.35em;
+  color: #D4881E; margin-bottom: 1rem;
+}
+
+.section-divider {
+  width: 48px; height: 2px;
+  background: linear-gradient(to right, transparent, #D4881E, transparent);
+  margin: 1.5rem auto 0; border-radius: 2px;
+}
+
+/* ─── Buttons ─── */
+.btn-gold {
+  display: inline-flex; align-items: center; gap: 8px;
+  background-color: #D4881E; color: #FFFFFF;
+  border-radius: 10px; padding: 13px 28px;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border: none; cursor: pointer;
+  transition: all 0.3s ease; text-decoration: none;
+}
+
+.btn-gold:hover {
+  background-color: #B8720F;
+  box-shadow: 0 8px 24px rgba(212,136,30,0.3);
+  transform: translateY(-1px); color: #FFFFFF;
+}
+
+.btn-outline-dark {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: #1A1400;
+  border: 1.5px solid #1A1400; border-radius: 10px;
+  padding: 12px 28px; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.3s ease; text-decoration: none;
+}
+
+.btn-outline-dark:hover { background-color: #1A1400; color: #FFFFFF; }
+
+/* ─── Cards ─── */
+.card-white {
+  background-color: #FFFFFF; border: 1.5px solid #E8E2D4;
+  border-radius: 16px; padding: 28px;
+  transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.card-white:hover {
+  border-color: #D4881E;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.card-soft {
+  background-color: #FAFAF8; border: 1.5px solid #E8E2D4;
+  border-radius: 16px; padding: 28px; transition: all 0.3s ease;
+}
+
+.card-soft:hover {
+  border-color: #D4881E; background-color: #FFFFFF;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06); transform: translateY(-2px);
+}
+
+/* ─── Dark section ─── */
+.section-dark { background-color: #1A1400; color: #FFFFFF; }
+
+/* ─── Grids ─── */
+.services-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 768px) { .services-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.realisations-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 768px) { .realisations-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .realisations-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (min-width: 768px) { .metrics-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.steps-grid { display: grid; grid-template-columns: 1fr; gap: 40px; }
+@media (min-width: 768px) { .steps-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; } }
+@media (min-width: 1280px) { .steps-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+
+/* ─── Gold line ─── */
+.gold-line { height: 2px; background: linear-gradient(to right, transparent, #D4881E, transparent); border-radius: 2px; }
