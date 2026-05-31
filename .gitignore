@@ -1,0 +1,17 @@
+﻿# .NET
+**/bin/
+**/obj/
+appsettings.Development.json
+
+# Node / Next.js
+**/node_modules/
+**/.next/
+**/.env.local
+**/.env
+
+# Archives
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
