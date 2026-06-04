@@ -220,4 +220,105 @@ public static class DbSeeder
 
         Console.WriteLine("[Seed] ✅ 5 offres créées : 360°, Matterport, Luxedia IA, 360° + IA, Matterport + IA");
     }
+
+    /// <summary>
+    /// Seed des questions fréquentes (FAQ).
+    /// Indépendant et idempotent : ne fait rien si des FAQ existent déjà.
+    /// </summary>
+    public static async Task SeedFaqsAsync(AppDbContext db)
+    {
+        if (await db.Faqs.AnyAsync())
+        {
+            Console.WriteLine("[Seed] FAQ déjà présentes — seed ignoré.");
+            return;
+        }
+
+        Console.WriteLine("[Seed] Création des FAQ de départ...");
+
+        var faqs = new List<Faq>
+        {
+            new()
+            {
+                Question = "Quelle différence entre 360° et Matterport ?",
+                Answer = "Le 360° permet de présenter un espace avec des vues panoramiques immersives. Matterport va plus loin en créant un jumeau numérique 3D entièrement navigable, avec une sensation plus complète de visite virtuelle.",
+                DisplayOrder = 1,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Qu'est-ce que Luxedia ?",
+                Answer = "Luxedia est l'assistant intelligent de Signature Immersion. Il accompagne les visiteurs pendant l'expérience immersive, répond à leurs questions et les aide à passer à l'action.",
+                DisplayOrder = 2,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "L'IA est-elle personnalisable ?",
+                Answer = "Oui. Luxedia peut être alimentée avec vos propres documents, fiches produits, catalogues, brochures ou informations internes afin de répondre avec précision aux questions de vos visiteurs.",
+                DisplayOrder = 3,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Est-ce que Luxedia utilise Internet pour répondre ?",
+                Answer = "Dans la première version, Luxedia répond uniquement à partir des documents fournis pour votre projet. Cela permet de garder des réponses contrôlées, cohérentes et adaptées à votre entreprise.",
+                DisplayOrder = 4,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Puis-je ajouter mes propres documents ?",
+                Answer = "Oui. Vous pouvez fournir des documents comme des PDF, DOCX, XLSX ou TXT. Ces fichiers servent de base de connaissance pour l'assistant Luxedia.",
+                DisplayOrder = 5,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Est-ce que je peux partager mon expérience par lien ou QR code ?",
+                Answer = "Oui. Chaque projet peut générer un lien public et un QR code afin de partager facilement l'expérience sur un site web, une affiche, une brochure ou directement avec un client.",
+                DisplayOrder = 6,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Est-ce que l'expérience fonctionne sur mobile ?",
+                Answer = "Oui. L'expérience est conçue pour fonctionner sur ordinateur, tablette et téléphone. Sur mobile, l'immersion s'affiche en plein écran avec un bouton flottant pour accéder à Luxedia.",
+                DisplayOrder = 7,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Quels types d'entreprises peuvent utiliser Signature Immersion ?",
+                Answer = "Signature Immersion peut s'adapter à plusieurs secteurs : automobile, immobilier, restauration, hôtellerie, commerce, espaces événementiels et autres environnements nécessitant une présentation immersive.",
+                DisplayOrder = 8,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Combien de temps faut-il pour créer une expérience ?",
+                Answer = "Le délai dépend du service choisi, de la taille de l'espace et du niveau de personnalisation souhaité. Après l'analyse du besoin, nous pouvons proposer un délai adapté à votre projet.",
+                DisplayOrder = 9,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Combien coûte une expérience Signature Immersion ?",
+                Answer = "Le tarif dépend du service choisi, de la taille de l'espace, du niveau d'intégration IA et des besoins du client. Une démonstration ou une soumission personnalisée permet d'établir un prix adapté.",
+                DisplayOrder = 10,
+                IsPublished = true
+            },
+            new()
+            {
+                Question = "Puis-je modifier mon expérience après sa publication ?",
+                Answer = "Oui. Les informations, documents, actions personnalisées et certains contenus peuvent être mis à jour sans devoir reconstruire toute l'expérience.",
+                DisplayOrder = 11,
+                IsPublished = true
+            }
+        };
+
+        db.Faqs.AddRange(faqs);
+        await db.SaveChangesAsync();
+
+        Console.WriteLine("[Seed] ✅ 11 FAQ créées.");
+    }
 }

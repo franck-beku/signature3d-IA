@@ -115,6 +115,7 @@ builder.Services.AddScoped<IDocumentService,  DocumentService>();
 builder.Services.AddScoped<IChatService,      ChatService>();
 builder.Services.AddScoped<IQrCodeService,    QrCodeService>();
 builder.Services.AddScoped<IOfferingService,  OfferingService>();
+builder.Services.AddScoped<IFaqService, FaqService>();
 
 builder.Services.AddScoped<IAIProvider, GroqProvider>();
 
@@ -154,7 +155,8 @@ using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedAsync(db);
-        await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedOfferingsAsync(db);   // ← seed des 5 offres
+        await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedOfferingsAsync(db);
+        await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedFaqsAsync(db);
     }
     catch (Exception ex)
     {
