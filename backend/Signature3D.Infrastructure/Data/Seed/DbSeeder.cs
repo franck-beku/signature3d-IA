@@ -140,4 +140,84 @@ public static class DbSeeder
         Console.WriteLine("[Seed] Secteurs créés : Automobile, Immobilier, Restaurant, Hôtellerie, Commerce, Événementiel");
         Console.WriteLine("[Seed] Client démo : Mercedes Québec avec 3 projets");
     }
+
+    /// <summary>
+    /// Seed des 5 offres commerciales (Offerings).
+    /// Indépendant : s'exécute même si la base est déjà initialisée,
+    /// et ne fait rien si les offres existent déjà (idempotent).
+    /// </summary>
+    public static async Task SeedOfferingsAsync(AppDbContext db)
+    {
+        if (await db.Offerings.AnyAsync())
+        {
+            Console.WriteLine("[Seed] Offres déjà présentes — seed ignoré.");
+            return;
+        }
+
+        Console.WriteLine("[Seed] Création des 5 offres...");
+
+        var offerings = new List<Offering>
+        {
+            new()
+            {
+                Name             = "360°",
+                Slug             = "360",
+                Level            = "Découverte",
+                ShortDescription = "Immersion accessible.",
+                LongDescription  = "Panoramas immersifs haute définition pour une découverte rapide et fluide de votre espace.",
+                Icon             = "panorama",
+                DisplayOrder     = 1,
+                IsActive         = true
+            },
+            new()
+            {
+                Name             = "Matterport",
+                Slug             = "matterport",
+                Level            = "Professionnel",
+                ShortDescription = "Jumeau numérique professionnel.",
+                LongDescription  = "Visite 3D ultra-réaliste de votre espace, navigable librement par le visiteur.",
+                Icon             = "cube",
+                DisplayOrder     = 2,
+                IsActive         = true
+            },
+            new()
+            {
+                Name             = "Luxedia IA",
+                Slug             = "luxedia-ia",
+                Level            = "Intelligence",
+                ShortDescription = "Assistant intelligent.",
+                LongDescription  = "Un ambassadeur IA qui dialogue avec vos visiteurs et répond à leurs questions en temps réel.",
+                Icon             = "sparkles",
+                DisplayOrder     = 3,
+                IsActive         = true
+            },
+            new()
+            {
+                Name             = "360° + IA",
+                Slug             = "360-ia",
+                Level            = "Premium",
+                ShortDescription = "Expérience augmentée.",
+                LongDescription  = "La légèreté du 360° combinée à l'intelligence conversationnelle de Luxedia.",
+                Icon             = "panorama-plus",
+                DisplayOrder     = 4,
+                IsActive         = true
+            },
+            new()
+            {
+                Name             = "Matterport + IA",
+                Slug             = "matterport-ia",
+                Level            = "Signature",
+                ShortDescription = "Solution Signature.",
+                LongDescription  = "L'immersion 3D complète accompagnée de l'assistant Luxedia. Notre offre phare.",
+                Icon             = "cube-plus",
+                DisplayOrder     = 5,
+                IsActive         = true
+            },
+        };
+
+        db.Offerings.AddRange(offerings);
+        await db.SaveChangesAsync();
+
+        Console.WriteLine("[Seed] ✅ 5 offres créées : 360°, Matterport, Luxedia IA, 360° + IA, Matterport + IA");
+    }
 }

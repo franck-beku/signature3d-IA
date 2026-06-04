@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Signature3D.Infrastructure.Data;
@@ -11,9 +12,11 @@ using Signature3D.Infrastructure.Data;
 namespace Signature3D.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260602025801_SectorV2")]
+    partial class SectorV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,52 +285,6 @@ namespace Signature3D.Infrastructure.Migrations
                     b.ToTable("Leads");
                 });
 
-            modelBuilder.Entity("Signature3D.Domain.Entities.Offering", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Icon")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Level")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LongDescription")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ShortDescription")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Offerings");
-                });
-
             modelBuilder.Entity("Signature3D.Domain.Entities.Project", b =>
                 {
                     b.Property<Guid>("Id")
@@ -358,9 +315,6 @@ namespace Signature3D.Infrastructure.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("OfferingId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -382,8 +336,6 @@ namespace Signature3D.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("OfferingId");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -674,10 +626,6 @@ namespace Signature3D.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Signature3D.Domain.Entities.Offering", null)
-                        .WithMany("Projects")
-                        .HasForeignKey("OfferingId");
-
                     b.Navigation("Client");
                 });
 
@@ -727,11 +675,6 @@ namespace Signature3D.Infrastructure.Migrations
             modelBuilder.Entity("Signature3D.Domain.Entities.Document", b =>
                 {
                     b.Navigation("Chunks");
-                });
-
-            modelBuilder.Entity("Signature3D.Domain.Entities.Offering", b =>
-                {
-                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("Signature3D.Domain.Entities.Project", b =>

@@ -12,9 +12,7 @@ using Signature3D.Infrastructure.Storage;
 var builder = WebApplication.CreateBuilder(args);
 
 /* ══════════════════════════════════════════
-   0. PORT — Railway (NOUVEAU)
-   Railway injecte une variable PORT. Kestrel doit écouter sur
-   0.0.0.0:PORT, sinon l'app démarre mais reste injoignable.
+   0. PORT — Railway
    ══════════════════════════════════════════ */
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
@@ -70,8 +68,6 @@ builder.Services.AddAuthorization();
 
 /* ══════════════════════════════════════════
    4. CORS — autoriser le frontend Next.js
-   (MODIFIÉ) On gère plusieurs origines proprement et on évite
-   les valeurs vides/nulles qui font planter la policy.
    ══════════════════════════════════════════ */
 
 builder.Services.AddCors(options =>
@@ -118,6 +114,7 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IDocumentService,  DocumentService>();
 builder.Services.AddScoped<IChatService,      ChatService>();
 builder.Services.AddScoped<IQrCodeService,    QrCodeService>();
+builder.Services.AddScoped<IOfferingService,  OfferingService>();
 
 builder.Services.AddScoped<IAIProvider, GroqProvider>();
 
@@ -139,16 +136,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-/* (MODIFIÉ) Swagger disponible AUSSI en production, le temps de
-   valider le déploiement et la démo. Tu pourras le re-restreindre
-   plus tard en remettant le if (app.Environment.IsDevelopment()). */
 app.UseSwagger();
 app.UseSwaggerUI();
-
-/* (SUPPRIMÉ) app.UseHttpsRedirection();
-   Railway termine le HTTPS au niveau de son proxy ; le conteneur
-   reçoit du HTTP en interne. Garder cette ligne crée des boucles
-   de redirection. On la retire pour Railway. */
 
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
@@ -157,10 +146,6 @@ app.MapControllers();
 
 /* ══════════════════════════════════════════
    9. SEED — initialisation base de données
-   (MODIFIÉ) Protégé par try/catch : si le seed échoue (ex. doublons,
-   base déjà peuplée), l'app démarre quand même au lieu de crasher.
-   ⚠️ Vérifie quand même que DbSeeder.SeedAsync est idempotent
-   (qu'il teste l'existence avant de créer Alain/Franck/Mercedes).
    ══════════════════════════════════════════ */
 
 using (var scope = app.Services.CreateScope())
@@ -169,6 +154,7 @@ using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedAsync(db);
+        await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedOfferingsAsync(db);   // ← seed des 5 offres
     }
     catch (Exception ex)
     {
