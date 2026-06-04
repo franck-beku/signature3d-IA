@@ -157,6 +157,7 @@ using (var scope = app.Services.CreateScope())
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedAsync(db);
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedOfferingsAsync(db);
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedFaqsAsync(db);
+        await Signature3D.Infrastructure.Data.Seed.DbSeeder.UpdateProjectsV2Async(db);
     }
     catch (Exception ex)
     {

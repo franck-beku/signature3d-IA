@@ -15,4 +15,5 @@ public class Sector : BaseEntity
 
     /* Navigation */
     public ICollection<Client> Clients { get; set; } = [];
+    public ICollection<Project> Projects { get; set; } = [];
 }

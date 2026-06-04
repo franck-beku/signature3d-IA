@@ -98,4 +98,34 @@ public class ProjectsController : ControllerBase
 
         return NoContent();
     }
+
+    /* ════════════════════════════════════════
+       VITRINE PUBLIQUE (Réalisations)
+       ════════════════════════════════════════ */
+
+    /// <summary>
+    /// Projets publiés et mis en vedette — pour l'accueil.
+    /// GET /api/projects/featured — public.
+    /// </summary>
+    [HttpGet("featured")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetFeatured()
+    {
+        var result = await _projectService.GetFeaturedAsync();
+        return Ok(result.Data);
+    }
+
+    /// <summary>
+    /// Projets publiés d'un secteur, avec filtre optionnel par offre.
+    /// GET /api/projects/by-sector/automobile
+    /// GET /api/projects/by-sector/automobile?offering=matterport-ia
+    /// Public — utilisé par /realisations/{secteur}.
+    /// </summary>
+    [HttpGet("by-sector/{sectorSlug}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetBySector(string sectorSlug, [FromQuery] string? offering = null)
+    {
+        var result = await _projectService.GetPublishedBySectorAsync(sectorSlug, offering);
+        return Ok(result.Data);
+    }
 }

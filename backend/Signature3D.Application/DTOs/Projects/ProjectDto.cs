@@ -68,3 +68,25 @@ public class CreateButtonDto
     public string Action { get; set; } = "link";
     public int Order { get; set; }
 }
+
+/// <summary>
+/// DTO public léger pour la vitrine (page Réalisations).
+/// Ne contient que ce qu'un visiteur doit voir — pas de données internes
+/// (leads, analytics, documents, client interne).
+/// </summary>
+public class ProjectCardDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;          // sert à construire /embed/{slug}
+    public string? CoverImage { get; set; }
+    public string? ShortDescription { get; set; }
+    public bool IsFeatured { get; set; }
+    public int DisplayOrder { get; set; }
+
+    /* Contexte secteur / offre (pour les libellés et le filtre) */
+    public string? SectorName { get; set; }
+    public string? SectorSlug { get; set; }
+    public string? OfferingName { get; set; }                  // "Matterport + IA"
+    public string? OfferingSlug { get; set; }                  // "matterport-ia" → filtre
+}

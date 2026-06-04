@@ -14,9 +14,23 @@ public class Project : BaseEntity
     public ProjectStatus Status { get; set; } = ProjectStatus.Draft;
     public string? Notes { get; set; }
 
+    /* ── Champs V2 (vitrine) ── */
+    public string? ShortDescription { get; set; }    // description courte (galerie)
+    public string? CoverImage { get; set; }          // image de couverture (galerie)
+    public bool IsPublished { get; set; }            // visible sur le site (défaut false → accord client requis)
+    public bool IsFeatured { get; set; }             // mis en avant sur l'accueil
+    public int DisplayOrder { get; set; }            // ordre d'affichage
+
     /* Relations */
     public Guid ClientId { get; set; }
     public Client Client { get; set; } = null!;
+
+    /* ── Relations V2 (nullables pour ne pas casser l'existant) ── */
+    public Guid? SectorId { get; set; }              // secteur du projet (pilote la vitrine)
+    public Sector? Sector { get; set; }
+    public Guid? OfferingId { get; set; }            // type de service (pour le filtre)
+    public Offering? Offering { get; set; }
+
     public ICollection<ProjectButton> Buttons { get; set; } = [];
     public ICollection<Document> Documents { get; set; } = [];
     public ICollection<Lead> Leads { get; set; } = [];

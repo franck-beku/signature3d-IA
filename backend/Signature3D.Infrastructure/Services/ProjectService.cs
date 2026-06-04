@@ -143,6 +143,62 @@ public class ProjectService : IProjectService
 
         return Result.Ok();
     }
+    
+    /* ════════════════════════════════════════
+       VITRINE PUBLIQUE — page Réalisations
+       Ne renvoie QUE les projets publiés.
+       ════════════════════════════════════════ */
+
+    /// <summary>Projets publiés ET en vedette — pour l'accueil.</summary>
+    public async Task<Result<List<ProjectCardDto>>> GetFeaturedAsync()
+    {
+        var projects = await _db.Projects
+            .Include(p => p.Sector)
+            .Include(p => p.Offering)
+            .Where(p => p.IsPublished && p.IsFeatured)
+            .OrderBy(p => p.DisplayOrder).ThenByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return Result<List<ProjectCardDto>>.Ok(projects.Select(MapToCard).ToList());
+    }
+
+    /// <summary>
+    /// Projets publiés d'un secteur (page /realisations/{secteur}).
+    /// Filtre optionnel par offre (ex: "matterport-ia").
+    /// </summary>
+    public async Task<Result<List<ProjectCardDto>>> GetPublishedBySectorAsync(string sectorSlug, string? offeringSlug = null)
+    {
+        var query = _db.Projects
+            .Include(p => p.Sector)
+            .Include(p => p.Offering)
+            .Where(p => p.IsPublished && p.Sector != null && p.Sector.Slug == sectorSlug);
+
+        if (!string.IsNullOrWhiteSpace(offeringSlug))
+            query = query.Where(p => p.Offering != null && p.Offering.Slug == offeringSlug);
+
+        var projects = await query
+            .OrderBy(p => p.DisplayOrder).ThenByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return Result<List<ProjectCardDto>>.Ok(projects.Select(MapToCard).ToList());
+    }
+
+    /// <summary>Mapping entité → DTO public léger (carte vitrine).</summary>
+    private static ProjectCardDto MapToCard(Project p) => new()
+    {
+        Id = p.Id,
+        Name = p.Name,
+        Slug = p.Slug,
+        CoverImage = p.CoverImage,
+        ShortDescription = p.ShortDescription,
+        IsFeatured = p.IsFeatured,
+        DisplayOrder = p.DisplayOrder,
+        SectorName = p.Sector?.Name,
+        SectorSlug = p.Sector?.Slug,
+        OfferingName = p.Offering?.Name,
+        OfferingSlug = p.Offering?.Slug
+    };
+
 
     /// <summary>Convertit une entité Project en DTO avec l'URL embed.</summary>
     private ProjectDto MapToDto(Project p) => new()

@@ -8,9 +8,14 @@ namespace Signature3D.Application.Interfaces;
 /// </summary>
 public interface IProjectService
 {
+    /* --- Dashboard / embed (existant) --- */
     Task<Result<List<ProjectDto>>> GetByClientAsync(Guid clientId);
     Task<Result<ProjectDto>> GetBySlugAsync(string slug);
     Task<Result<ProjectDto>> CreateAsync(CreateProjectDto dto);
     Task<Result<ProjectDto>> UpdateAsync(Guid id, UpdateProjectDto dto);
     Task<Result> DeleteAsync(Guid id);
+
+    /* --- Vitrine publique (Réalisations) --- */
+    Task<Result<List<ProjectCardDto>>> GetFeaturedAsync();
+    Task<Result<List<ProjectCardDto>>> GetPublishedBySectorAsync(string sectorSlug, string? offeringSlug = null);
 }

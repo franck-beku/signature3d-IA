@@ -321,4 +321,54 @@ public static class DbSeeder
 
         Console.WriteLine("[Seed] ✅ 11 FAQ créées.");
     }
+
+    /// <summary>
+    /// Met à jour les projets existants avec les champs V2 (secteur, offre, publication).
+    /// Idempotent : ne touche qu'aux projets dont le secteur n'est pas encore défini.
+    /// </summary>
+    public static async Task UpdateProjectsV2Async(AppDbContext db)
+    {
+        // On ne fait rien si les projets ont déjà un secteur assigné
+        var projectsToUpdate = await db.Projects
+            .Where(p => p.SectorId == null)
+            .ToListAsync();
+
+        if (projectsToUpdate.Count == 0)
+        {
+            Console.WriteLine("[Seed] Projets déjà à jour (V2) — mise à jour ignorée.");
+            return;
+        }
+
+        // Récupérer le secteur Automobile et l'offre Matterport + IA
+        var sectorAuto = await db.Sectors.FirstOrDefaultAsync(s => s.Slug == "automobile");
+        var offeringMatterportIa = await db.Offerings.FirstOrDefaultAsync(o => o.Slug == "matterport-ia");
+
+        if (sectorAuto is null || offeringMatterportIa is null)
+        {
+            Console.WriteLine("[Seed] ⚠️ Secteur Automobile ou offre Matterport+IA introuvable — mise à jour annulée.");
+            return;
+        }
+
+        Console.WriteLine("[Seed] Mise à jour V2 des projets Mercedes...");
+
+        foreach (var project in projectsToUpdate)
+        {
+            project.SectorId = sectorAuto.Id;
+            project.OfferingId = offeringMatterportIa.Id;
+            project.ShortDescription = "Expérience immersive Mercedes augmentée par Luxedia.";
+            project.IsPublished = true;   // visibles sur la vitrine
+        }
+
+        // Mettre le projet Mercedes CLE en vedette sur l'accueil
+        var cle = projectsToUpdate.FirstOrDefault(p => p.Slug == "mercedes-voiture-1");
+        if (cle is not null)
+        {
+            cle.IsFeatured = true;
+            cle.DisplayOrder = 1;
+        }
+
+        await db.SaveChangesAsync();
+
+        Console.WriteLine($"[Seed] ✅ {projectsToUpdate.Count} projets mis à jour (secteur Automobile, offre Matterport+IA, publiés).");
+    }
 }
