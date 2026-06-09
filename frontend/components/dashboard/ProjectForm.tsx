@@ -1,0 +1,381 @@
+/**
+ * ProjectForm — Formulaire création/édition de projet
+ * Partagé par /dashboard/projets/nouveau et /dashboard/projets/[id]
+ */
+
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star } from 'lucide-react'
+import Link from 'next/link'
+import {
+  projectsApi, clientsApi, sectorsApi, offeringsApi,
+  type ProjectDto, type ClientDto, type SectorDto, type OfferingDto,
+} from '@/lib/api'
+
+const GOLD = '#d4af37'
+
+const inputStyle = {
+  width: '100%', backgroundColor: '#1a1a1a',
+  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
+  padding: '10px 14px', fontSize: '13px', color: 'white' as const,
+  outline: 'none', boxSizing: 'border-box' as const,
+  fontFamily: 'inherit', transition: 'border-color 0.2s ease',
+}
+
+const labelStyle = {
+  display: 'block' as const, fontSize: '11px', color: 'rgba(255,255,255,0.3)',
+  textTransform: 'uppercase' as const, letterSpacing: '0.2em', marginBottom: '6px',
+}
+
+const sectionTitle = {
+  fontSize: '11px', color: GOLD, textTransform: 'uppercase' as const,
+  letterSpacing: '0.25em', margin: '0 0 16px 0', fontWeight: 500,
+}
+
+interface ButtonRow {
+  label: string
+  url: string
+  action: string
+  order: number
+}
+
+interface DetailRow {
+  label: string
+  value: string
+  displayOrder: number
+  isVisible: boolean
+}
+
+interface Props {
+  projectId?: string   // si présent → mode édition
+}
+
+export default function ProjectForm({ projectId }: Props) {
+  const router = useRouter()
+  const isEdit = !!projectId
+
+  const [clients, setClients]     = useState<ClientDto[]>([])
+  const [sectors, setSectors]     = useState<SectorDto[]>([])
+  const [offerings, setOfferings] = useState<OfferingDto[]>([])
+
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving]   = useState(false)
+  const [error, setError]     = useState<string | null>(null)
+
+  // Champs du formulaire
+  const [name, setName]                       = useState('')
+  const [clientId, setClientId]               = useState('')
+  const [sectorId, setSectorId]               = useState('')
+  const [offeringId, setOfferingId]           = useState('')
+  const [matterportId, setMatterportId]       = useState('')
+  const [ambassadorName, setAmbassadorName]   = useState('Luxedia')
+  const [welcomeMessage, setWelcomeMessage]   = useState('')
+  const [shortDescription, setShortDescription] = useState('')
+  const [coverImage, setCoverImage]           = useState('')
+  const [status, setStatus]                   = useState('Active')
+  const [isPublished, setIsPublished]         = useState(false)
+  const [isFeatured, setIsFeatured]           = useState(false)
+  const [displayOrder, setDisplayOrder]       = useState(0)
+  const [buttons, setButtons]                 = useState<ButtonRow[]>([])
+  const [details, setDetails]                 = useState<DetailRow[]>([])
+
+  // Chargement initial : listes déroulantes + projet (si édition)
+  useEffect(() => {
+    const loadAll = async () => {
+      try {
+        const [clientsRes, sectorsRes, offeringsRes] = await Promise.all([
+          clientsApi.getAll(1, 100),
+          sectorsApi.getAll(),
+          offeringsApi.getAll(),
+        ])
+        setClients(clientsRes.items as ClientDto[])
+        setSectors(sectorsRes as SectorDto[])
+        setOfferings(offeringsRes as OfferingDto[])
+
+        if (isEdit && projectId) {
+          // Charger le projet à éditer : on récupère tous les projets et on filtre
+          const all = await projectsApi.getAll()
+          const p = (all as ProjectDto[]).find((x) => x.id === projectId)
+          if (p) {
+            setName(p.name)
+            setClientId(p.clientId)
+            setSectorId(p.sectorId ?? '')
+            setOfferingId(p.offeringId ?? '')
+            setMatterportId(p.matterportId ?? '')
+            setAmbassadorName(p.ambassadorName)
+            setWelcomeMessage(p.welcomeMessage ?? '')
+            setShortDescription(p.shortDescription ?? '')
+            setCoverImage(p.coverImage ?? '')
+            setStatus(p.status)
+            setIsPublished(p.isPublished)
+            setIsFeatured(p.isFeatured)
+            setDisplayOrder(p.displayOrder)
+            setButtons(p.buttons.map((b) => ({ label: b.label, url: b.url ?? '', action: b.action, order: b.order })))
+            setDetails(p.details.map((d) => ({ label: d.label, value: d.value, displayOrder: d.displayOrder, isVisible: d.isVisible })))
+          } else {
+            setError('Projet introuvable.')
+          }
+        }
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadAll()
+  }, [isEdit, projectId])
+
+  const addButton = () => setButtons((prev) => [...prev, { label: '', url: '', action: 'link', order: prev.length }])
+  const removeButton = (i: number) => setButtons((prev) => prev.filter((_, idx) => idx !== i))
+  const updateButton = (i: number, field: keyof ButtonRow, value: string | number) =>
+    setButtons((prev) => prev.map((b, idx) => idx === i ? { ...b, [field]: value } : b))
+
+  const addDetail = () => setDetails((prev) => [...prev, { label: '', value: '', displayOrder: prev.length, isVisible: true }])
+  const removeDetail = (i: number) => setDetails((prev) => prev.filter((_, idx) => idx !== i))
+  const updateDetail = (i: number, field: keyof DetailRow, value: string | number | boolean) =>
+    setDetails((prev) => prev.map((d, idx) => idx === i ? { ...d, [field]: value } : d))
+
+  const handleSave = async () => {
+    if (!name.trim()) { setError('Le nom du projet est obligatoire.'); return }
+    if (!clientId)    { setError('Le client est obligatoire.'); return }
+    setSaving(true)
+    setError(null)
+    try {
+      const cleanButtons = buttons
+        .filter((b) => b.label.trim())
+        .map((b, i) => ({ label: b.label, url: b.url || undefined, action: b.action, order: i }))
+
+      const cleanDetails = details
+        .filter((d) => d.label.trim() && d.value.trim())
+        .map((d, i) => ({ label: d.label, value: d.value, displayOrder: i, isVisible: d.isVisible }))
+
+      if (isEdit && projectId) {
+        await projectsApi.update(projectId, {
+          name, matterportId: matterportId || undefined, ambassadorName,
+          welcomeMessage: welcomeMessage || undefined, status,
+          shortDescription: shortDescription || undefined, coverImage: coverImage || undefined,
+          isPublished, isFeatured, displayOrder,
+          sectorId: sectorId || undefined, offeringId: offeringId || undefined,
+          buttons: cleanButtons,
+          details: cleanDetails,
+        })
+      } else {
+        await projectsApi.create({
+          name, matterportId: matterportId || undefined, ambassadorName,
+          welcomeMessage: welcomeMessage || undefined, clientId,
+          shortDescription: shortDescription || undefined, coverImage: coverImage || undefined,
+          isPublished, isFeatured, displayOrder,
+          sectorId: sectorId || undefined, offeringId: offeringId || undefined,
+          buttons: cleanButtons,
+          details: cleanDetails,
+        })
+      }
+      router.push('/dashboard/projets')
+    } catch (err: any) {
+      setError(err.message)
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0d0d0d', color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>Chargement...</div>
+  }
+
+  return (
+    <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <Link href="/dashboard/projets" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }} className="back-btn">
+          <ArrowLeft size={15} />
+        </Link>
+        <div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>
+            {isEdit ? 'Modifier le projet' : 'Nouveau projet'}
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>Expérience immersive</p>
+        </div>
+      </div>
+
+      <div style={{ padding: '28px 40px', maxWidth: '760px' }}>
+        {error && (
+          <div style={{ padding: '12px 16px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '10px', color: '#f87171', fontSize: '13px', marginBottom: '24px' }}>{error}</div>
+        )}
+
+        {/* SECTION 1 — Informations */}
+        <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+          <p style={sectionTitle}>Informations</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div>
+              <label style={labelStyle}>Nom du projet *</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mercedes CLE 53 AMG" style={inputStyle} className="dash-input" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label style={labelStyle}>Client *</label>
+                <select value={clientId} onChange={(e) => setClientId(e.target.value)} style={inputStyle} className="dash-input">
+                  <option value="">Choisir un client</option>
+                  {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Secteur</label>
+                <select value={sectorId} onChange={(e) => setSectorId(e.target.value)} style={inputStyle} className="dash-input">
+                  <option value="">Aucun</option>
+                  {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Offre / Service</label>
+                <select value={offeringId} onChange={(e) => setOfferingId(e.target.value)} style={inputStyle} className="dash-input">
+                  <option value="">Aucune</option>
+                  {offerings.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Ordre d'affichage</label>
+                <input type="number" value={displayOrder} onChange={(e) => setDisplayOrder(Number(e.target.value))} style={inputStyle} className="dash-input" />
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Description courte (carte vitrine)</label>
+              <input type="text" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} placeholder="Cabriolet sport haute performance avec expérience immersive." style={inputStyle} className="dash-input" />
+            </div>
+            <div>
+              <label style={labelStyle}>Image de couverture (URL)</label>
+              <input type="text" value={coverImage} onChange={(e) => setCoverImage(e.target.value)} placeholder="https://..." style={inputStyle} className="dash-input" />
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 2 — Expérience immersive */}
+        <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+          <p style={sectionTitle}>Expérience immersive</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div>
+              <label style={labelStyle}>Matterport ID <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(255,255,255,0.2)' }}>(vide = IA seule)</span></label>
+              <input type="text" value={matterportId} onChange={(e) => setMatterportId(e.target.value)} placeholder="WJzvgHF44zq" style={inputStyle} className="dash-input" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label style={labelStyle}>Nom de l'ambassadeur IA</label>
+                <input type="text" value={ambassadorName} onChange={(e) => setAmbassadorName(e.target.value)} placeholder="Luxedia" style={inputStyle} className="dash-input" />
+              </div>
+              {isEdit && (
+                <div>
+                  <label style={labelStyle}>Statut</label>
+                  <select value={status} onChange={(e) => setStatus(e.target.value)} style={inputStyle} className="dash-input">
+                    <option value="Active">Actif</option>
+                    <option value="Draft">Brouillon</option>
+                    <option value="Archived">Archivé</option>
+                  </select>
+                </div>
+              )}
+            </div>
+            <div>
+              <label style={labelStyle}>Message d'accueil de Luxedia</label>
+              <textarea value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} rows={2} placeholder="Bienvenue ! Je suis Luxedia, votre assistant. Comment puis-je vous aider ?" style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 3 — Boutons d'action */}
+        <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <p style={{ ...sectionTitle, margin: 0 }}>Boutons d'action</p>
+            <button onClick={addButton} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: GOLD, background: 'none', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
+              <Plus size={12} /> Ajouter
+            </button>
+          </div>
+          {buttons.length === 0 ? (
+            <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px', margin: 0 }}>Aucun bouton. Ajoutez des actions (Réserver, Appeler, Itinéraire...).</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {buttons.map((b, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr auto', gap: '8px', alignItems: 'center' }}>
+                  <input type="text" value={b.label} onChange={(e) => updateButton(i, 'label', e.target.value)} placeholder="Réserver un essai" style={inputStyle} className="dash-input" />
+                  <input type="text" value={b.url} onChange={(e) => updateButton(i, 'url', e.target.value)} placeholder="https://... ou tel:+1..." style={inputStyle} className="dash-input" />
+                  <select value={b.action} onChange={(e) => updateButton(i, 'action', e.target.value)} style={inputStyle} className="dash-input">
+                    <option value="link">Lien</option>
+                    <option value="form">Formulaire</option>
+                    <option value="call">Appel</option>
+                  </select>
+                  <button onClick={() => removeButton(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '6px', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', background: 'none', cursor: 'pointer' }} className="del-btn" title="Retirer">
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* SECTION 4 — Caractéristiques (Prix, Kilométrage, Superficie...) */}
+        <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <p style={{ ...sectionTitle, margin: 0 }}>Caractéristiques</p>
+            <button onClick={addDetail} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: GOLD, background: 'none', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
+              <Plus size={12} /> Ajouter
+            </button>
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '12px', margin: '0 0 16px 0' }}>
+            Infos affichées sur la carte (ex: Prix → 89 900 $, Kilométrage → 12 000 km, Superficie → 2 400 pi²). Masquez celles que vous ne voulez pas montrer.
+          </p>
+          {details.length === 0 ? (
+            <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px', margin: 0 }}>Aucune caractéristique.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {details.map((d, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr auto auto', gap: '8px', alignItems: 'center' }}>
+                  <input type="text" value={d.label} onChange={(e) => updateDetail(i, 'label', e.target.value)} placeholder="Prix" style={inputStyle} className="dash-input" />
+                  <input type="text" value={d.value} onChange={(e) => updateDetail(i, 'value', e.target.value)} placeholder="89 900 $" style={inputStyle} className="dash-input" />
+                  <button onClick={() => updateDetail(i, 'isVisible', !d.isVisible)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '38px', padding: '0 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#1a1a1a', color: d.isVisible ? '#4ade80' : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap' }} title={d.isVisible ? 'Visible' : 'Masqué'}>
+                    {d.isVisible ? <Eye size={13} /> : <EyeOff size={13} />}
+                    {d.isVisible ? 'Visible' : 'Masqué'}
+                  </button>
+                  <button onClick={() => removeDetail(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '38px', borderRadius: '6px', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', background: 'none', cursor: 'pointer' }} className="del-btn" title="Retirer">
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* SECTION 5 — Publication */}
+        <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '24px' }}>
+          <p style={sectionTitle}>Publication</p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={() => setIsPublished(!isPublished)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#1a1a1a', color: isPublished ? '#4ade80' : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '13px' }}>
+              {isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
+              {isPublished ? 'Publié sur le site' : 'Brouillon (non publié)'}
+            </button>
+            <button onClick={() => setIsFeatured(!isFeatured)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#1a1a1a', color: isFeatured ? GOLD : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '13px' }}>
+              <Star size={14} style={isFeatured ? { fill: GOLD } : undefined} />
+              {isFeatured ? 'En vedette' : 'Pas en vedette'}
+            </button>
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '12px', margin: '12px 0 0 0' }}>
+            Un projet doit être « Publié » pour apparaître dans les Réalisations du site. « En vedette » le met en avant sur l'accueil.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '11px 24px', borderRadius: '8px', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }} className="save-btn">
+            <Check size={14} /> {saving ? 'Sauvegarde...' : (isEdit ? 'Enregistrer' : 'Créer le projet')}
+          </button>
+          <Link href="/dashboard/projets" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '11px 24px', cursor: 'pointer', textDecoration: 'none' }}>Annuler</Link>
+        </div>
+      </div>
+
+      <style>{`
+        .back-btn:hover   { color: ${GOLD} !important; border-color: rgba(212,175,55,0.3) !important; }
+        .add-btn:hover    { background-color: rgba(212,175,55,0.1) !important; }
+        .del-btn:hover    { background-color: rgba(248,113,113,0.1) !important; }
+        .save-btn:hover   { background-color: #c9a84c !important; }
+        .dash-input:focus { border-color: ${GOLD} !important; }
+      `}</style>
+    </main>
+  )
+}

@@ -30,7 +30,10 @@ public class ProjectService : IProjectService
     {
         var projects = await _db.Projects
             .Include(p => p.Client)
+            .Include(p => p.Sector)
+            .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
+            .Include(p => p.Details)
             .Where(p => p.ClientId == clientId)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
@@ -43,7 +46,10 @@ public class ProjectService : IProjectService
     {
         var project = await _db.Projects
             .Include(p => p.Client)
+            .Include(p => p.Sector)
+            .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
+            .Include(p => p.Details)
             .FirstOrDefaultAsync(p => p.Slug == slug);
 
         if (project is null)
@@ -75,6 +81,13 @@ public class ProjectService : IProjectService
             LeadEmail = dto.LeadEmail,
             ClientId = dto.ClientId,
             Status = ProjectStatus.Active,
+            ShortDescription = dto.ShortDescription,
+            CoverImage = dto.CoverImage,
+            IsPublished = dto.IsPublished,
+            IsFeatured = dto.IsFeatured,
+            DisplayOrder = dto.DisplayOrder,
+            SectorId = dto.SectorId,
+            OfferingId = dto.OfferingId,
             Buttons = dto.Buttons.Select((b, i) => new ProjectButton
             {
                 Label = b.Label,
@@ -82,6 +95,14 @@ public class ProjectService : IProjectService
                 Action = Enum.TryParse<ButtonActionType>(b.Action, true, out var action)
                     ? action : ButtonActionType.Link,
                 Order = b.Order > 0 ? b.Order : i
+            }).ToList(),
+
+            Details = dto.Details.Select((d, i) => new ProjectDetail
+            {
+                Label = d.Label,
+                Value = d.Value,
+                DisplayOrder = d.DisplayOrder > 0 ? d.DisplayOrder : i,
+                IsVisible = d.IsVisible
             }).ToList()
         };
 
@@ -90,15 +111,19 @@ public class ProjectService : IProjectService
 
         await _db.Entry(project).Reference(p => p.Client).LoadAsync();
 
+        if (project.SectorId.HasValue)
+            await _db.Entry(project).Reference(p => p.Sector).LoadAsync();
+        if (project.OfferingId.HasValue)
+            await _db.Entry(project).Reference(p => p.Offering).LoadAsync();
+
         return Result<ProjectDto>.Ok(MapToDto(project));
     }
 
-    /// <summary>Modifie un projet existant — nom, Matterport ID, boutons.</summary>
+    /// <summary>Modifie un projet existant — nom, Matterport ID, boutons, caractéristiques.</summary>
     public async Task<Result<ProjectDto>> UpdateAsync(Guid id, UpdateProjectDto dto)
     {
         var project = await _db.Projects
             .Include(p => p.Client)
-            .Include(p => p.Buttons)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (project is null)
@@ -109,14 +134,24 @@ public class ProjectService : IProjectService
         project.MatterportId = dto.MatterportId;
         project.AmbassadorName = dto.AmbassadorName;
         project.WelcomeMessage = dto.WelcomeMessage;
+        project.ShortDescription = dto.ShortDescription;
+        project.CoverImage = dto.CoverImage;
+        project.IsPublished = dto.IsPublished;
+        project.IsFeatured = dto.IsFeatured;
+        project.DisplayOrder = dto.DisplayOrder;
+        project.SectorId = dto.SectorId;
+        project.OfferingId = dto.OfferingId;
         project.UpdatedAt = DateTime.UtcNow;
 
         if (Enum.TryParse<ProjectStatus>(dto.Status, out var status))
             project.Status = status;
 
-        // Remplacer les boutons
-        _db.ProjectButtons.RemoveRange(project.Buttons);
-        project.Buttons = dto.Buttons.Select((b, i) => new ProjectButton
+        // 1) Supprimer les anciens boutons et caractéristiques directement en base (robuste, sans tracking)
+        await _db.ProjectButtons.Where(b => b.ProjectId == project.Id).ExecuteDeleteAsync();
+        await _db.ProjectDetails.Where(d => d.ProjectId == project.Id).ExecuteDeleteAsync();
+
+        // 2) Ajouter les nouveaux boutons
+        var newButtons = dto.Buttons.Select((b, i) => new ProjectButton
         {
             Label = b.Label,
             Url = b.Url,
@@ -125,8 +160,28 @@ public class ProjectService : IProjectService
             Order = b.Order > 0 ? b.Order : i,
             ProjectId = project.Id
         }).ToList();
+        _db.ProjectButtons.AddRange(newButtons);
+
+        // 3) Ajouter les nouvelles caractéristiques
+        var newDetails = dto.Details.Select((d, i) => new ProjectDetail
+        {
+            Label = d.Label,
+            Value = d.Value,
+            DisplayOrder = d.DisplayOrder > 0 ? d.DisplayOrder : i,
+            IsVisible = d.IsVisible,
+            ProjectId = project.Id
+        }).ToList();
+        _db.ProjectDetails.AddRange(newDetails);
 
         await _db.SaveChangesAsync();
+
+        // Recharger les relations pour le DTO de retour
+        await _db.Entry(project).Collection(p => p.Buttons).LoadAsync();
+        await _db.Entry(project).Collection(p => p.Details).LoadAsync();
+        if (project.SectorId.HasValue)
+            await _db.Entry(project).Reference(p => p.Sector).LoadAsync();
+        if (project.OfferingId.HasValue)
+            await _db.Entry(project).Reference(p => p.Offering).LoadAsync();
 
         return Result<ProjectDto>.Ok(MapToDto(project));
     }
@@ -143,7 +198,7 @@ public class ProjectService : IProjectService
 
         return Result.Ok();
     }
-    
+
     /* ════════════════════════════════════════
        VITRINE PUBLIQUE — page Réalisations
        Ne renvoie QUE les projets publiés.
@@ -155,11 +210,27 @@ public class ProjectService : IProjectService
         var projects = await _db.Projects
             .Include(p => p.Sector)
             .Include(p => p.Offering)
+            .Include(p => p.Details)
             .Where(p => p.IsPublished && p.IsFeatured)
             .OrderBy(p => p.DisplayOrder).ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
 
         return Result<List<ProjectCardDto>>.Ok(projects.Select(MapToCard).ToList());
+    }
+
+    /// <summary>Retourne TOUS les projets — liste du dashboard.</summary>
+    public async Task<Result<List<ProjectDto>>> GetAllAsync()
+    {
+        var projects = await _db.Projects
+            .Include(p => p.Client)
+            .Include(p => p.Sector)
+            .Include(p => p.Offering)
+            .Include(p => p.Buttons.OrderBy(b => b.Order))
+            .Include(p => p.Details)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+
+        return Result<List<ProjectDto>>.Ok(projects.Select(MapToDto).ToList());
     }
 
     /// <summary>
@@ -171,6 +242,7 @@ public class ProjectService : IProjectService
         var query = _db.Projects
             .Include(p => p.Sector)
             .Include(p => p.Offering)
+            .Include(p => p.Details)
             .Where(p => p.IsPublished && p.Sector != null && p.Sector.Slug == sectorSlug);
 
         if (!string.IsNullOrWhiteSpace(offeringSlug))
@@ -190,15 +262,26 @@ public class ProjectService : IProjectService
         Name = p.Name,
         Slug = p.Slug,
         CoverImage = p.CoverImage,
+        MatterportId = p.MatterportId,
         ShortDescription = p.ShortDescription,
         IsFeatured = p.IsFeatured,
         DisplayOrder = p.DisplayOrder,
         SectorName = p.Sector?.Name,
         SectorSlug = p.Sector?.Slug,
         OfferingName = p.Offering?.Name,
-        OfferingSlug = p.Offering?.Slug
+        OfferingSlug = p.Offering?.Slug,
+        Details = p.Details?
+            .Where(d => d.IsVisible)
+            .OrderBy(d => d.DisplayOrder)
+            .Select(d => new ProjectDetailDto
+            {
+                Id = d.Id,
+                Label = d.Label,
+                Value = d.Value,
+                DisplayOrder = d.DisplayOrder,
+                IsVisible = d.IsVisible
+            }).ToList() ?? []
     };
-
 
     /// <summary>Convertit une entité Project en DTO avec l'URL embed.</summary>
     private ProjectDto MapToDto(Project p) => new()
@@ -212,8 +295,18 @@ public class ProjectService : IProjectService
         WelcomeMessage = p.WelcomeMessage,
         Status = p.Status.ToString(),
         ClientName = p.Client?.Name ?? string.Empty,
+        ClientId = p.ClientId,
         EmbedUrl = $"{_urls.EmbedBaseUrl}/{p.Slug}",
-        Buttons = p.Buttons?.Select(b => new ProjectButtonDto
+        ShortDescription = p.ShortDescription,
+        CoverImage = p.CoverImage,
+        IsPublished = p.IsPublished,
+        IsFeatured = p.IsFeatured,
+        DisplayOrder = p.DisplayOrder,
+        SectorId = p.SectorId,
+        SectorName = p.Sector?.Name,
+        OfferingId = p.OfferingId,
+        OfferingName = p.Offering?.Name,
+        Buttons = p.Buttons?.OrderBy(b => b.Order).Select(b => new ProjectButtonDto
         {
             Id = b.Id,
             Label = b.Label,
@@ -221,6 +314,16 @@ public class ProjectService : IProjectService
             Action = b.Action.ToString().ToLower(),
             Order = b.Order
         }).ToList() ?? [],
+        Details = p.Details?
+            .OrderBy(d => d.DisplayOrder)
+            .Select(d => new ProjectDetailDto
+            {
+                Id = d.Id,
+                Label = d.Label,
+                Value = d.Value,
+                DisplayOrder = d.DisplayOrder,
+                IsVisible = d.IsVisible
+            }).ToList() ?? [],
         CreatedAt = p.CreatedAt
     };
 

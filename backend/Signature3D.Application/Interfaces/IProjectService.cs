@@ -14,6 +14,7 @@ public interface IProjectService
     Task<Result<ProjectDto>> CreateAsync(CreateProjectDto dto);
     Task<Result<ProjectDto>> UpdateAsync(Guid id, UpdateProjectDto dto);
     Task<Result> DeleteAsync(Guid id);
+    Task<Result<List<ProjectDto>>> GetAllAsync();
 
     /* --- Vitrine publique (Réalisations) --- */
     Task<Result<List<ProjectCardDto>>> GetFeaturedAsync();

@@ -1,200 +1,212 @@
+/**
+ * Projets — Dashboard Signature Immersion
+ * Liste des projets (réelle) + accès création/édition.
+ */
+
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
-import { Plus, Search, ExternalLink, QrCode, MoreVertical } from 'lucide-react'
+import { Plus, Search, ExternalLink, Trash2, Pencil, AlertTriangle, Star } from 'lucide-react'
 import Link from 'next/link'
+import { projectsApi, type ProjectDto } from '@/lib/api'
 
-const projets = [
-  {
-    id: '1',
-    name: 'Mercedes Québec',
-    client: 'Mercedes Québec',
-    sector: 'Automobile',
-    status: 'actif',
-    leads: 23,
-    visitors: 342,
-    experiences: 3,
-    slug: 'mercedes-quebec',
-    createdAt: '2025-05-01',
-  },
-  {
-    id: '2',
-    name: 'Restaurant Bella',
-    client: 'Restaurant Bella',
-    sector: 'Restaurant',
-    status: 'actif',
-    leads: 14,
-    visitors: 218,
-    experiences: 1,
-    slug: 'restaurant-bella',
-    createdAt: '2025-05-15',
-  },
-  {
-    id: '3',
-    name: 'Immo Prestige',
-    client: 'Immo Prestige',
-    sector: 'Immobilier',
-    status: 'draft',
-    leads: 0,
-    visitors: 0,
-    experiences: 0,
-    slug: 'immo-prestige',
-    createdAt: '2025-05-20',
-  },
-]
+const GOLD = '#d4af37'
+
+const thStyle = {
+  textAlign: 'left' as const, padding: '14px 16px',
+  fontSize: '11px', textTransform: 'uppercase' as const,
+  letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)',
+  fontWeight: 400, borderBottom: '1px solid rgba(255,255,255,0.05)',
+  whiteSpace: 'nowrap' as const,
+}
+
+const inputStyle = {
+  width: '100%', backgroundColor: '#1a1a1a',
+  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
+  padding: '10px 14px', fontSize: '13px', color: 'white' as const,
+  outline: 'none', boxSizing: 'border-box' as const,
+  fontFamily: 'inherit', transition: 'border-color 0.2s ease',
+}
 
 export default function ProjetsPage() {
-  const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState('Tous')
+  const [projects, setProjects]           = useState<ProjectDto[]>([])
+  const [loading, setLoading]             = useState(true)
+  const [search, setSearch]               = useState('')
+  const [filter, setFilter]               = useState<'tous' | 'publies' | 'brouillons'>('tous')
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [error, setError]                 = useState<string | null>(null)
 
-  const filtered = projets.filter((p) => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
-    const matchFilter = filter === 'Tous' || p.status === filter
-    return matchSearch && matchFilter
-  })
+  const load = () => {
+    setLoading(true)
+    projectsApi.getAll()
+      .then((res) => setProjects(res as ProjectDto[]))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { load() }, [])
+
+  const handleDelete = async (id: string) => {
+    try {
+      await projectsApi.delete(id)
+      setProjects((prev) => prev.filter((p) => p.id !== id))
+      setDeleteConfirm(null)
+    } catch (err: any) {
+      setError(err.message)
+    }
+  }
+
+  const filtered = projects
+    .filter((p) => {
+      const matchSearch =
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.clientName.toLowerCase().includes(search.toLowerCase()) ||
+        (p.sectorName ?? '').toLowerCase().includes(search.toLowerCase())
+      const matchFilter =
+        filter === 'tous' ||
+        (filter === 'publies' && p.isPublished) ||
+        (filter === 'brouillons' && !p.isPublished)
+      return matchSearch && matchFilter
+    })
 
   return (
-    <div className="flex min-h-screen">
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-
-      <main className="flex-1 overflow-auto bg-[#0d0d0d]">
+      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-white/5">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <div>
-            <h1 className="font-display text-2xl font-light text-white">
-              Projets
-            </h1>
-            <p className="text-white/30 text-xs tracking-widest uppercase mt-1">
-              {projets.length} projets au total
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>Projets</h1>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+              {loading ? '...' : `${projects.length} projet${projects.length > 1 ? 's' : ''}`}
             </p>
           </div>
-          <button className="flex items-center gap-2 bg-gold text-void text-xs font-medium px-4 py-2.5 rounded-lg hover:bg-gold-light transition-colors">
-            <Plus size={14} />
-            Nouveau projet
-          </button>
+          <Link href="/dashboard/projets/nouveau" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', textDecoration: 'none' }} className="new-btn">
+            <Plus size={13} /> Nouveau projet
+          </Link>
         </div>
 
-        <div className="px-8 py-6 space-y-5">
+        <div style={{ padding: '28px 40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-          {/* Filtres + Recherche */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="relative flex-1 min-w-48">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-              <input
-                type="text"
-                placeholder="Rechercher un projet..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-dark-1 border border-white/8 rounded-lg pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-gold/40 transition-colors"
-              />
+          {error && (
+            <div style={{ padding: '12px 16px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '10px', color: '#f87171', fontSize: '13px' }}>{error}</div>
+          )}
+
+          {/* Recherche + filtres */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '240px', maxWidth: '320px' }}>
+              <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+              <input type="text" placeholder="Projet, client, secteur..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ ...inputStyle, paddingLeft: '36px' }} className="dash-input" />
             </div>
-            {['Tous', 'actif', 'draft', 'archived'].map((f) => (
+            {([['tous', 'Tous'], ['publies', 'Publiés'], ['brouillons', 'Brouillons']] as const).map(([key, label]) => (
               <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`text-xs px-4 py-2.5 rounded-lg border transition-colors capitalize ${
-                  filter === f
-                    ? 'bg-gold text-void border-gold font-medium'
-                    : 'border-white/8 text-white/40 hover:text-white hover:border-white/20'
-                }`}
+                key={key}
+                onClick={() => setFilter(key)}
+                style={{
+                  fontSize: '12px', padding: '9px 16px', borderRadius: '8px', cursor: 'pointer',
+                  border: filter === key ? `1px solid ${GOLD}` : '1px solid rgba(255,255,255,0.08)',
+                  backgroundColor: filter === key ? GOLD : 'transparent',
+                  color: filter === key ? '#000' : 'rgba(255,255,255,0.4)',
+                  fontWeight: filter === key ? 600 : 400,
+                }}
               >
-                {f}
+                {label}
               </button>
             ))}
           </div>
 
           {/* Table */}
-          <div className="bg-dark-1 border border-white/5 rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5">
-                  <th className="text-left px-5 py-4 text-[11px] uppercase tracking-widest text-white/30 font-normal">Projet</th>
-                  <th className="text-left px-5 py-4 text-[11px] uppercase tracking-widest text-white/30 font-normal">Secteur</th>
-                  <th className="text-left px-5 py-4 text-[11px] uppercase tracking-widest text-white/30 font-normal">Statut</th>
-                  <th className="text-left px-5 py-4 text-[11px] uppercase tracking-widest text-white/30 font-normal">Visiteurs</th>
-                  <th className="text-left px-5 py-4 text-[11px] uppercase tracking-widests text-white/30 font-normal">Leads</th>
-                  <th className="text-left px-5 py-4 text-[11px] uppercase tracking-widest text-white/30 font-normal">Expériences</th>
-                  <th className="text-left px-5 py-4 text-[11px] uppercase tracking-widest text-white/30 font-normal">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((p) => (
-                  <tr key={p.id} className="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-dark-2 border border-white/5 flex items-center justify-center flex-shrink-0">
-                          <span className="text-gold text-xs font-medium">
-                            {p.sector[0]}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-white text-sm font-medium">{p.name}</p>
-                          <p className="text-white/30 text-xs">{p.client}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="text-white/50 text-sm">{p.sector}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={`text-xs px-3 py-1 rounded-full ${
-                        p.status === 'actif'
-                          ? 'bg-green-400/10 text-green-400'
-                          : p.status === 'draft'
-                          ? 'bg-gold/10 text-gold'
-                          : 'bg-white/5 text-white/30'
-                      }`}>
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="text-white/70 text-sm">{p.visitors}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="text-white/70 text-sm">{p.leads}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="text-white/70 text-sm">{p.experiences}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/realisations/${p.slug}`}
-                          target="_blank"
-                          className="w-7 h-7 rounded-lg border border-white/8 flex items-center justify-center text-white/40 hover:text-gold hover:border-gold/30 transition-colors"
-                          title="Voir les expériences"
-                        >
-                          <ExternalLink size={12} />
-                        </Link>
-                        <button
-                          className="w-7 h-7 rounded-lg border border-white/8 flex items-center justify-center text-white/40 hover:text-gold hover:border-gold/30 transition-colors"
-                          title="QR Code"
-                        >
-                          <QrCode size={12} />
-                        </button>
-                        <button
-                          className="w-7 h-7 rounded-lg border border-white/8 flex items-center justify-center text-white/40 hover:text-gold hover:border-gold/30 transition-colors"
-                          title="Plus d'options"
-                        >
-                          <MoreVertical size={12} />
-                        </button>
-                      </div>
-                    </td>
+          <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', overflow: 'hidden' }}>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '48px', color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Chargement...</div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>Projet</th>
+                    <th style={thStyle}>Client</th>
+                    <th style={thStyle}>Secteur</th>
+                    <th style={thStyle}>Offre</th>
+                    <th style={thStyle}>Statut</th>
+                    <th style={{ ...thStyle, textAlign: 'center' as const }}>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {filtered.length === 0 && (
-              <div className="text-center py-12 text-white/20 text-sm">
-                Aucun projet trouvé
-              </div>
+                </thead>
+                <tbody>
+                  {filtered.map((p, i) => {
+                    const isDeletePending = deleteConfirm === p.id
+                    return (
+                      <React.Fragment key={p.id}>
+                        <tr style={{ borderBottom: isDeletePending ? 'none' : (i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none') }} className="client-row">
+                          <td style={{ padding: '14px 16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <span style={{ color: GOLD, fontSize: '12px', fontWeight: 500 }}>{p.name[0]}</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <p style={{ color: 'white', fontSize: '13px', fontWeight: 500, margin: 0 }}>{p.name}</p>
+                                {p.isFeatured && <Star size={12} style={{ color: GOLD, fill: GOLD }} />}
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding: '14px 16px' }}><span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>{p.clientName}</span></td>
+                          <td style={{ padding: '14px 16px' }}><span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>{p.sectorName ?? '—'}</span></td>
+                          <td style={{ padding: '14px 16px' }}><span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>{p.offeringName ?? '—'}</span></td>
+                          <td style={{ padding: '14px 16px' }}>
+                            {p.isPublished
+                              ? <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>Publié</span>
+                              : <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: 'rgba(212,175,55,0.1)', color: GOLD }}>Brouillon</span>}
+                          </td>
+                          <td style={{ padding: '14px 16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                              <a href={p.embedUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }} className="action-btn" title="Voir l'expérience">
+                                <ExternalLink size={12} />
+                              </a>
+                              <Link href={`/dashboard/projets/${p.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '6px', border: `1px solid rgba(212,175,55,0.2)`, color: GOLD, textDecoration: 'none' }} className="edit-btn" title="Modifier">
+                                <Pencil size={12} />
+                              </Link>
+                              <button onClick={() => setDeleteConfirm(isDeletePending ? null : p.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '6px', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', background: 'none', cursor: 'pointer' }} className="del-btn" title="Supprimer">
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        {isDeletePending && (
+                          <tr>
+                            <td colSpan={6} style={{ padding: '12px 16px', backgroundColor: 'rgba(248,113,113,0.05)', borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <AlertTriangle size={14} style={{ color: '#f87171', flexShrink: 0 }} />
+                                <p style={{ color: '#f87171', fontSize: '13px', margin: 0 }}>Supprimer <strong>{p.name}</strong> et toutes ses données (leads, visites) ? Irréversible.</p>
+                                <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                                  <button onClick={() => setDeleteConfirm(null)} style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', background: 'none', cursor: 'pointer' }}>Annuler</button>
+                                  <button onClick={() => handleDelete(p.id)} style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '6px', backgroundColor: '#f87171', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Confirmer</button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    )
+                  })}
+                  {filtered.length === 0 && !loading && (
+                    <tr><td colSpan={6} style={{ textAlign: 'center', padding: '48px', color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Aucun projet trouvé</td></tr>
+                  )}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
       </main>
+
+      <style>{`
+        .new-btn:hover    { background-color: #c9a84c !important; }
+        .client-row:hover { background-color: rgba(255,255,255,0.02) !important; }
+        .action-btn:hover { color: ${GOLD} !important; border-color: rgba(212,175,55,0.3) !important; }
+        .edit-btn:hover   { background-color: rgba(212,175,55,0.1) !important; }
+        .del-btn:hover    { background-color: rgba(248,113,113,0.1) !important; }
+        .dash-input:focus { border-color: ${GOLD} !important; }
+      `}</style>
     </div>
   )
 }

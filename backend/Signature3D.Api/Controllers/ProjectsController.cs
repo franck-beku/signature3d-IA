@@ -128,4 +128,15 @@ public class ProjectsController : ControllerBase
         var result = await _projectService.GetPublishedBySectorAsync(sectorSlug, offering);
         return Ok(result.Data);
     }
+
+    /// <summary>
+    /// Retourne tous les projets — liste du dashboard.
+    /// GET /api/projects
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _projectService.GetAllAsync();
+        return Ok(result.Data);
+    }
 }

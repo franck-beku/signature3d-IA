@@ -78,15 +78,38 @@ export interface SectorDto {
   name: string
   slug: string
   imageUrl?: string
+  description?: string
+  coverImage?: string
+  icon?: string
+  displayOrder: number
+  isActive: boolean
   clientCount: number
 }
 
 export const sectorsApi = {
-  /** Retourne tous les secteurs — utilisé par le site vitrine */
-  getAll: () => apiFetch<SectorDto[]>('/api/sectors'),
+  /** PUBLIC — secteurs actifs (site vitrine) */
+  getActive: () => apiFetch<SectorDto[]>('/api/sectors'),
 
-  /** Retourne un secteur par son slug */
+  /** PUBLIC — un secteur par slug */
   getBySlug: (slug: string) => apiFetch<SectorDto>(`/api/sectors/${slug}`),
+
+  /** DASHBOARD — tous les secteurs (même inactifs) */
+  getAll: () => apiFetch<SectorDto[]>('/api/sectors/all'),
+
+  /** DASHBOARD — créer un secteur */
+  create: (data: {
+    name: string; imageUrl?: string; description?: string
+    coverImage?: string; icon?: string; displayOrder: number; isActive: boolean
+  }) => apiFetch<SectorDto>('/api/sectors', { method: 'POST', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — modifier un secteur */
+  update: (id: string, data: {
+    name: string; imageUrl?: string; description?: string
+    coverImage?: string; icon?: string; displayOrder: number; isActive: boolean
+  }) => apiFetch<SectorDto>(`/api/sectors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — supprimer un secteur */
+  delete: (id: string) => apiFetch(`/api/sectors/${id}`, { method: 'DELETE' }),
 }
 
 /* ══════════════════════════════════════
@@ -166,9 +189,44 @@ export interface ProjectDto {
   welcomeMessage?: string
   status: string
   clientName: string
+  clientId: string
   embedUrl: string
+  shortDescription?: string
+  coverImage?: string
+  isPublished: boolean
+  isFeatured: boolean
+  displayOrder: number
+  sectorId?: string
+  sectorName?: string
+  offeringId?: string
+  offeringName?: string
   buttons: ProjectButtonDto[]
+  details: ProjectDetailDto[]
   createdAt: string
+}
+
+export interface ProjectCardDto {
+  id: string
+  name: string
+  slug: string
+  coverImage?: string
+  matterportId?: string
+  shortDescription?: string
+  isFeatured: boolean
+  displayOrder: number
+  sectorName?: string
+  sectorSlug?: string
+  offeringName?: string
+  offeringSlug?: string
+  details: ProjectDetailDto[]
+}
+
+export interface ProjectDetailDto {
+  id: string
+  label: string
+  value: string
+  displayOrder: number
+  isVisible: boolean
 }
 
 export const projectsApi = {
@@ -180,23 +238,42 @@ export const projectsApi = {
   getBySlug: (slug: string) =>
     apiFetch<ProjectDto>(`/api/projects/slug/${slug}`),
 
+  /** DASHBOARD — tous les projets */
+  getAll: () => apiFetch<ProjectDto[]>('/api/projects'),
   /** Crée un nouveau projet */
   create: (data: {
     name: string; matterportId?: string; ambassadorName: string
     welcomeMessage?: string; leadEmail?: string; clientId: string
+    shortDescription?: string; coverImage?: string
+    isPublished: boolean; isFeatured: boolean; displayOrder: number
+    sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
+    details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
   }) => apiFetch<ProjectDto>('/api/projects', { method: 'POST', body: JSON.stringify(data) }),
-
+  /** Modifie un projet */
   /** Modifie un projet */
   update: (id: string, data: {
     name: string; matterportId?: string; ambassadorName: string
     welcomeMessage?: string; status: string
+    shortDescription?: string; coverImage?: string
+    isPublished: boolean; isFeatured: boolean; displayOrder: number
+    sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
+    details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
   }) => apiFetch<ProjectDto>(`/api/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-
   /** Supprime un projet */
   delete: (id: string) =>
     apiFetch(`/api/projects/${id}`, { method: 'DELETE' }),
+
+  /** PUBLIC — projets vedettes (accueil) */
+  getFeatured: () =>
+    apiFetch<ProjectCardDto[]>('/api/projects/featured'),
+
+  /** PUBLIC — projets publiés d'un secteur, filtre offre optionnel */
+  getBySector: (sectorSlug: string, offering?: string) =>
+    apiFetch<ProjectCardDto[]>(
+      `/api/projects/by-sector/${sectorSlug}${offering ? `?offering=${offering}` : ''}`
+    ),
 }
 
 /* ══════════════════════════════════════
@@ -369,4 +446,78 @@ export const documentsApi = {
   /** Re-indexe un document pour le RAG */
   reindex: (documentId: string) =>
     apiFetch(`/api/documents/${documentId}/index`, { method: 'POST' }),
+}
+
+/* ══════════════════════════════════════
+   OFFRES (Offerings)
+   ══════════════════════════════════════ */
+
+export interface OfferingDto {
+  id: string
+  name: string
+  slug: string
+  shortDescription?: string
+  longDescription?: string
+  icon?: string
+  imageUrl?: string
+  level?: string
+  displayOrder: number
+  isActive: boolean
+}
+
+export const offeringsApi = {
+  /** PUBLIC — offres actives (site vitrine) */
+  getActive: () => apiFetch<OfferingDto[]>('/api/offerings'),
+
+  /** PUBLIC — une offre par slug */
+  getBySlug: (slug: string) => apiFetch<OfferingDto>(`/api/offerings/${slug}`),
+
+  /** DASHBOARD — toutes les offres */
+  getAll: () => apiFetch<OfferingDto[]>('/api/offerings/all'),
+
+  /** DASHBOARD — créer une offre */
+  create: (data: {
+    name: string; shortDescription?: string; longDescription?: string
+    icon?: string; imageUrl?: string; level?: string; displayOrder: number; isActive: boolean
+  }) => apiFetch<OfferingDto>('/api/offerings', { method: 'POST', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — modifier une offre */
+  update: (id: string, data: {
+    name: string; shortDescription?: string; longDescription?: string
+    icon?: string; imageUrl?: string; level?: string; displayOrder: number; isActive: boolean
+  }) => apiFetch<OfferingDto>(`/api/offerings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — supprimer une offre */
+  delete: (id: string) => apiFetch(`/api/offerings/${id}`, { method: 'DELETE' }),
+}
+
+/* ══════════════════════════════════════
+   FAQ
+   ══════════════════════════════════════ */
+
+export interface FaqDto {
+  id: string
+  question: string
+  answer: string
+  displayOrder: number
+  isPublished: boolean
+}
+
+export const faqApi = {
+  /** PUBLIC — FAQ publiées (site vitrine) */
+  getPublished: () => apiFetch<FaqDto[]>('/api/faq'),
+
+  /** DASHBOARD — toutes les FAQ */
+  getAll: () => apiFetch<FaqDto[]>('/api/faq/all'),
+
+  /** DASHBOARD — créer une FAQ */
+  create: (data: { question: string; answer: string; displayOrder: number; isPublished: boolean }) =>
+    apiFetch<FaqDto>('/api/faq', { method: 'POST', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — modifier une FAQ */
+  update: (id: string, data: { question: string; answer: string; displayOrder: number; isPublished: boolean }) =>
+    apiFetch<FaqDto>(`/api/faq/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — supprimer une FAQ */
+  delete: (id: string) => apiFetch(`/api/faq/${id}`, { method: 'DELETE' }),
 }

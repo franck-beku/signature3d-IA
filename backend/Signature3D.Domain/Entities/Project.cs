@@ -37,5 +37,6 @@ public class Project : BaseEntity
     public ICollection<Visit> Visits { get; set; } = [];
     public ICollection<ChatSession> ChatSessions { get; set; } = [];
     public ICollection<AnalyticsEvent> AnalyticsEvents { get; set; } = [];
+    public ICollection<ProjectDetail> Details { get; set; } = [];
     public QrCode? QrCode { get; set; }
 }

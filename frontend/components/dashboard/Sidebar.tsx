@@ -1,6 +1,6 @@
 /**
- * Sidebar — Dashboard Signature 3D IA
- * Version: 3.0 — Messagerie + Agenda ajoutés
+ * Sidebar — Dashboard Signature Immersion
+ * Version: 4.0 — Modules contenu V2 (Projets, Secteurs, Offres, FAQ)
  */
 
 'use client'
@@ -9,18 +9,26 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Users, Bell, Settings, LogOut, BarChart2, FileText, Inbox, MessageSquare, Calendar } from 'lucide-react'
+import { LayoutDashboard, Users, Box, Inbox, Layers, Sparkles, HelpCircle, FileText, BarChart2, Calendar, Bell, Settings, LogOut } from 'lucide-react'
 
 const navItems = [
   { label: 'Vue globale',   href: '/dashboard',               icon: LayoutDashboard },
-  { label: 'Clients',       href: '/dashboard/clients',       icon: Users           },
-  { label: 'Analytics',     href: '/dashboard/analytics',     icon: BarChart2       },
-  { label: 'Leads',         href: '/dashboard/leads',         icon: Inbox           },
-  { label: 'Documents',     href: '/dashboard/documents',     icon: FileText        },
-  { label: 'Messagerie',    href: '/dashboard/messagerie',    icon: MessageSquare   },
-  { label: 'Agenda',        href: '/dashboard/agenda',        icon: Calendar        },
-  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell            },
-  { label: 'Paramètres',    href: '/dashboard/parametres',    icon: Settings        },
+  // CRM
+  { label: 'Clients',       href: '/dashboard/clients',       icon: Users },
+  { label: 'Projets',       href: '/dashboard/projets',       icon: Box },
+  { label: 'Leads',         href: '/dashboard/leads',         icon: Inbox },
+  // Contenu
+  { label: 'Secteurs',      href: '/dashboard/secteurs',      icon: Layers },
+  { label: 'Offres',        href: '/dashboard/offres',        icon: Sparkles },
+  { label: 'FAQ',           href: '/dashboard/faq',           icon: HelpCircle },
+  { label: 'Documents',     href: '/dashboard/documents',     icon: FileText },
+  // Analyse
+  { label: 'Analytics',     href: '/dashboard/analytics',     icon: BarChart2 },
+  // Organisation
+  { label: 'Agenda',        href: '/dashboard/agenda',        icon: Calendar },
+  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
+  // Système
+  { label: 'Paramètres',    href: '/dashboard/parametres',    icon: Settings },
 ]
 
 export default function Sidebar() {
@@ -48,7 +56,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <Link href="/dashboard" style={{ display: 'block' }}>
-          <Image src="/logo-dark.png" alt="Signature 3D IA" width={120} height={40} style={{ height: '32px', width: 'auto' }} />
+          <Image src="/logo-dark.png" alt="Signature Immersion" width={120} height={40} style={{ height: '32px', width: 'auto' }} />
         </Link>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '8px' }}>
           {user?.role === 'admin' ? 'Admin' : 'Développeur'}

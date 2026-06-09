@@ -26,6 +26,7 @@ public class AppDbContext : DbContext
     public DbSet<AnalyticsEvent> AnalyticsEvents => Set<AnalyticsEvent>();
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<ProjectDetail> ProjectDetails => Set<ProjectDetail>();
     public DbSet<QrCode> QrCodes => Set<QrCode>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
