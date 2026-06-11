@@ -1,13 +1,14 @@
 /**
  * EmbedInterface — Signature 3D IA
- * Version: 3.0 — projectSlug passé au chatbot pour appels API Groq
+ * Version: 4.0 — tracking des visites (create au montage + updateDuration au départ)
  */
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import MatterportViewer from './MatterportViewer'
 import AmbassadeurIA from './AmbassadeurIA'
+import { visitsApi } from '@/lib/api'
 
 interface Button {
   label: string
@@ -21,7 +22,23 @@ interface EmbedInterfaceProps {
   ambassadorName: string
   welcomeMessage: string
   buttons:        Button[]
-  projectSlug?:   string  // slug du projet pour l'API chat Groq
+  projectSlug?:   string  // slug du projet pour l'API chat Groq + tracking visites
+}
+
+/**
+ * Mappe le paramètre d'URL ?src= vers une valeur exacte de l'enum VisitSource (backend).
+ * ⚠️ La casse doit correspondre EXACTEMENT aux membres de l'enum, sinon le backend
+ *    tombe silencieusement sur "Unknown" (Enum.TryParse sensible à la casse).
+ *    Valeurs valides : DirectLink | QrCode | Iframe | Unknown
+ */
+function resolveSource(): string {
+  if (typeof window === 'undefined') return 'DirectLink'
+  const src = new URLSearchParams(window.location.search).get('src')
+  switch (src) {
+    case 'qr':     return 'QrCode'
+    case 'iframe': return 'Iframe'
+    default:       return 'DirectLink'
+  }
 }
 
 export default function EmbedInterface({
@@ -29,6 +46,59 @@ export default function EmbedInterface({
   welcomeMessage, buttons, projectSlug
 }: EmbedInterfaceProps) {
   const [isMobileAIOpen, setIsMobileAIOpen] = useState(false)
+
+  /* ── Tracking des visites ──
+     - create() au montage (une seule fois, guard contre le double-montage Strict Mode)
+     - updateDuration() au départ via visibilitychange (fiable sur mobile)
+     Le tracking est silencieux : aucune erreur ne doit perturber l'expérience visiteur. */
+  const visitIdRef    = useRef<string | null>(null)
+  const startTimeRef  = useRef<number>(Date.now())
+  const hasTrackedRef = useRef<boolean>(false)
+  const durationSentRef = useRef<boolean>(false)
+
+  useEffect(() => {
+    // Pas de slug → impossible de tracker (le backend résout la visite par slug)
+    if (!projectSlug) return
+    // Guard : éviter le double-call (re-render + double-montage Strict Mode en dev)
+    if (hasTrackedRef.current) return
+    hasTrackedRef.current = true
+
+    startTimeRef.current = Date.now()
+
+    // 1) Enregistrer la visite
+    visitsApi
+      .create(projectSlug, resolveSource())
+      .then((visit: any) => {
+        if (visit && visit.id) visitIdRef.current = visit.id
+      })
+      .catch(() => { /* silencieux — ne pas perturber le visiteur */ })
+
+    // 2) Envoyer la durée au départ
+    const sendDuration = () => {
+      if (durationSentRef.current) return
+      if (!visitIdRef.current) return
+      const seconds = Math.round((Date.now() - startTimeRef.current) / 1000)
+      if (seconds <= 0) return
+      durationSentRef.current = true
+      visitsApi
+        .updateDuration(visitIdRef.current, seconds)
+        .catch(() => { /* silencieux */ })
+    }
+
+    // visibilitychange : déclenché quand l'onglet passe en arrière-plan / l'app mobile est fermée.
+    // Plus fiable que beforeunload sur mobile (où beforeunload est souvent ignoré).
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') sendDuration()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    // Filet de sécurité desktop
+    window.addEventListener('pagehide', sendDuration)
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('pagehide', sendDuration)
+    }
+  }, [projectSlug])
 
   /* ── IA seule — matterportId vide → chatbot plein écran ── */
   const isIAOnly = !matterportId || matterportId.trim() === ''
