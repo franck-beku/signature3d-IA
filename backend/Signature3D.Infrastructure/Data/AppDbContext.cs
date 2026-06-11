@@ -163,7 +163,7 @@ public class AppDbContext : DbContext
         {
             e.HasKey(x => x.Id);
             e.Property(x => x.EventType).HasConversion<string>();
-            e.Property(x => x.Metadata).HasColumnType("jsonb");
+            e.Property(x => x.Metadata).HasColumnType("text");
 
             e.HasOne(x => x.Project)
              .WithMany(x => x.AnalyticsEvents)
