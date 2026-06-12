@@ -80,6 +80,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Name).HasMaxLength(256);
             e.Property(x => x.Slug).HasMaxLength(256);
             e.Property(x => x.Status).HasConversion<string>();
+            e.Property(x => x.ExperienceType).HasConversion<string>();
 
             // Project → Client (many-to-one)
             e.HasOne(x => x.Client)

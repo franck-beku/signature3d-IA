@@ -76,6 +76,9 @@ public class ProjectService : IProjectService
             Name = dto.Name,
             Slug = slug,
             MatterportId = dto.MatterportId,
+            ExperienceType = Enum.TryParse<ExperienceType>(dto.ExperienceType, true, out var expType)
+                ? expType : Domain.Enums.ExperienceType.Matterport,
+            ExperienceUrl = dto.ExperienceUrl,   
             AmbassadorName = dto.AmbassadorName,
             WelcomeMessage = dto.WelcomeMessage ?? AppConstants.DefaultWelcomeMessage,
             LeadEmail = dto.LeadEmail,
@@ -132,6 +135,9 @@ public class ProjectService : IProjectService
         // Mettre à jour les champs
         project.Name = dto.Name;
         project.MatterportId = dto.MatterportId;
+        project.ExperienceType = Enum.TryParse<ExperienceType>(dto.ExperienceType, true, out var expType)
+            ? expType : Domain.Enums.ExperienceType.Matterport;
+        project.ExperienceUrl = dto.ExperienceUrl;    
         project.AmbassadorName = dto.AmbassadorName;
         project.WelcomeMessage = dto.WelcomeMessage;
         project.ShortDescription = dto.ShortDescription;
@@ -290,6 +296,8 @@ public class ProjectService : IProjectService
         Name = p.Name,
         Slug = p.Slug,
         MatterportId = p.MatterportId,
+        ExperienceType = p.ExperienceType.ToString(),
+        ExperienceUrl = p.ExperienceUrl,
         ThumbnailUrl = p.ThumbnailUrl,
         AmbassadorName = p.AmbassadorName,
         WelcomeMessage = p.WelcomeMessage,

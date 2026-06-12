@@ -45,6 +45,8 @@ public class EmbedsController : ControllerBase
             slug           = project.Slug,
             projectName    = project.Name,
             matterportId   = project.MatterportId ?? string.Empty,
+            experienceType = project.ExperienceType, 
+            experienceUrl  = project.ExperienceUrl,
             ambassadorName = project.AmbassadorName,
             welcomeMessage = project.WelcomeMessage,
             buttons        = project.Buttons,

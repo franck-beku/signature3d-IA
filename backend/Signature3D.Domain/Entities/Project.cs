@@ -7,6 +7,8 @@ public class Project : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public string? MatterportId { get; set; }       // vide = IA seule
+    public ExperienceType ExperienceType { get; set; } = ExperienceType.Matterport;
+    public string? ExperienceUrl { get; set; }
     public string? ThumbnailUrl { get; set; }
     public string AmbassadorName { get; set; } = "Luxedia";
     public string? WelcomeMessage { get; set; }

@@ -9,6 +9,8 @@ public class ProjectDto
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public string? MatterportId { get; set; }
+    public string ExperienceType { get; set; } = "Matterport";
+    public string? ExperienceUrl { get; set; } 
     public string? ThumbnailUrl { get; set; }
     public string AmbassadorName { get; set; } = string.Empty;
     public string? WelcomeMessage { get; set; }
@@ -40,6 +42,8 @@ public class CreateProjectDto
 {
     public string Name { get; set; } = string.Empty;
     public string? MatterportId { get; set; }
+    public string ExperienceType { get; set; } = "Matterport";
+    public string? ExperienceUrl { get; set; }
     public string AmbassadorName { get; set; } = "Luxedia";
     public string? WelcomeMessage { get; set; }
     public string? LeadEmail { get; set; }
@@ -65,6 +69,8 @@ public class UpdateProjectDto
 {
     public string Name { get; set; } = string.Empty;
     public string? MatterportId { get; set; }
+    public string ExperienceType { get; set; } = "Matterport"; 
+    public string? ExperienceUrl { get; set; } 
     public string AmbassadorName { get; set; } = string.Empty;
     public string? WelcomeMessage { get; set; }
     public string Status { get; set; } = string.Empty;
