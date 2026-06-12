@@ -184,6 +184,8 @@ export interface ProjectDto {
   name: string
   slug: string
   matterportId?: string
+  experienceType?: string
+  experienceUrl?: string
   thumbnailUrl?: string
   ambassadorName: string
   welcomeMessage?: string
@@ -243,6 +245,7 @@ export const projectsApi = {
   /** Crée un nouveau projet */
   create: (data: {
     name: string; matterportId?: string; ambassadorName: string
+    experienceType?: string; experienceUrl?: string  
     welcomeMessage?: string; leadEmail?: string; clientId: string
     shortDescription?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
@@ -250,10 +253,11 @@ export const projectsApi = {
     buttons: { label: string; url?: string; action: string; order: number }[]
     details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
   }) => apiFetch<ProjectDto>('/api/projects', { method: 'POST', body: JSON.stringify(data) }),
-  /** Modifie un projet */
+  
   /** Modifie un projet */
   update: (id: string, data: {
     name: string; matterportId?: string; ambassadorName: string
+    experienceType?: string; experienceUrl?: string
     welcomeMessage?: string; status: string
     shortDescription?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number

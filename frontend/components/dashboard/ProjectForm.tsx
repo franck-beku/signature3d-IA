@@ -70,6 +70,8 @@ export default function ProjectForm({ projectId }: Props) {
   const [sectorId, setSectorId]               = useState('')
   const [offeringId, setOfferingId]           = useState('')
   const [matterportId, setMatterportId]       = useState('')
+  const [experienceType, setExperienceType]   = useState('Matterport')
+  const [experienceUrl, setExperienceUrl]     = useState('')
   const [ambassadorName, setAmbassadorName]   = useState('Luxedia')
   const [welcomeMessage, setWelcomeMessage]   = useState('')
   const [shortDescription, setShortDescription] = useState('')
@@ -104,6 +106,8 @@ export default function ProjectForm({ projectId }: Props) {
             setSectorId(p.sectorId ?? '')
             setOfferingId(p.offeringId ?? '')
             setMatterportId(p.matterportId ?? '')
+            setExperienceType(p.experienceType ?? 'Matterport')
+            setExperienceUrl(p.experienceUrl ?? '')
             setAmbassadorName(p.ambassadorName)
             setWelcomeMessage(p.welcomeMessage ?? '')
             setShortDescription(p.shortDescription ?? '')
@@ -154,6 +158,7 @@ export default function ProjectForm({ projectId }: Props) {
       if (isEdit && projectId) {
         await projectsApi.update(projectId, {
           name, matterportId: matterportId || undefined, ambassadorName,
+          experienceType, experienceUrl: experienceUrl || undefined,
           welcomeMessage: welcomeMessage || undefined, status,
           shortDescription: shortDescription || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
@@ -164,6 +169,7 @@ export default function ProjectForm({ projectId }: Props) {
       } else {
         await projectsApi.create({
           name, matterportId: matterportId || undefined, ambassadorName,
+          experienceType, experienceUrl: experienceUrl || undefined,
           welcomeMessage: welcomeMessage || undefined, clientId,
           shortDescription: shortDescription || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
@@ -254,9 +260,27 @@ export default function ProjectForm({ projectId }: Props) {
           <p style={sectionTitle}>Expérience immersive</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
-              <label style={labelStyle}>Matterport ID <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(255,255,255,0.2)' }}>(vide = IA seule)</span></label>
-              <input type="text" value={matterportId} onChange={(e) => setMatterportId(e.target.value)} placeholder="WJzvgHF44zq" style={inputStyle} className="dash-input" />
+              <label style={labelStyle}>Type d'expérience</label>
+              <select value={experienceType} onChange={(e) => setExperienceType(e.target.value)} style={inputStyle} className="dash-input">
+                <option value="Matterport">Matterport (jumeau numérique 3D)</option>
+                <option value="Tour360">360° (Glo3D, Kuula...)</option>
+                <option value="IAOnly">IA seule (chat plein écran)</option>
+              </select>
             </div>
+
+            {experienceType === 'Matterport' && (
+              <div>
+                <label style={labelStyle}>Matterport ID</label>
+                <input type="text" value={matterportId} onChange={(e) => setMatterportId(e.target.value)} placeholder="WJzvgHF44zq" style={inputStyle} className="dash-input" />
+              </div>
+            )}
+
+            {experienceType === 'Tour360' && (
+              <div>
+                <label style={labelStyle}>URL de l'expérience 360°</label>
+                <input type="text" value={experienceUrl} onChange={(e) => setExperienceUrl(e.target.value)} placeholder="https://glo3d.net/xxxxx" style={inputStyle} className="dash-input" />
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <label style={labelStyle}>Nom de l'ambassadeur IA</label>
