@@ -1,12 +1,14 @@
 /**
- * EmbedInterface — Signature 3D IA
- * Version: 4.0 — tracking des visites (create au montage + updateDuration au départ)
+ * EmbedInterface — Signature Immersion
+ * Version: 5.0 — choix du viewer selon experienceType (Matterport / Tour360 / IAOnly)
+ *                + tracking des visites (create au montage + updateDuration au départ)
  */
 
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import MatterportViewer from './MatterportViewer'
+import Tour360Viewer from './Tour360Viewer'
 import AmbassadeurIA from './AmbassadeurIA'
 import { visitsApi } from '@/lib/api'
 
@@ -23,6 +25,8 @@ interface EmbedInterfaceProps {
   welcomeMessage: string
   buttons:        Button[]
   projectSlug?:   string  // slug du projet pour l'API chat Groq + tracking visites
+  experienceType?: string // 'Matterport' | 'Tour360' | 'IAOnly'
+  experienceUrl?:  string | null // URL iframe pour Tour360 (Glo3D, etc.)
 }
 
 /**
@@ -43,7 +47,8 @@ function resolveSource(): string {
 
 export default function EmbedInterface({
   matterportId, projectName, ambassadorName,
-  welcomeMessage, buttons, projectSlug
+  welcomeMessage, buttons, projectSlug,
+  experienceType, experienceUrl
 }: EmbedInterfaceProps) {
   const [isMobileAIOpen, setIsMobileAIOpen] = useState(false)
 
@@ -100,9 +105,14 @@ export default function EmbedInterface({
     }
   }, [projectSlug])
 
-  /* ── IA seule — matterportId vide → chatbot plein écran ── */
-  const isIAOnly = !matterportId || matterportId.trim() === ''
+  /* ── Choix du viewer ──
+     Priorité : Tour360 (si type Tour360 + URL) → Matterport (si matterportId) → IA seule.
+     Repli robuste : si experienceType absent, on déduit par matterportId comme avant. */
+  const hasTour360    = experienceType === 'Tour360' && !!experienceUrl && experienceUrl.trim() !== ''
+  const hasMatterport = !!matterportId && matterportId.trim() !== ''
+  const isIAOnly      = !hasTour360 && !hasMatterport
 
+  /* ── IA seule — pas de visite immersive → chatbot plein écran ── */
   if (isIAOnly) {
     return (
       <div style={{ position: 'fixed', inset: 0, backgroundColor: '#0d0d0d', display: 'flex', flexDirection: 'column' }}>
@@ -143,13 +153,17 @@ export default function EmbedInterface({
     )
   }
 
-  /* ── Matterport + IA — interface 80/20 ── */
+  /* ── Visite immersive (Matterport OU Tour360) + IA — interface 80/20 ── */
   return (
     <div style={{ position: 'fixed', inset: 0, display: 'flex', backgroundColor: '#000', overflow: 'hidden' }}>
 
-      {/* Matterport — 80% */}
+      {/* Viewer immersif — 80% */}
       <div style={{ position: 'relative', flex: 1 }}>
-        <MatterportViewer matterportId={matterportId} projectName={projectName} />
+        {hasTour360 ? (
+          <Tour360Viewer experienceUrl={experienceUrl!} projectName={projectName} />
+        ) : (
+          <MatterportViewer matterportId={matterportId} projectName={projectName} />
+        )}
       </div>
 
       {/* Ambassadeur IA — 340px desktop */}

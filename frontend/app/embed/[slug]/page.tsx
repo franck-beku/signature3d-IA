@@ -1,6 +1,6 @@
 /**
- * Page Embed — Signature 3D IA
- * Version: 3.0 — Connecté au backend PostgreSQL + Groq IA
+ * Page Embed — Signature Immersion
+ * Version: 4.0 — Connecté au backend PostgreSQL + Groq IA + experienceType (Matterport/Tour360/IAOnly)
  */
 
 import EmbedInterface from '@/components/embed/EmbedInterface'
@@ -11,6 +11,8 @@ interface EmbedData {
   slug:           string
   projectName:    string
   matterportId:   string
+  experienceType: string          // 'Matterport' | 'Tour360' | 'IAOnly'
+  experienceUrl:  string | null    // URL iframe pour Tour360 (Glo3D, etc.)
   ambassadorName: string
   welcomeMessage: string
   buttons: {
@@ -72,6 +74,8 @@ export default async function EmbedSlugPage({
   return (
     <EmbedInterface
       matterportId={project.matterportId ?? ''}
+      experienceType={project.experienceType}
+      experienceUrl={project.experienceUrl}
       projectName={project.projectName}
       ambassadorName={project.ambassadorName}
       welcomeMessage={project.welcomeMessage ?? `Bienvenue ! Je suis ${project.ambassadorName}, votre assistant intelligent.`}
