@@ -1,6 +1,6 @@
 /**
  * AmbassadeurIA — Chatbot Luxedia
- * Version: 4.0 — Avatar image + Multilingue FR/EN + Groq
+ * Version: 4.1 — Avatar image + Multilingue FR/EN + Groq + logo Signature Immersion
  */
 
 'use client'
@@ -140,7 +140,7 @@ export default function AmbassadeurIA({
           ))}
         </div>
 
-        <Image src="/logo-dark.png" alt="Signature 3D IA" width={60} height={20} style={{ height: '16px', width: 'auto', opacity: 0.5 }} />
+        <Image src="/logo-dark.png" alt="Signature Immersion" width={90} height={36} style={{ height: '24px', width: 'auto', opacity: 0.7 }} />
       </div>
 
       {/* Messages */}

@@ -21,8 +21,8 @@ export default function MatterportViewer({ matterportId, projectName }: Matterpo
       </div>
 
       {/* Branding */}
-      <div style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 10, opacity: 0.6 }}>
-        <Image src="/logo-dark.png" alt="Signature 3D IA" width={80} height={26} style={{ height: '20px', width: 'auto' }} />
+      <div style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 10, opacity: 0.85 }}>
+        <Image src="/logo-dark.png" alt="Signature Immersion" width={120} height={39} style={{ height: '100px', width: 'auto' }} />
       </div>
 
       {/* Iframe */}
