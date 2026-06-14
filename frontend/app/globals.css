@@ -1,16 +1,31 @@
 @import "tailwindcss";
-
 @theme {
+  /* ─── Or Signature (inchangé, déjà parfait) ─── */
   --color-gold:        #D4881E;
   --color-gold-light:  #E09420;
   --color-gold-dark:   #B8720F;
   --color-gold-muted:  rgba(212,136,30,0.1);
-  --color-bg:          #FFFFFF;
+
+  /* ─── Clair éditorial (blanc cassé premium) ─── */
+  --color-bg:          #F7F5F2;   /* blanc cassé (était #FFFFFF) */
+  --color-bg-pure:     #FFFFFF;   /* blanc pur, pour cartes/contrastes */
   --color-bg-soft:     #FAFAF8;
-  --color-text:        #1A1400;
+
+  /* ─── Sombre charbon (sections dramatiques) ─── */
+  --color-charcoal:    #0B0B0B;   /* noir charbon premium */
+  --color-charcoal-soft: #141414; /* charbon légèrement plus clair */
+
+  /* ─── Argent doux (texte secondaire, séparateurs) ─── */
+  --color-silver:      #B8BDC7;
+
+  /* ─── Texte ─── */
+  --color-text:        #1A1400;   /* texte sur fond clair */
   --color-text-soft:   #5A4E3A;
   --color-text-muted:  #8A7A5A;
+  --color-text-light:  #F7F5F2;   /* texte sur fond sombre */
   --color-border:      #E8E2D4;
+
+  /* ─── Polices ─── */
   --font-display:      var(--font-cormorant);
   --font-body:         var(--font-inter);
 }
@@ -25,7 +40,7 @@ html {
 }
 
 body {
-  background-color: #FFFFFF;
+  background-color: #F7F5F2;
   color: #1A1400;
   font-family: var(--font-body), sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -161,7 +176,7 @@ section {
 }
 
 /* ─── Dark section ─── */
-.section-dark { background-color: #1A1400; color: #FFFFFF; }
+.section-dark { background-color: #0B0B0B; color: #F7F5F2; }
 
 /* ─── Grids ─── */
 .services-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }

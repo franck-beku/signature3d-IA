@@ -1,6 +1,6 @@
 /**
- * Navbar — Signature 3D IA
- * Version: 4.0 — Multilingue FR/EN via LanguageContext
+ * Navbar — Signature Immersion
+ * Version: 5.1 — Pages dédiées + Or Signature #D4881E + seuil mobile 1100px
  */
 
 'use client'
@@ -11,22 +11,22 @@ import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
-const GOLD = '#C8981A'
+const GOLD = '#D4881E'
 
 const navLinks = {
   fr: [
-    { label: 'Services',          href: '/#services'    },
-    { label: 'Réalisations',      href: '/realisations' },
-    { label: 'Résultats',         href: '/#resultats'   },
-    { label: 'Comment ça marche', href: '/#comment'     },
-    { label: 'Contact',           href: '/#contact'     },
+    { label: 'Services',          href: '/services'          },
+    { label: 'Réalisations',      href: '/realisations'      },
+    { label: 'Comment ça marche', href: '/comment-ca-marche' },
+    { label: 'FAQ',               href: '/faq'               },
+    { label: 'Contact',           href: '/contact'           },
   ],
   en: [
-    { label: 'Services',        href: '/#services'    },
-    { label: 'Portfolio',       href: '/realisations' },
-    { label: 'Results',         href: '/#resultats'   },
-    { label: 'How it works',    href: '/#comment'     },
-    { label: 'Contact',         href: '/#contact'     },
+    { label: 'Services',        href: '/services'          },
+    { label: 'Portfolio',       href: '/realisations'      },
+    { label: 'How it works',    href: '/comment-ca-marche' },
+    { label: 'FAQ',             href: '/faq'               },
+    { label: 'Contact',         href: '/contact'           },
   ],
 }
 
@@ -36,7 +36,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onResize = () => { if (window.innerWidth >= 900) setIsOpen(false) }
+    const onResize = () => { if (window.innerWidth >= 1100) setIsOpen(false) }
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('resize', onResize)
     window.addEventListener('scroll', onScroll)
@@ -51,7 +51,7 @@ export default function Navbar() {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      backgroundColor: '#0C0C0A',
+      backgroundColor: '#0B0B0B',
       borderBottom: `1px solid ${scrolled ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)'}`,
       boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.4)' : 'none',
       transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
@@ -61,7 +61,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <Image src="/logo-dark.png" alt="Signature 3D IA" width={200} height={64} priority style={{ height: '48px', width: 'auto' }} />
+            <Image src="/logo-dark.png" alt="Signature Immersion" width={200} height={64} priority style={{ height: '48px', width: 'auto' }} />
           </Link>
 
           {/* Desktop nav */}
@@ -99,7 +99,7 @@ export default function Navbar() {
             <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.08)' }} />
 
             {/* CTA */}
-            <Link href="/#contact" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', color: '#0C0C0A', borderRadius: '6px', padding: '9px 18px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s ease', whiteSpace: 'nowrap' }} className="nav-cta">
+            <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', color: '#0B0B0B', borderRadius: '6px', padding: '9px 18px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s ease', whiteSpace: 'nowrap' }} className="nav-cta">
               {t('Demander une démo', 'Request a demo')}
               <span style={{ color: GOLD, fontSize: '13px' }}>→</span>
             </Link>
@@ -118,7 +118,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div style={{ overflow: 'hidden', maxHeight: isOpen ? '480px' : '0', transition: 'max-height 0.35s ease', backgroundColor: '#0C0C0A', borderTop: isOpen ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+      <div style={{ overflow: 'hidden', maxHeight: isOpen ? '480px' : '0', transition: 'max-height 0.35s ease', backgroundColor: '#0B0B0B', borderTop: isOpen ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
         <div className="container-main" style={{ paddingTop: '12px', paddingBottom: '20px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {links.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} style={{ padding: '11px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 400, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', transition: 'all 0.2s ease' }} className="mobile-nav-link">
@@ -133,7 +133,7 @@ export default function Navbar() {
                 </button>
               ))}
             </div>
-            <Link href="/#contact" onClick={() => setIsOpen(false)} style={{ flex: 1, textAlign: 'center', backgroundColor: '#FFFFFF', color: '#0C0C0A', borderRadius: '6px', padding: '11px 20px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
+            <Link href="/contact" onClick={() => setIsOpen(false)} style={{ flex: 1, textAlign: 'center', backgroundColor: '#FFFFFF', color: '#0B0B0B', borderRadius: '6px', padding: '11px 20px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
               {t('Demander une démo', 'Request a demo')}
             </Link>
           </div>
@@ -144,8 +144,7 @@ export default function Navbar() {
         .nav-link:hover        { color: rgba(255,255,255,0.9) !important; }
         .nav-cta:hover         { background-color: ${GOLD} !important; color: #000 !important; }
         .mobile-nav-link:hover { color: rgba(255,255,255,0.9) !important; background: rgba(255,255,255,0.03) !important; }
-        @media (max-width: 1100px) { .nav-desktop { gap: 24px !important; } }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
           .nav-desktop    { display: none !important; }
           .nav-right      { display: none !important; }
           .nav-mobile-btn { display: flex !important; }

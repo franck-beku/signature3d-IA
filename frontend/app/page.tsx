@@ -17,11 +17,11 @@ export default function Home() {
     <main className="overflow-hidden" key={lang}>
       <Navbar />
       <Hero />
-      <CommentCaMarche />
-      <Realisations />
-      <PreuveSociale />
-      <PourquoiNous />
-      <ContactForm />
+      { <CommentCaMarche /> }
+      { <Realisations /> }
+      { <PreuveSociale /> }
+      { <PourquoiNous /> }
+      { <ContactForm /> }
       <Footer />
     </main>
   )
