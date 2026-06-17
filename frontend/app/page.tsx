@@ -6,6 +6,7 @@ import Hero from '@/components/site/Hero'
 import Manifeste from '@/components/site/Manifeste'
 import NosUnivers from '@/components/site/NosUnivers'
 import Luxedia from '@/components/site/Luxedia'
+import Demo8020 from '@/components/site/Demo8020'
 import ContactFinal from '@/components/site/ContactFinal'
 import Footer from '@/components/site/Footer'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
@@ -26,7 +27,8 @@ export default function Home() {
       <Hero />
       <Manifeste />
       <NosUnivers />
-      <Luxedia /> 
+      <Luxedia />
+      <Demo8020 /> 
       <CommentCaMarche />
 
       {/* ⏸ À refaire en premium avant de réafficher :
