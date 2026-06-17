@@ -8,6 +8,7 @@ import NosUnivers from '@/components/site/NosUnivers'
 import Luxedia from '@/components/site/Luxedia'
 import ContactFinal from '@/components/site/ContactFinal'
 import Footer from '@/components/site/Footer'
+import CommentCaMarche from '@/components/site/CommentCaMarche'
 
 // ⏸ Sections V1 (style crème) à refaire en premium — temporairement retirées :
 // import CommentCaMarche from '@/components/site/CommentCaMarche'
@@ -26,6 +27,7 @@ export default function Home() {
       <Manifeste />
       <NosUnivers />
       <Luxedia /> 
+      <CommentCaMarche />
 
       {/* ⏸ À refaire en premium avant de réafficher :
       <CommentCaMarche />

@@ -1,115 +1,251 @@
+'use client';
+
+import { useRef } from 'react';
+import { motion } from 'framer-motion';
+import { Aperture, Layers, Sparkles, QrCode } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+
 /**
- * Comment ça marche — Signature 3D IA
- * Version: 3.0 — Multilingue FR/EN
+ * Comment ça marche — Acte 6 du film.
+ *
+ * Section explicative (pas émotionnelle) : on montre le parcours concret en
+ * 4 étapes ordonnées. Les numéros 01–04 sont justifiés : c'est une vraie
+ * séquence où l'ordre porte de l'information.
+ *
+ * Direction : fond charbon (continuité), 4 colonnes reliées par une ligne
+ * dorée fine qui se "trace" au scroll, icônes fines, apparition séquencée.
+ * Étape 1 = « 3D ou 360° » (pas « Matterport » : on nomme le bénéfice, pas l'outil).
  */
 
-'use client'
-
-import { motion } from 'framer-motion'
-import { Camera, FileText, Brain, Zap } from 'lucide-react'
-import { useLanguage } from '@/context/LanguageContext'
-
-const GOLD      = '#D4881E'
-const DARK      = '#1A1400'
-
-const content = {
-  fr: {
-    label:    'Notre processus',
-    title:    'Comment ça marche',
-    subtitle: 'Une approche simple et rapide pour transformer vos espaces physiques en expériences intelligentes.',
-    cta:      'Démarrer mon projet',
-    steps: [
-      { icon: Camera,   number: '01', title: 'Captation immersive',        description: "Nous filmons votre espace avec la technologie Matterport 4K pour un rendu réaliste et fluide.",               detail: "Accessible depuis n'importe quel appareil, à tout moment." },
-      { icon: FileText, number: '02', title: 'Intégration de vos contenus', description: 'Vos menus, fiches et documents sont intégrés directement dans la visite immersive.',                          detail: "Votre contenu prend vie dans l'espace 3D." },
-      { icon: Brain,    number: '03', title: 'IA contextuelle Luxedia',     description: 'Luxedia guide chaque visiteur avec précision 24h/24 — informe, conseille et convertit.',                      detail: 'Personnalisée à votre univers et vos documents.' },
-      { icon: Zap,      number: '04', title: 'Expérience livrée',           description: 'Un lien unique et un QR code prêts à partager. Aucune installation requise.',                                  detail: 'Votre expérience est live en quelques jours.' },
-    ],
-  },
-  en: {
-    label:    'Our process',
-    title:    'How it works',
-    subtitle: 'A simple and fast approach to transform your physical spaces into intelligent experiences.',
-    cta:      'Start my project',
-    steps: [
-      { icon: Camera,   number: '01', title: 'Immersive capture',       description: 'We film your space with Matterport 4K technology for a realistic and smooth rendering.',              detail: 'Accessible from any device, at any time.' },
-      { icon: FileText, number: '02', title: 'Content integration',     description: 'Your menus, fact sheets and documents are integrated directly into the immersive visit.',             detail: 'Your content comes to life in the 3D space.' },
-      { icon: Brain,    number: '03', title: 'Luxedia contextual AI',   description: 'Luxedia guides each visitor with precision 24/7 — informs, advises and converts.',                   detail: 'Personalized to your universe and your documents.' },
-      { icon: Zap,      number: '04', title: 'Experience delivered',    description: 'A unique link and a QR code ready to share. No installation required.',                               detail: 'Your experience is live within a few days.' },
-    ],
-  },
-}
-
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.13 } },
-}
-
-const stepVariants = {
-  hidden:   { opacity: 0, y: 28 },
-  visible:  { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-}
+const GOLD = '#D4881E';
+const CHARBON = '#0B0B0B';
 
 export default function CommentCaMarche() {
-  const { lang } = useLanguage()
-  const c = content[lang]
+  const ref = useRef<HTMLElement>(null);
+  const { t } = useLanguage();
+
+  const steps = [
+    {
+      icon: Aperture,
+      num: '01',
+      title: t('Captation immersive', 'Immersive capture'),
+      desc: t(
+        'Nous capturons votre espace en 3D ou 360°, pour une visite réaliste et fluide, accessible depuis n’importe quel appareil.',
+        'We capture your space in 3D or 360°, for a realistic, fluid tour accessible from any device.'
+      ),
+    },
+    {
+      icon: Layers,
+      num: '02',
+      title: t('Intégration de vos contenus', 'Your content, integrated'),
+      desc: t(
+        'Fiches, menus, documents et offres prennent vie directement à l’intérieur de la visite immersive.',
+        'Listings, menus, documents and offers come to life directly inside the immersive tour.'
+      ),
+    },
+    {
+      icon: Sparkles,
+      num: '03',
+      title: t('Intelligence Luxedia', 'Luxedia intelligence'),
+      desc: t(
+        'Luxedia apprend votre univers pour guider chaque visiteur — informer, orienter, accompagner, à toute heure.',
+        'Luxedia learns your world to guide every visitor — inform, orient, accompany, around the clock.'
+      ),
+    },
+    {
+      icon: QrCode,
+      num: '04',
+      title: t('Expérience livrée', 'Experience delivered'),
+      desc: t(
+        'Un lien unique et un QR code prêts à partager. Aucune installation — votre expérience est en ligne en quelques jours.',
+        'A unique link and a QR code ready to share. No installation — your experience is live within days.'
+      ),
+    },
+  ];
+
+  const container = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
+  };
+  const item = {
+    hidden: { opacity: 0, y: 28 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
+    },
+  };
 
   return (
-    <section id="comment" style={{ backgroundColor: '#FFFFFF', padding: '104px 0 96px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(212,136,30,0.04) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(212,136,30,0.03) 0%, transparent 50%)', pointerEvents: 'none' }} />
-
-      <div className="container-main" style={{ position: 'relative', zIndex: 1 }}>
-
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} style={{ textAlign: 'center', marginBottom: '80px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ width: '32px', height: '1px', backgroundColor: GOLD }} />
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.32em', textTransform: 'uppercase', color: GOLD }}>{c.label}</span>
-            <div style={{ width: '32px', height: '1px', backgroundColor: GOLD }} />
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', fontWeight: 300, color: DARK, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '20px' }}>
-            {c.title}
-          </h2>
-          <p style={{ maxWidth: '460px', margin: '0 auto', fontSize: '15px', lineHeight: 1.75, color: '#6B6458', fontWeight: 300 }}>{c.subtitle}</p>
+    <section
+      ref={ref}
+      aria-label={t('Comment ça marche', 'How it works')}
+      style={{ backgroundColor: CHARBON, position: 'relative', overflow: 'hidden' }}
+    >
+      <div
+        style={{
+          maxWidth: '1240px',
+          margin: '0 auto',
+          padding: '150px 32px',
+        }}
+      >
+        {/* En-tête */}
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={container}
+          style={{ textAlign: 'center', marginBottom: '90px' }}
+        >
+          <motion.p
+            variants={item}
+            style={{
+              fontSize: '11px',
+              fontWeight: 500,
+              letterSpacing: '0.45em',
+              textTransform: 'uppercase',
+              color: 'rgba(212,136,30,0.85)',
+              marginBottom: '24px',
+            }}
+          >
+            {t('Comment ça marche', 'How it works')}
+          </motion.p>
+          <motion.h2
+            variants={item}
+            style={{
+              fontFamily: 'var(--font-cormorant), serif',
+              fontWeight: 300,
+              color: '#F7F5F2',
+              fontSize: 'clamp(2rem, 4vw, 3.4rem)',
+              lineHeight: 1.15,
+              margin: 0,
+            }}
+          >
+            {t('De votre espace à l’expérience.', 'From your space to the experience.')}
+          </motion.h2>
         </motion.div>
 
-        {/* Steps */}
-        <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0', position: 'relative' }} className="steps-container">
-          <div className="connector-line" style={{ position: 'absolute', top: '40px', left: 'calc(12.5% + 32px)', right: 'calc(12.5% + 32px)', height: '1px', background: `linear-gradient(to right, ${GOLD}, rgba(212,136,30,0.2))`, zIndex: 0 }} />
+        {/* Les 4 étapes */}
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={container}
+          className="ccm-steps"
+          style={{
+            position: 'relative',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '32px',
+          }}
+        >
+          {/* Ligne connectrice dorée qui se trace au scroll (desktop) */}
+          <motion.div
+            aria-hidden="true"
+            className="ccm-line"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.4, ease: 'easeInOut', delay: 0.3 }}
+            style={{
+              position: 'absolute',
+              top: '34px',
+              left: '12%',
+              right: '12%',
+              height: '1px',
+              background:
+                'linear-gradient(to right, rgba(212,136,30,0) 0%, rgba(212,136,30,0.5) 15%, rgba(212,136,30,0.5) 85%, rgba(212,136,30,0) 100%)',
+              transformOrigin: 'left',
+            }}
+          />
 
-          {c.steps.map((step, i) => (
-            <motion.div key={step.title} variants={stepVariants} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 20px', position: 'relative', zIndex: 1 }} className="step-item">
-              <div style={{ position: 'relative', marginBottom: '28px' }}>
-                <div className="step-circle" style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: i === 0 ? DARK : '#FFFFFF', border: `1.5px solid ${i === 0 ? DARK : '#E8E2D4'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease', cursor: 'default' }}>
-                  <step.icon size={22} strokeWidth={1.4} style={{ color: GOLD }} />
+          {steps.map((s) => {
+            const Icon = s.icon;
+            return (
+              <motion.div
+                key={s.num}
+                variants={item}
+                className="ccm-step"
+                style={{ position: 'relative', textAlign: 'center' }}
+              >
+                {/* Pastille icône */}
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    width: '68px',
+                    height: '68px',
+                    margin: '0 auto 28px',
+                    borderRadius: '50%',
+                    backgroundColor: CHARBON,
+                    border: '1px solid rgba(212,136,30,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 30px rgba(212,136,30,0.12)',
+                  }}
+                >
+                  <Icon size={26} strokeWidth={1.3} style={{ color: GOLD }} />
                 </div>
-                <span style={{ position: 'absolute', top: '-6px', right: '-6px', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700, color: '#FFFFFF', letterSpacing: '0' }}>
-                  {i + 1}
-                </span>
-              </div>
-              <h3 style={{ fontSize: '13.5px', fontWeight: 600, color: DARK, marginBottom: '10px', letterSpacing: '-0.01em', lineHeight: 1.3 }}>{step.title}</h3>
-              <p style={{ fontSize: '12.5px', lineHeight: 1.75, color: '#8A7A5A', fontWeight: 300, maxWidth: '200px', marginBottom: '14px' }}>{step.description}</p>
-              <div style={{ padding: '10px 14px', background: 'rgba(212,136,30,0.06)', borderRadius: '8px', borderLeft: `2px solid ${GOLD}`, fontSize: '11.5px', color: '#6B6458', lineHeight: 1.55, textAlign: 'left', width: '100%', boxSizing: 'border-box' as const }}>
-                {step.detail}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
 
-        {/* CTA */}
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.55 }} style={{ textAlign: 'center', marginTop: '72px' }}>
-          <a href="#contact" className="cta-process" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', backgroundColor: DARK, color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '14px 32px', fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s ease' }}>
-            {c.cta}
-            <span style={{ color: GOLD, fontSize: '16px', lineHeight: 1 }}>→</span>
-          </a>
+                {/* Numéro */}
+                <p
+                  style={{
+                    fontFamily: 'var(--font-cormorant), serif',
+                    fontSize: '15px',
+                    letterSpacing: '0.3em',
+                    color: 'rgba(212,136,30,0.7)',
+                    margin: '0 0 12px',
+                  }}
+                >
+                  {s.num}
+                </p>
+
+                {/* Titre */}
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-cormorant), serif',
+                    fontWeight: 400,
+                    fontSize: 'clamp(1.25rem, 2vw, 1.6rem)',
+                    color: '#F7F5F2',
+                    lineHeight: 1.25,
+                    margin: '0 0 14px',
+                  }}
+                >
+                  {s.title}
+                </h3>
+
+                {/* Description */}
+                <p
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 300,
+                    lineHeight: 1.7,
+                    color: 'rgba(247,245,242,0.6)',
+                    margin: '0 auto',
+                    maxWidth: '240px',
+                  }}
+                >
+                  {s.desc}
+                </p>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
 
       <style>{`
-        .step-circle:hover { border-color: ${GOLD} !important; transform: translateY(-4px); box-shadow: 0 8px 24px rgba(212,136,30,0.15); }
-        .cta-process:hover { background-color: ${GOLD} !important; box-shadow: 0 8px 24px rgba(212,136,30,0.3); transform: translateY(-1px); }
-        @media (max-width: 1024px) { .steps-container { grid-template-columns: repeat(2, 1fr) !important; gap: 48px !important; } .connector-line { display: none !important; } }
-        @media (max-width: 560px)  { .steps-container { grid-template-columns: 1fr !important; gap: 40px !important; } }
+        @media (max-width: 880px) {
+          .ccm-steps {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 48px 24px !important;
+          }
+          .ccm-line { display: none !important; }
+        }
+        @media (max-width: 520px) {
+          .ccm-steps { grid-template-columns: 1fr !important; }
+        }
       `}</style>
     </section>
-  )
+  );
 }
