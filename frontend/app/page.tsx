@@ -10,6 +10,7 @@ import Demo8020 from '@/components/site/Demo8020'
 import ContactFinal from '@/components/site/ContactFinal'
 import Footer from '@/components/site/Footer'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
+import Services from '@/components/site/Services'
 
 // ⏸ Sections V1 (style crème) à refaire en premium — temporairement retirées :
 // import CommentCaMarche from '@/components/site/CommentCaMarche'
@@ -30,6 +31,7 @@ export default function Home() {
       <Luxedia />
       <Demo8020 /> 
       <CommentCaMarche />
+      <Services />
 
       {/* ⏸ À refaire en premium avant de réafficher :
       <CommentCaMarche />
