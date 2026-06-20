@@ -3,16 +3,21 @@
 import { useState, useEffect, useRef, forwardRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
-import { leadsApi } from "@/lib/api";
+import { leadsApi, projectsApi } from "@/lib/api";
 
 const GOLD = "#D4881E";
 const CREAM = "#F7F5F2";
 const INK = "#101010";
 
-const QR_TARGET = "https://signatureimmersion.ca/embed/mercedes-voiture-1";
-const QR_SRC = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&data=${encodeURIComponent(
-  QR_TARGET
-)}`;
+// Base du SITE public (pas l'API). En prod : https://signatureimmersion.ca
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+// Repli si getFeatured() échoue ou ne renvoie rien → le QR n'est jamais vide.
+const FALLBACK_SLUG = "mercedes-voiture-1";
+
+const qrSrc = (slug: string) =>
+  `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&data=${encodeURIComponent(
+    `${SITE_URL}/embed/${slug}`
+  )}`;
 
 const PHONE_SCREEN = "/assets/univers/auto.jpg";
 
@@ -20,6 +25,21 @@ export default function ContactFinal() {
   const { t } = useLanguage();
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
+  const [featuredSlug, setFeaturedSlug] = useState(FALLBACK_SLUG);
+
+  // QR dynamique : on suit le projet vedette. Repli sur FALLBACK_SLUG si échec.
+  useEffect(() => {
+    projectsApi
+      .getFeatured()
+      .then((projects) => {
+        if (projects && projects.length > 0 && projects[0].slug) {
+          setFeaturedSlug(projects[0].slug);
+        }
+      })
+      .catch(() => {
+        /* on garde FALLBACK_SLUG */
+      });
+  }, []);
 
   const fade = (delay = 0) =>
     reduce
@@ -118,7 +138,7 @@ export default function ContactFinal() {
           </motion.div>
 
           <motion.div {...fade(0.24)} className="final-qr flex justify-center">
-            <QrCard t={t} />
+            <QrCard t={t} slug={featuredSlug} />
           </motion.div>
         </div>
 
@@ -344,7 +364,13 @@ function PhoneMockup({
   );
 }
 
-function QrCard({ t }: { t: (fr: string, en: string) => string }) {
+function QrCard({
+  t,
+  slug,
+}: {
+  t: (fr: string, en: string) => string;
+  slug: string;
+}) {
   return (
     <div
       className="flex flex-col items-center rounded-[2rem] px-8 py-9"
@@ -359,7 +385,7 @@ function QrCard({ t }: { t: (fr: string, en: string) => string }) {
 
       <div className="relative">
         <img
-          src={QR_SRC}
+          src={qrSrc(slug)}
           alt={t("QR code vers l'expérience", "QR code to the experience")}
           className="h-44 w-44"
         />
@@ -447,12 +473,10 @@ function ContactModal({
     setError(null);
     setLoading(true);
 
-    // Champ unique « courriel ou téléphone » → on route vers email si présence d'un @, sinon phone.
     const contact = form.contact.trim();
     const isEmail = contact.includes("@");
 
     try {
-      // Lead « contact général » : pas de projectId (site d'accueil).
       await leadsApi.create({
         name: form.nom.trim(),
         email: isEmail ? contact : undefined,
