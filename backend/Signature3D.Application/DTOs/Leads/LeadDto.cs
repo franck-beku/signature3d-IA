@@ -18,7 +18,9 @@ public class LeadDto
 }
 
 /// <summary>
-/// DTO pour créer un lead depuis l'interface embed.
+/// DTO pour créer un lead depuis l'interface embed OU le site public.
+/// ProjectId est OPTIONNEL : un lead « contact général » (accueil / page
+/// contact) n'est rattaché à aucun projet.
 /// </summary>
 public class CreateLeadDto
 {
@@ -27,5 +29,5 @@ public class CreateLeadDto
     public string? Phone { get; set; }
     public string? Message { get; set; }
     public string ButtonLabel { get; set; } = string.Empty;
-    public Guid ProjectId { get; set; }
+    public Guid? ProjectId { get; set; }
 }

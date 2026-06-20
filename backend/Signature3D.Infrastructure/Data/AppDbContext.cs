@@ -135,17 +135,21 @@ public class AppDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
         });
 
-        /* ── Lead ── */
-        modelBuilder.Entity<Lead>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Status).HasConversion<string>();
-
-            e.HasOne(x => x.Project)
-             .WithMany(x => x.Leads)
-             .HasForeignKey(x => x.ProjectId)
-             .OnDelete(DeleteBehavior.Cascade);
-        });
+         /* ── Lead ── */
+modelBuilder.Entity<Lead>(e =>
+{
+    e.HasKey(x => x.Id);
+    e.Property(x => x.Status).HasConversion<string>();
+ 
+    // Project → Lead : relation OPTIONNELLE.
+    // Un lead « contact général » (accueil / page contact) n'a pas de projet.
+    // SetNull : si le projet est supprimé, le lead est CONSERVÉ (ProjectId → null).
+    e.HasOne(x => x.Project)
+     .WithMany(x => x.Leads)
+     .HasForeignKey(x => x.ProjectId)
+     .IsRequired(false)
+     .OnDelete(DeleteBehavior.SetNull);
+});
 
         /* ── Visit ── */
         modelBuilder.Entity<Visit>(e =>

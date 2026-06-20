@@ -6,6 +6,20 @@ namespace Signature3D.Infrastructure.Configurations;
 public class ResendSettings
 {
     public string ApiKey { get; set; } = string.Empty;
-    public string FromEmail { get; set; } = "leads@signature3dia.com";
-    public string FromName { get; set; } = "Signature 3D IA";
+
+    /// <summary>
+    /// Adresse expéditrice. Tant que le domaine n'est pas vérifié dans Resend,
+    /// utiliser "onboarding@resend.dev". Une fois le domaine vérifié :
+    /// "notifications@signatureimmersion.ca".
+    /// </summary>
+    public string FromEmail { get; set; } = "onboarding@resend.dev";
+
+    public string FromName { get; set; } = "Signature Immersion";
+
+    /// <summary>
+    /// Destinataires des notifications de leads « contact général »
+    /// (leads du site sans projet associé). Ex. Franck + Alain.
+    /// Configurable sans recompiler via appsettings / variables d'env.
+    /// </summary>
+    public List<string> NotificationRecipients { get; set; } = new();
 }

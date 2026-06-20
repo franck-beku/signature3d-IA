@@ -11,7 +11,9 @@ public class Lead : BaseEntity
     public string ButtonLabel { get; set; } = string.Empty;
     public LeadStatus Status { get; set; } = LeadStatus.Nouveau;
 
-    /* Relations */
-    public Guid ProjectId { get; set; }
-    public Project Project { get; set; } = null!;
+    /* Relations — ProjectId OPTIONNEL.
+       Un lead « contact général » (site d'accueil / page contact)
+       n'est rattaché à aucun projet. */
+    public Guid? ProjectId { get; set; }
+    public Project? Project { get; set; }
 }

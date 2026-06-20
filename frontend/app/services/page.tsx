@@ -1,0 +1,247 @@
+/**
+ * Page Services — Signature Immersion
+ * "C Premium" : éditoriale, très aérée, typographie comme matière.
+ * Chaque offre = un bloc immersif (numéro géant en fond, nom, niveau, description).
+ * Branchée sur offeringsApi.getActive() · ordre piloté par displayOrder · multilingue · blindée.
+ */
+
+'use client'
+
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
+import { offeringsApi, type OfferingDto } from '@/lib/api'
+import Navbar from '@/components/site/Navbar'
+import Footer from '@/components/site/Footer'
+
+const GOLD = '#D4881E'
+
+export default function ServicesPage() {
+  const { t, lang } = useLanguage()
+
+  const [offerings, setOfferings] = useState<OfferingDto[]>([])
+  const [loading, setLoading]     = useState(true)
+
+  useEffect(() => {
+    let active = true
+    offeringsApi
+      .getActive()
+      .then((data) => {
+        if (active && Array.isArray(data)) {
+          setOfferings([...data].sort((a, b) => a.displayOrder - b.displayOrder))
+        }
+      })
+      .catch(() => { /* silencieux — la page ne doit pas casser */ })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [])
+
+  return (
+    <main key={lang} style={{ backgroundColor: '#F7F5F2', minHeight: '100vh' }}>
+      <Navbar />
+
+      {/* ── Introduction éditoriale ── */}
+      <section style={{ paddingTop: '170px', paddingBottom: '80px' }}>
+        <div className="container-main" style={{ maxWidth: '900px' }}>
+          <span className="section-eyebrow" style={{ color: GOLD }}>
+            {t('Nos solutions', 'Our solutions')}
+          </span>
+          <h1 style={{
+            fontFamily: 'var(--font-display), serif',
+            fontSize: 'clamp(2.4rem, 5.5vw, 4.4rem)',
+            fontWeight: 500,
+            lineHeight: 1.08,
+            color: '#1A1400',
+            letterSpacing: '-0.015em',
+            maxWidth: '720px',
+          }}>
+            {t(
+              'Une expérience immersive pour chaque espace.',
+              'An immersive experience for every space.'
+            )}
+          </h1>
+          <p style={{
+            marginTop: '1.75rem',
+            fontSize: '1.12rem',
+            lineHeight: 1.75,
+            color: '#5A4E3A',
+            maxWidth: '560px',
+            fontWeight: 300,
+          }}>
+            {t(
+              "Chaque espace est unique. Nous concevons l'expérience adaptée à vos objectifs, à votre environnement et à vos visiteurs — de la simple immersion à l'intelligence conversationnelle.",
+              'Every space is unique. We design the experience that fits your goals, your environment and your visitors — from pure immersion to conversational intelligence.'
+            )}
+          </p>
+        </div>
+      </section>
+
+      {/* ── Les offres : blocs immersifs ── */}
+      <section style={{ paddingBottom: '40px' }}>
+        <div className="container-main">
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '80px 0', color: '#8A7A5A', fontSize: '0.9rem' }}>
+              {t('Chargement…', 'Loading…')}
+            </div>
+          ) : offerings.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '80px 0', color: '#8A7A5A', fontSize: '0.95rem' }}>
+              {t(
+                'Nos solutions seront bientôt présentées ici. Écrivez-nous en attendant.',
+                'Our solutions will be presented here soon. Reach out in the meantime.'
+              )}
+            </div>
+          ) : (
+            offerings.map((offer, index) => {
+              const num = String(index + 1).padStart(2, '0')
+              const isLast = index === offerings.length - 1
+              return (
+                <div
+                  key={offer.id}
+                  style={{
+                    position: 'relative',
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.6fr)',
+                    gap: '40px',
+                    padding: '64px 0',
+                    borderBottom: isLast ? 'none' : '1px solid #E8E2D4',
+                  }}
+                  className="offer-block"
+                >
+                  {/* Colonne gauche : numéro géant + niveau */}
+                  <div style={{ position: 'relative' }}>
+                    <span style={{
+                      fontFamily: 'var(--font-display), serif',
+                      fontSize: 'clamp(4rem, 9vw, 8rem)',
+                      fontWeight: 500,
+                      lineHeight: 0.9,
+                      color: 'transparent',
+                      WebkitTextStroke: `1px ${GOLD}`,
+                      display: 'block',
+                      opacity: 0.55,
+                    }}>
+                      {num}
+                    </span>
+                    {offer.level && (
+                      <span style={{
+                        display: 'inline-block',
+                        marginTop: '20px',
+                        fontSize: '0.62rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.28em',
+                        textTransform: 'uppercase',
+                        color: GOLD,
+                        border: `1px solid rgba(212,136,30,0.35)`,
+                        borderRadius: '40px',
+                        padding: '7px 16px',
+                      }}>
+                        {offer.level}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Colonne droite : nom + descriptions */}
+                  <div>
+                    <h2 style={{
+                      fontFamily: 'var(--font-display), serif',
+                      fontSize: 'clamp(1.9rem, 3.5vw, 2.9rem)',
+                      fontWeight: 500,
+                      lineHeight: 1.1,
+                      color: '#1A1400',
+                      marginBottom: '0.6rem',
+                      letterSpacing: '-0.01em',
+                    }}>
+                      {offer.name}
+                    </h2>
+                    {offer.shortDescription && (
+                      <p style={{
+                        fontSize: '1.05rem',
+                        color: GOLD,
+                        fontWeight: 400,
+                        marginBottom: '1.25rem',
+                        fontStyle: 'italic',
+                        fontFamily: 'var(--font-display), serif',
+                      }}>
+                        {offer.shortDescription}
+                      </p>
+                    )}
+                    {offer.longDescription && (
+                      <p style={{
+                        fontSize: '1rem',
+                        lineHeight: 1.8,
+                        color: '#5A4E3A',
+                        fontWeight: 300,
+                        maxWidth: '560px',
+                      }}>
+                        {offer.longDescription}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+      </section>
+
+      {/* ── CTA final ── */}
+      <section className="section-dark" style={{ paddingTop: '88px', paddingBottom: '88px' }}>
+        <div className="container-main" style={{ textAlign: 'center' }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display), serif',
+            fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)',
+            fontWeight: 500,
+            color: '#F7F5F2',
+            lineHeight: 1.2,
+            marginBottom: '1rem',
+          }}>
+            {t('Trouvons la solution faite pour vous.', 'Let\u2019s find the right fit for you.')}
+          </h2>
+          <p style={{
+            fontSize: '1rem',
+            color: 'rgba(247,245,242,0.6)',
+            fontWeight: 300,
+            maxWidth: '480px',
+            margin: '0 auto 2rem',
+            lineHeight: 1.7,
+          }}>
+            {t(
+              'Présentez-nous votre espace : nous concevons l\u2019expérience immersive qui lui correspond.',
+              'Tell us about your space: we\u2019ll design the immersive experience that fits it.'
+            )}
+          </p>
+          <Link
+            href="/contact"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              backgroundColor: GOLD,
+              color: '#0B0B0B',
+              borderRadius: '10px',
+              padding: '15px 34px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+            }}
+            className="services-cta"
+          >
+            {t('Demander une démonstration', 'Request a demonstration')}
+            <span>→</span>
+          </Link>
+        </div>
+      </section>
+
+      <Footer />
+
+      <style>{`
+        .services-cta:hover { background-color: #E09420 !important; transform: translateY(-1px); }
+        @media (max-width: 768px) {
+          .offer-block { grid-template-columns: 1fr !important; gap: 16px !important; padding: 44px 0 !important; }
+        }
+      `}</style>
+    </main>
+  )
+}

@@ -1,11 +1,11 @@
 /**
- * Client API — Signature 3D IA
+ * Client API — Signature Immersion
  * Centralise tous les appels vers le backend ASP.NET Core.
- * En développement : http://localhost:5125
+ * En développement : http://localhost:8080
  * En production : https://api.signature3dia.com
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5125'
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
 
 /* ── Helper fetch avec gestion d'erreurs ── */
 async function apiFetch<T>(
@@ -306,10 +306,14 @@ export const leadsApi = {
   getByProject: (projectId: string) =>
     apiFetch<LeadDto[]>(`/api/leads/project/${projectId}`),
 
-  /** Crée un lead depuis l'embed */
+  /**
+   * Crée un lead :
+   * - depuis l'embed → avec projectId
+   * - depuis le site public (accueil / contact) → SANS projectId (lead « contact général »)
+   */
   create: (data: {
     name?: string; email?: string; phone?: string
-    message?: string; buttonLabel: string; projectId: string
+    message?: string; buttonLabel: string; projectId?: string
   }) => apiFetch<LeadDto>('/api/leads', { method: 'POST', body: JSON.stringify(data) }),
 
   /** Met à jour le statut d'un lead */
@@ -397,7 +401,7 @@ export const embedApi = {
 }
 
 /* ══════════════════════════════════════
-   DOCUMENTS — à ajouter dans lib/api.ts
+   DOCUMENTS
    ══════════════════════════════════════ */
 
 export interface DocumentDto {
@@ -425,7 +429,7 @@ export const documentsApi = {
     formData.append('file', file)
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5125'}/api/documents/upload/${projectId}`,
+      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/documents/upload/${projectId}`,
       {
         method: 'POST',
         headers: {

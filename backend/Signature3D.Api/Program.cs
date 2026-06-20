@@ -120,7 +120,18 @@ builder.Services.AddScoped<IFaqService, FaqService>();
 builder.Services.AddScoped<IAIProvider, GroqProvider>();
 
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
-builder.Services.AddScoped<IEmailService,    NullEmailService>();
+
+// Email : Resend si une clé API est configurée, sinon NullEmailService (no-op).
+// ResendEmailService est un HttpClient typé → ASP.NET gère le pool de connexions.
+if (!string.IsNullOrWhiteSpace(resendSettings.ApiKey))
+{
+    builder.Services.AddHttpClient<IEmailService, ResendEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, NullEmailService>();
+}
+
 builder.Services.AddScoped<IRealtimeService, NullRealtimeService>();
 
 /* ══════════════════════════════════════════

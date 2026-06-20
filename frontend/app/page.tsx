@@ -7,7 +7,7 @@ import Manifeste from '@/components/site/Manifeste'
 import NosUnivers from '@/components/site/NosUnivers'
 import Luxedia from '@/components/site/Luxedia'
 import Demo8020 from '@/components/site/Demo8020'
-import ContactFinal from '@/components/site/ContactFinal'
+import Final from '@/components/site/Final'
 import Footer from '@/components/site/Footer'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
 import Services from '@/components/site/Services'
@@ -40,7 +40,7 @@ export default function Home() {
       <PourquoiNous />
       */}
 
-      <ContactFinal />
+      <Final />
       <Footer />
     </main>
   )
