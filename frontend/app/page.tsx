@@ -7,17 +7,15 @@ import Manifeste from '@/components/site/Manifeste'
 import NosUnivers from '@/components/site/NosUnivers'
 import Luxedia from '@/components/site/Luxedia'
 import Demo8020 from '@/components/site/Demo8020'
-import Final from '@/components/site/Final'
-import Footer from '@/components/site/Footer'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
 import Services from '@/components/site/Services'
+import Final from '@/components/site/Final'
+import Footer from '@/components/site/Footer'
 
-// ⏸ Sections V1 (style crème) à refaire en premium — temporairement retirées :
-// import CommentCaMarche from '@/components/site/CommentCaMarche'
-// import Realisations from '@/components/site/Realisations'
-// import PreuveSociale from '@/components/site/PreuveSociale'
-// import PourquoiNous from '@/components/site/PourquoiNous'
-// import ContactForm from '@/components/site/ContactForm'
+// À refaire en premium avant de réafficher sur l'accueil :
+//   Realisations (teaser « preuve avant tech » → lien vers la page /realisations)
+// Sections retirées définitivement (doublons / pas de matière réelle) :
+//   PourquoiNous, PreuveSociale
 
 export default function Home() {
   const { lang } = useLanguage()
@@ -29,17 +27,9 @@ export default function Home() {
       <Manifeste />
       <NosUnivers />
       <Luxedia />
-      <Demo8020 /> 
+      <Demo8020 />
       <CommentCaMarche />
       <Services />
-
-      {/* ⏸ À refaire en premium avant de réafficher :
-      <CommentCaMarche />
-      <Realisations />
-      <PreuveSociale />
-      <PourquoiNous />
-      */}
-
       <Final />
       <Footer />
     </main>
