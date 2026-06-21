@@ -1,7 +1,8 @@
 /**
  * Footer — Signature Immersion
- * Version: 4.0 — Logo complet + Univers (ambition) / Explorer / Réalisations récentes (dynamique) / Contact
+ * Version: 4.1 — Logo complet + Univers (ambition) / Explorer / Réalisations récentes (dynamique) / Contact
  *                Charbon #0B0B0B + Or #D4881E + pages légales (Confidentialité / CGU / Cookies)
+ *                Lien CGU corrigé : /cgu -> /conditions
  */
 
 'use client'
@@ -34,7 +35,7 @@ const content = {
     ],
     legalLinks: [
       { href: '/confidentialite', label: 'Confidentialité' },
-      { href: '/cgu',             label: 'CGU'             },
+      { href: '/conditions',      label: 'CGU'             },
       { href: '/cookies',         label: 'Cookies'         },
     ],
     city: 'Trois-Rivières, Québec',
@@ -58,7 +59,7 @@ const content = {
     ],
     legalLinks: [
       { href: '/confidentialite', label: 'Privacy' },
-      { href: '/cgu',             label: 'Terms'   },
+      { href: '/conditions',      label: 'Terms'   },
       { href: '/cookies',         label: 'Cookies' },
     ],
     city: 'Trois-Rivières, Québec',
