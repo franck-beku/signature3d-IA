@@ -5,7 +5,7 @@
 
 import EmbedInterface from '@/components/embed/EmbedInterface'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5125'
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
 
 interface EmbedData {
   slug:           string
