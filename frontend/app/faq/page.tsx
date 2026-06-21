@@ -1,6 +1,7 @@
 /**
  * Page FAQ — Signature Immersion
- * Accordéon premium · multilingue (habillage FR/EN, contenu FR depuis l'API)
+ * Charte V2 : accordéon premium, Cormorant, fond crème lumineux + halo doré.
+ * Multilingue (habillage FR/EN, contenu depuis l'API).
  * Branchée sur faqApi.getPublished() · blindée (loading + erreur silencieuse)
  */
 
@@ -8,19 +9,23 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useLanguage } from '@/context/LanguageContext'
 import { faqApi, type FaqDto } from '@/lib/api'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 
+/* ── Charte V2 ── */
 const GOLD = '#D4881E'
+const CREAM = '#F7F5F2'
+const INK = '#101010'
 
 export default function FaqPage() {
   const { t, lang } = useLanguage()
 
-  const [faqs, setFaqs]       = useState<FaqDto[]>([])
+  const [faqs, setFaqs] = useState<FaqDto[]>([])
   const [loading, setLoading] = useState(true)
-  const [openId, setOpenId]   = useState<string | null>(null)
+  const [openId, setOpenId] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -39,46 +44,69 @@ export default function FaqPage() {
   const toggle = (id: string) => setOpenId((cur) => (cur === id ? null : id))
 
   return (
-    <main key={lang} style={{ backgroundColor: '#F7F5F2', minHeight: '100vh' }}>
+    <main
+      key={lang}
+      style={{
+        minHeight: '100vh',
+        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)`,
+      }}
+    >
       <Navbar />
 
       {/* ── En-tête ── */}
-      <section style={{ paddingTop: '160px', paddingBottom: '64px' }}>
-        <div className="container-main" style={{ textAlign: 'center' }}>
-          <span className="section-eyebrow" style={{ color: GOLD }}>
+      <section style={{ position: 'relative', overflow: 'hidden', paddingTop: '160px', paddingBottom: '64px' }}>
+        {/* halo doré ambiant */}
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(45% 30% at 50% 12%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+          }}
+        />
+        <div className="container-main" style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+          <motion.span
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
+            className="section-eyebrow" style={{ color: GOLD }}
+          >
             {t('Foire aux questions', 'Frequently asked questions')}
-          </span>
-          <h1 style={{
-            fontFamily: 'var(--font-display), serif',
-            fontSize: 'clamp(2.4rem, 5vw, 4rem)',
-            fontWeight: 500,
-            lineHeight: 1.1,
-            color: '#1A1400',
-            letterSpacing: '-0.01em',
-          }}>
+          </motion.span>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              fontFamily: 'var(--font-cormorant), serif',
+              fontSize: 'clamp(2.6rem, 5vw, 4.2rem)',
+              fontWeight: 500,
+              lineHeight: 1.08,
+              color: INK,
+              letterSpacing: '-0.01em',
+            }}
+          >
             {t('Questions fréquentes', 'Common questions')}
-          </h1>
-          <p style={{
-            marginTop: '1.25rem',
-            fontSize: '1rem',
-            lineHeight: 1.7,
-            color: '#5A4E3A',
-            maxWidth: '560px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            fontWeight: 300,
-          }}>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              marginTop: '1.25rem',
+              fontSize: '1rem',
+              lineHeight: 1.7,
+              color: '#5A4E3A',
+              maxWidth: '560px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              fontWeight: 400,
+            }}
+          >
             {t(
               "Tout ce qu'il faut savoir sur nos expériences immersives, l'assistant Luxedia et le déroulement d'un projet.",
               'Everything you need to know about our immersive experiences, the Luxedia assistant and how a project unfolds.'
             )}
-          </p>
+          </motion.p>
           <div className="section-divider" />
         </div>
       </section>
 
       {/* ── Accordéon ── */}
-      <section style={{ paddingBottom: '96px' }}>
+      <section style={{ paddingBottom: '96px', position: 'relative', zIndex: 1 }}>
         <div className="container-main" style={{ maxWidth: '820px' }}>
 
           {loading ? (
@@ -94,18 +122,22 @@ export default function FaqPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {faqs.map((faq) => {
+              {faqs.map((faq, index) => {
                 const isOpen = openId === faq.id
                 return (
-                  <div
+                  <motion.div
                     key={faq.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-30px' }}
+                    transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
                     style={{
-                      backgroundColor: isOpen ? '#FFFFFF' : 'transparent',
+                      backgroundColor: isOpen ? '#FFFFFF' : 'rgba(255,255,255,0.5)',
                       border: `1px solid ${isOpen ? 'rgba(212,136,30,0.35)' : '#E8E2D4'}`,
-                      borderRadius: '14px',
+                      borderRadius: '16px',
                       overflow: 'hidden',
                       transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
-                      boxShadow: isOpen ? '0 12px 40px rgba(0,0,0,0.06)' : 'none',
+                      boxShadow: isOpen ? '0 16px 44px -18px rgba(0,0,0,0.14)' : 'none',
                     }}
                   >
                     <button
@@ -125,9 +157,9 @@ export default function FaqPage() {
                       }}
                     >
                       <span style={{
-                        fontSize: '1.02rem',
+                        fontSize: '1.05rem',
                         fontWeight: 500,
-                        color: '#1A1400',
+                        color: INK,
                         lineHeight: 1.45,
                       }}>
                         {faq.question}
@@ -162,13 +194,13 @@ export default function FaqPage() {
                         fontSize: '0.97rem',
                         lineHeight: 1.75,
                         color: '#5A4E3A',
-                        fontWeight: 300,
+                        fontWeight: 400,
                         maxWidth: '90%',
                       }}>
                         {faq.answer}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 )
               })}
             </div>
@@ -177,22 +209,25 @@ export default function FaqPage() {
       </section>
 
       {/* ── CTA final ── */}
-      <section className="section-dark" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
+      <section style={{ backgroundColor: '#0B0B0B', paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="container-main" style={{ textAlign: 'center' }}>
-          <h2 style={{
-            fontFamily: 'var(--font-display), serif',
-            fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)',
-            fontWeight: 500,
-            color: '#F7F5F2',
-            lineHeight: 1.2,
-            marginBottom: '1rem',
-          }}>
+          <motion.h2
+            initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              fontFamily: 'var(--font-cormorant), serif',
+              fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)',
+              fontWeight: 500,
+              color: CREAM,
+              lineHeight: 1.2,
+              marginBottom: '1rem',
+            }}
+          >
             {t('Une autre question ?', 'Another question?')}
-          </h2>
+          </motion.h2>
           <p style={{
             fontSize: '1rem',
             color: 'rgba(247,245,242,0.6)',
-            fontWeight: 300,
+            fontWeight: 400,
             maxWidth: '460px',
             margin: '0 auto 2rem',
             lineHeight: 1.7,
@@ -209,14 +244,15 @@ export default function FaqPage() {
               alignItems: 'center',
               gap: '10px',
               backgroundColor: GOLD,
-              color: '#0B0B0B',
-              borderRadius: '10px',
+              color: '#FFFFFF',
+              borderRadius: '999px',
               padding: '15px 34px',
               fontSize: '0.8rem',
               fontWeight: 700,
-              letterSpacing: '0.05em',
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
               textDecoration: 'none',
+              boxShadow: '0 18px 40px -16px rgba(212,136,30,0.55)',
             }}
             className="faq-cta"
           >
@@ -229,7 +265,7 @@ export default function FaqPage() {
       <Footer />
 
       <style>{`
-        .faq-cta:hover { background-color: #E09420 !important; transform: translateY(-1px); }
+        .faq-cta:hover { transform: translateY(-1px); box-shadow: 0 22px 48px -16px rgba(212,136,30,0.6) !important; }
       `}</style>
     </main>
   )
