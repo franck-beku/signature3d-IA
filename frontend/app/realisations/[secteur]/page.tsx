@@ -1,5 +1,7 @@
 /**
  * /realisations/[secteur] — Projets publiés d'un secteur (connecté au backend)
+ * Charte V2 : cadre crème lumineux + Cormorant + halo doré + animations.
+ * Cartes projets en charbon #0B0B0B (la vignette immersive ressort sur le sombre).
  * Clic sur un projet → /embed/[slug]
  */
 
@@ -8,10 +10,17 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
-import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import { projectsApi, sectorsApi, type ProjectCardDto, type SectorDto } from '@/lib/api'
+
+/* ── Charte V2 ── */
+const GOLD = '#D4881E'
+const CREAM = '#F7F5F2'
+const INK = '#101010'
+const CHARCOAL = '#0B0B0B'
 
 /** Génère l'URL de la vignette d'un espace Matterport. */
 function getMatterportThumb(matterportId?: string): string | null {
@@ -19,18 +28,16 @@ function getMatterportThumb(matterportId?: string): string | null {
   return `https://my.matterport.com/api/v1/player/models/${matterportId}/thumb?width=1200&dpr=1&disable=upscale`
 }
 
-const GOLD = '#D4881E'
-
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1200&q=85&auto=format&fit=crop'
 
 export default function SecteurPage() {
   const params = useParams()
   const secteurSlug = params.secteur as string
 
-  const [sector, setSector]       = useState<SectorDto | null>(null)
-  const [projects, setProjects]   = useState<ProjectCardDto[]>([])
-  const [loading, setLoading]     = useState(true)
-  const [notFound, setNotFound]   = useState(false)
+  const [sector, setSector] = useState<SectorDto | null>(null)
+  const [projects, setProjects] = useState<ProjectCardDto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -55,47 +62,67 @@ export default function SecteurPage() {
   const totalExp = projects.length
 
   return (
-    <main style={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
+    <main style={{ minHeight: '100vh', background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)` }}>
       <Navbar />
 
-      <div style={{ paddingTop: '76px' }}>
+      <div style={{ paddingTop: '76px', position: 'relative', overflow: 'hidden' }}>
+        {/* halo doré ambiant */}
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(50% 28% at 50% 6%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+          }}
+        />
 
         {/* Header */}
-        <section style={{ backgroundColor: '#FFFFFF', padding: '64px 0 48px' }}>
+        <section style={{ padding: '64px 0 48px', position: 'relative', zIndex: 1 }}>
           <div className="container-main">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px' }}>
-              <Link href="/realisations" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#999', textDecoration: 'none' }} className="breadcrumb-link">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px' }}
+            >
+              <Link href="/realisations" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#9A8E78', textDecoration: 'none' }} className="breadcrumb-link">
                 <ArrowLeft size={14} /> Réalisations
               </Link>
-              <span style={{ color: '#DDD' }}>/</span>
+              <span style={{ color: '#D8CEBE' }}>/</span>
               <span style={{ fontSize: '13px', color: GOLD, fontWeight: 600 }}>{secteurNom}</span>
-            </div>
+            </motion.div>
 
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
               <div>
-                <span style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3em', color: GOLD, marginBottom: '12px' }}>
+                <motion.span
+                  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.05 }}
+                  style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.32em', color: GOLD, marginBottom: '14px' }}
+                >
                   {secteurNom}
-                </span>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.02em', lineHeight: 1.1, margin: 0 }}>
+                </motion.span>
+                <motion.h1
+                  initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)', fontWeight: 500, color: INK, letterSpacing: '-0.01em', lineHeight: 1.08, margin: 0 }}
+                >
                   Expériences {secteurNom.toLowerCase()}
-                </h1>
+                </motion.h1>
               </div>
               {!loading && (
-                <p style={{ fontSize: '14px', color: '#999', fontWeight: 400, margin: 0 }}>
+                <motion.p
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }}
+                  style={{ fontSize: '14px', color: '#9A8E78', fontWeight: 400, margin: 0 }}
+                >
                   {totalExp} expérience{totalExp > 1 ? 's' : ''} disponible{totalExp > 1 ? 's' : ''}
-                </p>
+                </motion.p>
               )}
             </div>
           </div>
         </section>
 
         {/* Grille */}
-        <section style={{ backgroundColor: '#FAFAF8', padding: '0 0 96px', minHeight: '300px' }}>
+        <section style={{ padding: '0 0 96px', minHeight: '300px', position: 'relative', zIndex: 1 }}>
           <div className="container-main">
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '80px 0', color: '#999', fontSize: '15px' }}>Chargement...</div>
+              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>Chargement…</div>
             ) : projects.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '80px 0', color: '#999' }}>
+              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78' }}>
                 <p style={{ fontSize: '16px' }}>Expériences bientôt disponibles.</p>
                 <Link href="/realisations" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', color: GOLD, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
                   <ArrowLeft size={14} /> Retour aux réalisations
@@ -103,20 +130,27 @@ export default function SecteurPage() {
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="exp-grid">
-                {projects.map((exp) => {
+                {projects.map((exp, index) => {
                   const image = exp.coverImage || getMatterportThumb(exp.matterportId) || FALLBACK_IMAGE
                   return (
-                    <div key={exp.slug} style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,0.07)', overflow: 'hidden', backgroundColor: '#111111', boxShadow: '0 4px 20px rgba(0,0,0,0.12)', transition: 'all 0.35s ease' }} className="exp-card">
-
+                    <motion.div
+                      key={exp.slug}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-40px' }}
+                      transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: CHARCOAL, boxShadow: '0 18px 50px -26px rgba(0,0,0,0.4)', transition: 'all 0.35s ease' }}
+                      className="exp-card"
+                    >
                       {/* Image */}
-                      <div style={{ position: 'relative', height: '220px', overflow: 'hidden', backgroundColor: '#0a0a0a' }}>
+                      <div style={{ position: 'relative', height: '220px', overflow: 'hidden', backgroundColor: CHARCOAL }}>
                         <img src={image} alt={exp.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.6s ease' }} className="exp-img" />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11,11,11,0.7) 0%, rgba(11,11,11,0.1) 60%, transparent 100%)' }} />
 
-                        {/* Badge offre (au lieu du secteur) */}
+                        {/* Badge offre */}
                         {exp.offeringName && (
                           <div style={{ position: 'absolute', top: '14px', left: '14px' }}>
-                            <span style={{ borderRadius: '999px', backgroundColor: 'rgba(212,136,30,0.9)', padding: '5px 12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#FFFFFF' }}>
+                            <span style={{ borderRadius: '999px', backgroundColor: 'rgba(212,136,30,0.92)', padding: '5px 12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#FFFFFF' }}>
                               {exp.offeringName}
                             </span>
                           </div>
@@ -139,8 +173,8 @@ export default function SecteurPage() {
                       </div>
 
                       {/* Body */}
-                      <div style={{ padding: '18px 20px', backgroundColor: '#111111' }}>
-                        <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#FFFFFF', marginBottom: '4px', letterSpacing: '-0.01em' }}>
+                      <div style={{ padding: '18px 20px', backgroundColor: CHARCOAL }}>
+                        <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.4rem', fontWeight: 500, color: '#FFFFFF', marginBottom: '4px', letterSpacing: '0' }}>
                           {exp.name}
                         </h3>
                         <p style={{ fontSize: '12px', lineHeight: 1.5, color: 'rgba(255,255,255,0.5)', marginBottom: '14px' }}>
@@ -165,7 +199,7 @@ export default function SecteurPage() {
                           Voir l&apos;expérience <ArrowRight size={12} />
                         </Link>
                       </div>
-                    </div>
+                    </motion.div>
                   )
                 })}
               </div>
@@ -178,7 +212,7 @@ export default function SecteurPage() {
 
       <style>{`
         .breadcrumb-link:hover { color: ${GOLD} !important; }
-        .exp-card:hover { box-shadow: 0 24px 64px rgba(0,0,0,0.25) !important; transform: translateY(-4px); border-color: rgba(212,136,30,0.3) !important; }
+        .exp-card:hover { box-shadow: 0 28px 70px -22px rgba(0,0,0,0.5) !important; transform: translateY(-4px); }
         .exp-card:hover .exp-img { transform: scale(1.04); }
         .exp-card:hover .exp-overlay { opacity: 1 !important; }
         .voir-link:hover { gap: 10px !important; }
