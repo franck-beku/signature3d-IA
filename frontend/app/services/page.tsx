@@ -1,6 +1,6 @@
 /**
  * Page Services — Signature Immersion
- * "C Premium" : éditoriale, très aérée, typographie comme matière.
+ * Charte V2 : éditoriale, très aérée, typographie Cormorant comme matière.
  * Chaque offre = un bloc immersif (numéro géant en fond, nom, niveau, description).
  * Branchée sur offeringsApi.getActive() · ordre piloté par displayOrder · multilingue · blindée.
  */
@@ -9,18 +9,22 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useLanguage } from '@/context/LanguageContext'
 import { offeringsApi, type OfferingDto } from '@/lib/api'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 
+/* ── Charte V2 ── */
 const GOLD = '#D4881E'
+const CREAM = '#F7F5F2'
+const INK = '#101010'
 
 export default function ServicesPage() {
   const { t, lang } = useLanguage()
 
   const [offerings, setOfferings] = useState<OfferingDto[]>([])
-  const [loading, setLoading]     = useState(true)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let active = true
@@ -37,42 +41,65 @@ export default function ServicesPage() {
   }, [])
 
   return (
-    <main key={lang} style={{ backgroundColor: '#F7F5F2', minHeight: '100vh' }}>
+    <main
+      key={lang}
+      style={{
+        minHeight: '100vh',
+        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)`,
+      }}
+    >
       <Navbar />
 
       {/* ── Introduction éditoriale ── */}
-      <section style={{ paddingTop: '170px', paddingBottom: '80px' }}>
-        <div className="container-main" style={{ maxWidth: '900px' }}>
-          <span className="section-eyebrow" style={{ color: GOLD }}>
+      <section style={{ position: 'relative', overflow: 'hidden', paddingTop: '170px', paddingBottom: '80px' }}>
+        {/* halo doré ambiant */}
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(45% 30% at 30% 12%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+          }}
+        />
+        <div className="container-main" style={{ position: 'relative', zIndex: 1, maxWidth: '900px' }}>
+          <motion.span
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
+            className="section-eyebrow" style={{ color: GOLD }}
+          >
             {t('Nos solutions', 'Our solutions')}
-          </span>
-          <h1 style={{
-            fontFamily: 'var(--font-display), serif',
-            fontSize: 'clamp(2.4rem, 5.5vw, 4.4rem)',
-            fontWeight: 500,
-            lineHeight: 1.08,
-            color: '#1A1400',
-            letterSpacing: '-0.015em',
-            maxWidth: '720px',
-          }}>
+          </motion.span>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              fontFamily: 'var(--font-cormorant), serif',
+              fontSize: 'clamp(2.6rem, 5.5vw, 4.6rem)',
+              fontWeight: 500,
+              lineHeight: 1.06,
+              color: INK,
+              letterSpacing: '-0.01em',
+              maxWidth: '720px',
+            }}
+          >
             {t(
               'Une expérience immersive pour chaque espace.',
               'An immersive experience for every space.'
             )}
-          </h1>
-          <p style={{
-            marginTop: '1.75rem',
-            fontSize: '1.12rem',
-            lineHeight: 1.75,
-            color: '#5A4E3A',
-            maxWidth: '560px',
-            fontWeight: 300,
-          }}>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              marginTop: '1.75rem',
+              fontSize: '1.12rem',
+              lineHeight: 1.75,
+              color: '#5A4E3A',
+              maxWidth: '560px',
+              fontWeight: 400,
+            }}
+          >
             {t(
               "Chaque espace est unique. Nous concevons l'expérience adaptée à vos objectifs, à votre environnement et à vos visiteurs — de la simple immersion à l'intelligence conversationnelle.",
               'Every space is unique. We design the experience that fits your goals, your environment and your visitors — from pure immersion to conversational intelligence.'
             )}
-          </p>
+          </motion.p>
         </div>
       </section>
 
@@ -96,8 +123,12 @@ export default function ServicesPage() {
               const num = String(index + 1).padStart(2, '0')
               const isLast = index === offerings.length - 1
               return (
-                <div
+                <motion.div
                   key={offer.id}
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-60px' }}
+                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     position: 'relative',
                     display: 'grid',
@@ -111,7 +142,7 @@ export default function ServicesPage() {
                   {/* Colonne gauche : numéro géant + niveau */}
                   <div style={{ position: 'relative' }}>
                     <span style={{
-                      fontFamily: 'var(--font-display), serif',
+                      fontFamily: 'var(--font-cormorant), serif',
                       fontSize: 'clamp(4rem, 9vw, 8rem)',
                       fontWeight: 500,
                       lineHeight: 0.9,
@@ -143,11 +174,11 @@ export default function ServicesPage() {
                   {/* Colonne droite : nom + descriptions */}
                   <div>
                     <h2 style={{
-                      fontFamily: 'var(--font-display), serif',
-                      fontSize: 'clamp(1.9rem, 3.5vw, 2.9rem)',
+                      fontFamily: 'var(--font-cormorant), serif',
+                      fontSize: 'clamp(2rem, 3.5vw, 3rem)',
                       fontWeight: 500,
                       lineHeight: 1.1,
-                      color: '#1A1400',
+                      color: INK,
                       marginBottom: '0.6rem',
                       letterSpacing: '-0.01em',
                     }}>
@@ -155,12 +186,12 @@ export default function ServicesPage() {
                     </h2>
                     {offer.shortDescription && (
                       <p style={{
-                        fontSize: '1.05rem',
+                        fontSize: '1.1rem',
                         color: GOLD,
                         fontWeight: 400,
                         marginBottom: '1.25rem',
                         fontStyle: 'italic',
-                        fontFamily: 'var(--font-display), serif',
+                        fontFamily: 'var(--font-cormorant), serif',
                       }}>
                         {offer.shortDescription}
                       </p>
@@ -170,14 +201,14 @@ export default function ServicesPage() {
                         fontSize: '1rem',
                         lineHeight: 1.8,
                         color: '#5A4E3A',
-                        fontWeight: 300,
+                        fontWeight: 400,
                         maxWidth: '560px',
                       }}>
                         {offer.longDescription}
                       </p>
                     )}
                   </div>
-                </div>
+                </motion.div>
               )
             })
           )}
@@ -185,22 +216,25 @@ export default function ServicesPage() {
       </section>
 
       {/* ── CTA final ── */}
-      <section className="section-dark" style={{ paddingTop: '88px', paddingBottom: '88px' }}>
+      <section style={{ backgroundColor: '#0B0B0B', paddingTop: '88px', paddingBottom: '88px' }}>
         <div className="container-main" style={{ textAlign: 'center' }}>
-          <h2 style={{
-            fontFamily: 'var(--font-display), serif',
-            fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)',
-            fontWeight: 500,
-            color: '#F7F5F2',
-            lineHeight: 1.2,
-            marginBottom: '1rem',
-          }}>
+          <motion.h2
+            initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              fontFamily: 'var(--font-cormorant), serif',
+              fontSize: 'clamp(2rem, 3.5vw, 3rem)',
+              fontWeight: 500,
+              color: CREAM,
+              lineHeight: 1.2,
+              marginBottom: '1rem',
+            }}
+          >
             {t('Trouvons la solution faite pour vous.', 'Let\u2019s find the right fit for you.')}
-          </h2>
+          </motion.h2>
           <p style={{
             fontSize: '1rem',
             color: 'rgba(247,245,242,0.6)',
-            fontWeight: 300,
+            fontWeight: 400,
             maxWidth: '480px',
             margin: '0 auto 2rem',
             lineHeight: 1.7,
@@ -217,14 +251,15 @@ export default function ServicesPage() {
               alignItems: 'center',
               gap: '10px',
               backgroundColor: GOLD,
-              color: '#0B0B0B',
-              borderRadius: '10px',
+              color: '#FFFFFF',
+              borderRadius: '999px',
               padding: '15px 34px',
               fontSize: '0.8rem',
               fontWeight: 700,
-              letterSpacing: '0.05em',
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
               textDecoration: 'none',
+              boxShadow: '0 18px 40px -16px rgba(212,136,30,0.55)',
             }}
             className="services-cta"
           >
@@ -237,7 +272,7 @@ export default function ServicesPage() {
       <Footer />
 
       <style>{`
-        .services-cta:hover { background-color: #E09420 !important; transform: translateY(-1px); }
+        .services-cta:hover { transform: translateY(-1px); box-shadow: 0 22px 48px -16px rgba(212,136,30,0.6) !important; }
         @media (max-width: 768px) {
           .offer-block { grid-template-columns: 1fr !important; gap: 16px !important; padding: 44px 0 !important; }
         }
