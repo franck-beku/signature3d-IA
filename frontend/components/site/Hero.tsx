@@ -20,7 +20,7 @@ import { useLanguage } from '@/context/LanguageContext';
  * le mouvement est ambiant, pas interactif.
  */
 
-const GOLD = '#D4881E';
+const GOLD = '#C8A45D';
 const CHARBON = '#0B0B0B';
 
 /* Mêmes assets que la section Nos univers — cohérence du film. */
@@ -152,7 +152,7 @@ export default function Hero() {
               fontWeight: 500,
               letterSpacing: '0.45em',
               textTransform: 'uppercase',
-              color: 'rgba(212,136,30,0.85)',
+              color: 'rgba(200,164,93,0.85)',
               marginBottom: '28px',
             }}
           >
@@ -291,7 +291,7 @@ export default function Hero() {
             width: '1px',
             height: '32px',
             background:
-              'linear-gradient(to bottom, rgba(212,136,30,0.8), rgba(212,136,30,0))',
+              'linear-gradient(to bottom, rgba(200,164,93,0.8), rgba(200,164,93,0))',
           }}
         />
       </motion.div>
@@ -325,12 +325,12 @@ export default function Hero() {
 
       <style>{`
         .hero-cta-primary:hover {
-          box-shadow: 0 0 32px rgba(212,136,30,0.45);
+          box-shadow: 0 0 32px rgba(200,164,93,0.45);
           transform: translateY(-2px);
         }
         .hero-cta-ghost:hover {
           background: rgba(255,255,255,0.12) !important;
-          border-color: rgba(212,136,30,0.6) !important;
+          border-color: rgba(200,164,93,0.6) !important;
         }
         @media (max-width: 640px) {
           .hero-progress { display: none !important; }

@@ -16,7 +16,7 @@ import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 
 /* ── Charte V2 ── */
-const GOLD = '#D4881E'
+const GOLD = '#C8A45D'
 const CREAM = '#F7F5F2'
 const INK = '#101010'
 
@@ -57,7 +57,7 @@ export default function ServicesPage() {
           aria-hidden
           style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'radial-gradient(45% 30% at 30% 12%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(45% 30% at 30% 12%, rgba(200,164,93,0.10) 0%, transparent 70%)',
           }}
         />
         <div className="container-main" style={{ position: 'relative', zIndex: 1, maxWidth: '900px' }}>
@@ -162,7 +162,7 @@ export default function ServicesPage() {
                         letterSpacing: '0.28em',
                         textTransform: 'uppercase',
                         color: GOLD,
-                        border: `1px solid rgba(212,136,30,0.35)`,
+                        border: `1px solid rgba(200,164,93,0.35)`,
                         borderRadius: '40px',
                         padding: '7px 16px',
                       }}>
@@ -259,7 +259,7 @@ export default function ServicesPage() {
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               textDecoration: 'none',
-              boxShadow: '0 18px 40px -16px rgba(212,136,30,0.55)',
+              boxShadow: '0 18px 40px -16px rgba(200,164,93,0.55)',
             }}
             className="services-cta"
           >
@@ -272,7 +272,7 @@ export default function ServicesPage() {
       <Footer />
 
       <style>{`
-        .services-cta:hover { transform: translateY(-1px); box-shadow: 0 22px 48px -16px rgba(212,136,30,0.6) !important; }
+        .services-cta:hover { transform: translateY(-1px); box-shadow: 0 22px 48px -16px rgba(200,164,93,0.6) !important; }
         @media (max-width: 768px) {
           .offer-block { grid-template-columns: 1fr !important; gap: 16px !important; padding: 44px 0 !important; }
         }

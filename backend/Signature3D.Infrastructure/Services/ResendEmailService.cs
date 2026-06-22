@@ -109,7 +109,7 @@ public class ResendEmailService : IEmailService
 
         return $@"
 <div style=""font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 0 auto; color: #101010;"">
-  <div style=""border-left: 4px solid #D4881E; padding: 8px 16px; margin-bottom: 20px;"">
+  <div style=""border-left: 4px solid #C8A45D; padding: 8px 16px; margin-bottom: 20px;"">
     <h2 style=""margin: 0; font-size: 20px;"">Nouveau lead reçu</h2>
     <p style=""margin: 4px 0 0; color: #6B6B6B; font-size: 14px;"">{E(projectName)}</p>
   </div>

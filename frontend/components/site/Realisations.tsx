@@ -12,8 +12,8 @@ import Link from 'next/link'
 import { sectorsApi, type SectorDto } from '@/lib/api'
 import { useLanguage } from '@/context/LanguageContext'
 
-const GOLD      = '#D4881E'
-const GOLD_DARK = '#B8720F'
+const GOLD      = '#C8A45D'
+const GOLD_DARK = '#A8863F'
 const DARK      = '#1A1400'
 
 const DEFAULT_IMAGES: Record<string, string> = {
@@ -73,7 +73,7 @@ export default function Realisations() {
 
   return (
     <section id="realisations" style={{ backgroundColor: '#FFFFFF', padding: '104px 0 96px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(212,136,30,0.04) 0%, transparent 60%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(200,164,93,0.04) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
       <div className="container-main" style={{ position: 'relative', zIndex: 1 }}>
 
@@ -165,7 +165,7 @@ export default function Realisations() {
       </div>
 
       <style>{`
-        .card-realisation:hover { box-shadow: 0 20px 56px rgba(0,0,0,0.1) !important; transform: translateY(-5px); border-color: rgba(212,136,30,0.25) !important; }
+        .card-realisation:hover { box-shadow: 0 20px 56px rgba(0,0,0,0.1) !important; transform: translateY(-5px); border-color: rgba(200,164,93,0.25) !important; }
         .card-realisation:hover .card-img { transform: scale(1.05); }
         .card-realisation:hover .card-overlay { opacity: 1 !important; }
         .voir-link:hover { gap: 10px !important; color: ${GOLD_DARK} !important; }

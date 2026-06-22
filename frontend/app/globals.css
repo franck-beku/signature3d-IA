@@ -1,13 +1,13 @@
 @import "tailwindcss";
 @theme {
-  /* ─── Or Signature (inchangé, déjà parfait) ─── */
-  --color-gold:        #D4881E;
-  --color-gold-light:  #E09420;
-  --color-gold-dark:   #B8720F;
-  --color-gold-muted:  rgba(212,136,30,0.1);
+  /* ─── Or Signature (champagne calme, premium) ─── */
+  --color-gold:        #C8A45D;
+  --color-gold-light:  #D4B06E;
+  --color-gold-dark:   #A8863F;
+  --color-gold-muted:  rgba(200,164,93,0.1);
 
   /* ─── Clair éditorial (blanc cassé premium) ─── */
-  --color-bg:          #F7F5F2;   /* blanc cassé (était #FFFFFF) */
+  --color-bg:          #F7F5F2;   /* blanc cassé */
   --color-bg-pure:     #FFFFFF;   /* blanc pur, pour cartes/contrastes */
   --color-bg-soft:     #FAFAF8;
 
@@ -71,8 +71,8 @@ input, textarea, select {
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: #D4881E;
-  box-shadow: 0 0 0 3px rgba(212,136,30,0.1);
+  border-color: #C8A45D;
+  box-shadow: 0 0 0 3px rgba(200,164,93,0.1);
 }
 
 input::placeholder, textarea::placeholder { color: #B0AA9E; }
@@ -81,10 +81,10 @@ select option { background-color: #FFFFFF; color: #1A1400; }
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar       { width: 5px; }
 ::-webkit-scrollbar-track { background: #FAFAF8; }
-::-webkit-scrollbar-thumb { background: #D4881E; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #C8A45D; border-radius: 4px; }
 
 /* ─── Selection ─── */
-::selection { background: rgba(212,136,30,0.15); color: #B8720F; }
+::selection { background: rgba(200,164,93,0.15); color: #A8863F; }
 
 /* ─── Section — sans padding global, géré par chaque section ─── */
 section {
@@ -115,19 +115,19 @@ section {
   display: block;
   font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.35em;
-  color: #D4881E; margin-bottom: 1rem;
+  color: #C8A45D; margin-bottom: 1rem;
 }
 
 .section-divider {
   width: 48px; height: 2px;
-  background: linear-gradient(to right, transparent, #D4881E, transparent);
+  background: linear-gradient(to right, transparent, #C8A45D, transparent);
   margin: 1.5rem auto 0; border-radius: 2px;
 }
 
 /* ─── Buttons ─── */
 .btn-gold {
   display: inline-flex; align-items: center; gap: 8px;
-  background-color: #D4881E; color: #FFFFFF;
+  background-color: #C8A45D; color: #FFFFFF;
   border-radius: 10px; padding: 13px 28px;
   font-size: 13px; font-weight: 700;
   letter-spacing: 0.05em; text-transform: uppercase;
@@ -136,8 +136,8 @@ section {
 }
 
 .btn-gold:hover {
-  background-color: #B8720F;
-  box-shadow: 0 8px 24px rgba(212,136,30,0.3);
+  background-color: #A8863F;
+  box-shadow: 0 8px 24px rgba(200,164,93,0.3);
   transform: translateY(-1px); color: #FFFFFF;
 }
 
@@ -160,7 +160,7 @@ section {
 }
 
 .card-white:hover {
-  border-color: #D4881E;
+  border-color: #C8A45D;
   box-shadow: 0 8px 32px rgba(0,0,0,0.08);
   transform: translateY(-2px);
 }
@@ -171,7 +171,7 @@ section {
 }
 
 .card-soft:hover {
-  border-color: #D4881E; background-color: #FFFFFF;
+  border-color: #C8A45D; background-color: #FFFFFF;
   box-shadow: 0 8px 32px rgba(0,0,0,0.06); transform: translateY(-2px);
 }
 
@@ -194,4 +194,4 @@ section {
 @media (min-width: 1280px) { .steps-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
 
 /* ─── Gold line ─── */
-.gold-line { height: 2px; background: linear-gradient(to right, transparent, #D4881E, transparent); border-radius: 2px; }
+.gold-line { height: 2px; background: linear-gradient(to right, transparent, #C8A45D, transparent); border-radius: 2px; }

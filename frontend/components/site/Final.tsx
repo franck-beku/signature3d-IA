@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { leadsApi, projectsApi } from "@/lib/api";
 
-const GOLD = "#D4881E";
+const GOLD = "#C8A45D";
 const CREAM = "#F7F5F2";
 const INK = "#101010";
 
@@ -67,7 +67,7 @@ export default function ContactFinal() {
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background: `radial-gradient(55% 40% at 54% 42%, rgba(212,136,30,0.13) 0%, transparent 68%)`,
+          background: `radial-gradient(55% 40% at 54% 42%, rgba(200,164,93,0.13) 0%, transparent 68%)`,
         }}
       />
 
@@ -149,7 +149,7 @@ export default function ContactFinal() {
             style={{
               background: GOLD,
               color: "#FFFFFF",
-              boxShadow: "0 22px 52px -18px rgba(212,136,30,0.55)",
+              boxShadow: "0 22px 52px -18px rgba(200,164,93,0.55)",
             }}
           >
             <span
@@ -283,7 +283,7 @@ function PhoneMockup({
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 blur-3xl"
         style={{
-          background: `radial-gradient(45% 45% at 50% 50%, rgba(212,136,30,0.38) 0%, transparent 72%)`,
+          background: `radial-gradient(45% 45% at 50% 50%, rgba(200,164,93,0.38) 0%, transparent 72%)`,
           transform: "scale(1.35)",
         }}
       />
@@ -341,7 +341,7 @@ function PhoneMockup({
               className="flex items-center justify-between rounded-full px-4 py-2.5"
               style={{
                 background: "rgba(20,20,20,0.86)",
-                border: "1px solid rgba(212,136,30,0.38)",
+                border: "1px solid rgba(200,164,93,0.38)",
               }}
             >
               <span className="text-[11px] text-white/55">
@@ -596,7 +596,7 @@ function ContactModal({
                   style={{
                     background: GOLD,
                     color: "#FFFFFF",
-                    boxShadow: "0 16px 36px -14px rgba(212,136,30,0.55)",
+                    boxShadow: "0 16px 36px -14px rgba(200,164,93,0.55)",
                   }}
                 >
                   {loading
@@ -608,7 +608,7 @@ function ContactModal({
               <div className="py-6 text-center">
                 <div
                   className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full"
-                  style={{ background: "rgba(212,136,30,0.12)" }}
+                  style={{ background: "rgba(200,164,93,0.12)" }}
                 >
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                     <path
@@ -663,7 +663,7 @@ const Field = forwardRef<
   }
 >(function Field({ label, value, onChange, placeholder, textarea }, ref) {
   const base =
-    "w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none transition-colors placeholder:text-black/30 focus:border-[#D4881E]";
+    "w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none transition-colors placeholder:text-black/30 focus:border-[#C8A45D]";
 
   return (
     <label className="block">

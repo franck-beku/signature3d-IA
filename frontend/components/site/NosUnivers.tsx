@@ -85,7 +85,7 @@ export default function NosUnivers() {
       className="w-full"
     >
       <div className="mx-auto max-w-5xl px-6 pt-28 pb-16 text-center md:pt-36 md:pb-24">
-        <p className="mb-5 text-xs uppercase tracking-[0.4em] text-[#D4881E]">
+        <p className="mb-5 text-xs uppercase tracking-[0.4em] text-[#C8A45D]">
           {t('Nos univers', 'Our worlds')}
         </p>
         <h2
@@ -224,20 +224,20 @@ function UniversPanel({
           <motion.div variants={item} className="mt-9">
             <Link
               href={`/realisations/${univers.slug}`}
-              className="group inline-flex items-center gap-3 rounded-sm px-7 py-3 text-sm uppercase tracking-[0.2em] text-[#F7F5F2] transition-all duration-300 hover:bg-[#D4881E] hover:text-[#0B0B0B]"
+              className="group inline-flex items-center gap-3 rounded-sm px-7 py-3 text-sm uppercase tracking-[0.2em] text-[#F7F5F2] transition-all duration-300 hover:bg-[#C8A45D] hover:text-[#0B0B0B]"
               style={{
                 background: 'rgba(0,0,0,0.28)',
                 backdropFilter: 'blur(6px)',
                 WebkitBackdropFilter: 'blur(6px)',
-                border: '1px solid rgba(212,136,30,0.55)',
-                boxShadow: '0 0 0 rgba(212,136,30,0)',
+                border: '1px solid rgba(200,164,93,0.55)',
+                boxShadow: '0 0 0 rgba(200,164,93,0)',
                 transition: 'all 0.3s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 24px rgba(212,136,30,0.35)';
+                e.currentTarget.style.boxShadow = '0 0 24px rgba(200,164,93,0.35)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 0 rgba(212,136,30,0)';
+                e.currentTarget.style.boxShadow = '0 0 0 rgba(200,164,93,0)';
               }}
             >
               {t('Voir les réalisations', 'View projects')}

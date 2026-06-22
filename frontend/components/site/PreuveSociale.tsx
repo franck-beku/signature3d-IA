@@ -11,8 +11,8 @@ import { TrendingUp, Users, MessageSquare, BarChart2 } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { sectorsApi, type SectorDto } from '@/lib/api'
 
-const GOLD      = '#D4881E'
-const GOLD_DARK = '#B8720F'
+const GOLD      = '#C8A45D'
+const GOLD_DARK = '#A8863F'
 const DARK      = '#1A1400'
 
 const content = {
@@ -67,7 +67,7 @@ export default function PreuveSociale() {
 
   return (
     <section id="resultats" style={{ backgroundColor: '#FAFAF8', padding: '104px 0 96px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 90% 10%, rgba(212,136,30,0.05) 0%, transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,136,30,0.04) 0%, transparent 50%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 90% 10%, rgba(200,164,93,0.05) 0%, transparent 50%), radial-gradient(circle at 10% 90%, rgba(200,164,93,0.04) 0%, transparent 50%)', pointerEvents: 'none' }} />
 
       <div className="container-main" style={{ position: 'relative', zIndex: 1 }}>
 
@@ -119,8 +119,8 @@ export default function PreuveSociale() {
       </div>
 
       <style>{`
-        .metric-card:hover { border-color: rgba(212,136,30,0.35) !important; transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.07) !important; }
-        .sector-badge:hover { background-color: rgba(212,136,30,0.06) !important; border-color: rgba(212,136,30,0.35) !important; color: ${GOLD_DARK} !important; }
+        .metric-card:hover { border-color: rgba(200,164,93,0.35) !important; transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.07) !important; }
+        .sector-badge:hover { background-color: rgba(200,164,93,0.06) !important; border-color: rgba(200,164,93,0.35) !important; color: ${GOLD_DARK} !important; }
         @media (max-width: 900px) { .metrics-grid-custom { grid-template-columns: repeat(2, 1fr) !important; } }
         @media (max-width: 480px) { .metrics-grid-custom { grid-template-columns: 1fr !important; } }
       `}</style>

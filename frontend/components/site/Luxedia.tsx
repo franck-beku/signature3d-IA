@@ -19,7 +19,7 @@ import { useLanguage } from '@/context/LanguageContext';
  *  - eyebrow « Présence numérique » (écho à « Notre conviction » / « Nos univers »)
  */
 
-const GOLD = '#D4881E';
+const GOLD = '#C8A45D';
 const CHARBON = '#0B0B0B';
 
 export default function Luxedia() {
@@ -90,7 +90,7 @@ export default function Luxedia() {
       style={{
         position: 'relative',
         background:
-          'radial-gradient(circle at 72% 50%, rgba(212,136,30,0.10) 0%, rgba(212,136,30,0.03) 32%, rgba(11,11,11,1) 64%), #0B0B0B',
+          'radial-gradient(circle at 72% 50%, rgba(200,164,93,0.10) 0%, rgba(200,164,93,0.03) 32%, rgba(11,11,11,1) 64%), #0B0B0B',
         overflow: 'hidden',
       }}
     >
@@ -120,7 +120,7 @@ export default function Luxedia() {
               fontWeight: 500,
               letterSpacing: '0.45em',
               textTransform: 'uppercase',
-              color: 'rgba(212,136,30,0.85)',
+              color: 'rgba(200,164,93,0.85)',
               marginBottom: '32px',
             }}
           >
@@ -221,7 +221,7 @@ export default function Luxedia() {
                 height: '560px',
                 borderRadius: '50%',
                 background:
-                  'radial-gradient(circle, rgba(212,136,30,0.16) 0%, rgba(212,136,30,0.05) 40%, rgba(212,136,30,0) 70%)',
+                  'radial-gradient(circle, rgba(200,164,93,0.16) 0%, rgba(200,164,93,0.05) 40%, rgba(200,164,93,0) 70%)',
               }}
             />
 
@@ -235,7 +235,7 @@ export default function Luxedia() {
                 width: '260px',
                 height: '260px',
                 borderRadius: '50%',
-                border: '1px solid rgba(212,136,30,0.15)',
+                border: '1px solid rgba(200,164,93,0.15)',
               }}
             />
 
@@ -250,8 +250,8 @@ export default function Luxedia() {
                 height: '70px',
                 borderRadius: '50%',
                 background:
-                  'radial-gradient(circle at 35% 30%, rgba(247,224,180,0.95) 0%, rgba(212,136,30,0.9) 45%, rgba(150,90,15,0.6) 100%)',
-                boxShadow: '0 0 60px rgba(212,136,30,0.6)',
+                  'radial-gradient(circle at 35% 30%, rgba(247,224,180,0.95) 0%, rgba(200,164,93,0.9) 45%, rgba(150,90,15,0.6) 100%)',
+                boxShadow: '0 0 60px rgba(200,164,93,0.6)',
               }}
             />
 
@@ -277,7 +277,7 @@ export default function Luxedia() {
                     background: 'rgba(255,255,255,0.07)',
                     backdropFilter: 'blur(10px)',
                     WebkitBackdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(212,136,30,0.35)',
+                    border: '1px solid rgba(200,164,93,0.35)',
                     borderRadius: '999px',
                     padding: '12px 22px',
                     fontSize: '14px',

@@ -18,7 +18,7 @@ import { useLanguage } from '@/context/LanguageContext';
  *  3. une phrase d'ancrage plus discrète qui ramène au concret
  */
 
-const GOLD = '#D4881E';
+const GOLD = '#C8A45D';
 const CHARBON = '#0B0B0B';
 
 export default function Manifeste() {
@@ -66,7 +66,7 @@ export default function Manifeste() {
           transform: 'translateX(-50%)',
           width: '1px',
           height: '64px',
-          background: `linear-gradient(to bottom, ${GOLD}, rgba(212,136,30,0))`,
+          background: `linear-gradient(to bottom, ${GOLD}, rgba(200,164,93,0))`,
         }}
       />
 
@@ -94,7 +94,7 @@ export default function Manifeste() {
               fontWeight: 500,
               letterSpacing: '0.45em',
               textTransform: 'uppercase',
-              color: 'rgba(212,136,30,0.85)',
+              color: 'rgba(200,164,93,0.85)',
               marginBottom: '40px',
             }}
           >

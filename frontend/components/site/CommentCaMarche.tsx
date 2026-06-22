@@ -17,7 +17,7 @@ import { useLanguage } from '@/context/LanguageContext';
  * Étape 1 = « 3D ou 360° » (pas « Matterport » : on nomme le bénéfice, pas l'outil).
  */
 
-const GOLD = '#D4881E';
+const GOLD = '#C8A45D';
 const CHARBON = '#0B0B0B';
 
 export default function CommentCaMarche() {
@@ -104,7 +104,7 @@ export default function CommentCaMarche() {
               fontWeight: 500,
               letterSpacing: '0.45em',
               textTransform: 'uppercase',
-              color: 'rgba(212,136,30,0.85)',
+              color: 'rgba(200,164,93,0.85)',
               marginBottom: '24px',
             }}
           >
@@ -154,7 +154,7 @@ export default function CommentCaMarche() {
               right: '12%',
               height: '1px',
               background:
-                'linear-gradient(to right, rgba(212,136,30,0) 0%, rgba(212,136,30,0.5) 15%, rgba(212,136,30,0.5) 85%, rgba(212,136,30,0) 100%)',
+                'linear-gradient(to right, rgba(200,164,93,0) 0%, rgba(200,164,93,0.5) 15%, rgba(200,164,93,0.5) 85%, rgba(200,164,93,0) 100%)',
               transformOrigin: 'left',
             }}
           />
@@ -178,11 +178,11 @@ export default function CommentCaMarche() {
                     margin: '0 auto 28px',
                     borderRadius: '50%',
                     backgroundColor: CHARBON,
-                    border: '1px solid rgba(212,136,30,0.4)',
+                    border: '1px solid rgba(200,164,93,0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 0 30px rgba(212,136,30,0.12)',
+                    boxShadow: '0 0 30px rgba(200,164,93,0.12)',
                   }}
                 >
                   <Icon size={26} strokeWidth={1.3} style={{ color: GOLD }} />
@@ -194,7 +194,7 @@ export default function CommentCaMarche() {
                     fontFamily: 'var(--font-cormorant), serif',
                     fontSize: '15px',
                     letterSpacing: '0.3em',
-                    color: 'rgba(212,136,30,0.7)',
+                    color: 'rgba(200,164,93,0.7)',
                     margin: '0 0 12px',
                   }}
                 >

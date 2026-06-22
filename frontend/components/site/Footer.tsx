@@ -1,7 +1,7 @@
 /**
  * Footer — Signature Immersion
  * Version: 4.1 — Logo complet + Univers (ambition) / Explorer / Réalisations récentes (dynamique) / Contact
- *                Charbon #0B0B0B + Or #D4881E + pages légales (Confidentialité / CGU / Cookies)
+ *                Charbon #0B0B0B + Or #C8A45D + pages légales (Confidentialité / CGU / Cookies)
  *                Lien CGU corrigé : /cgu -> /conditions
  */
 
@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
 import { projectsApi, type ProjectCardDto } from '@/lib/api'
 
-const GOLD = '#D4881E'
+const GOLD = '#C8A45D'
 
 const content = {
   fr: {
@@ -99,7 +99,7 @@ export default function Footer() {
               <Image src="/logo-full.png" alt="Signature Immersion" width={320} height={213} style={{ height: '88px', width: 'auto', opacity: 1 }} />
             </Link>
             <p style={{ fontSize: '12px', lineHeight: 1.8, color: 'rgba(255,255,255,0.35)', fontWeight: 300, maxWidth: '260px', marginBottom: '20px' }}>{c.desc}</p>
-            <p style={{ fontSize: '9px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.4em', color: 'rgba(212,136,30,0.5)' }}>{c.tagline}</p>
+            <p style={{ fontSize: '9px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.4em', color: 'rgba(200,164,93,0.5)' }}>{c.tagline}</p>
           </div>
 
           {/* Nos univers — texte simple (ambition, pas de liens) */}

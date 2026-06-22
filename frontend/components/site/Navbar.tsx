@@ -1,6 +1,6 @@
 /**
  * Navbar — Signature Immersion
- * Version: 5.1 — Pages dédiées + Or Signature #D4881E + seuil mobile 1100px
+ * Version: 5.1 — Pages dédiées + Or Signature #C8A45D + seuil mobile 1100px
  */
 
 'use client'
@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
-const GOLD = '#D4881E'
+const GOLD = '#C8A45D'
 
 const navLinks = {
   fr: [

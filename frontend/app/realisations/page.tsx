@@ -15,7 +15,7 @@ import Footer from '@/components/site/Footer'
 import { sectorsApi, type SectorDto } from '@/lib/api'
 
 /* ── Charte V2 (identique à l'accueil / Final / Contact) ── */
-const GOLD = '#D4881E'
+const GOLD = '#C8A45D'
 const CREAM = '#F7F5F2'
 const INK = '#101010'
 
@@ -51,7 +51,7 @@ export default function RealisationsPage() {
           aria-hidden
           style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'radial-gradient(50% 30% at 50% 8%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(50% 30% at 50% 8%, rgba(200,164,93,0.10) 0%, transparent 70%)',
           }}
         />
 

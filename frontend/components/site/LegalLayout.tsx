@@ -10,7 +10,7 @@ import { motion } from 'framer-motion'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 
-const GOLD = '#D4881E'
+const GOLD = '#C8A45D'
 const CREAM = '#F7F5F2'
 const INK = '#101010'
 
@@ -38,7 +38,7 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
           aria-hidden
           style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'radial-gradient(45% 26% at 50% 8%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(45% 26% at 50% 8%, rgba(200,164,93,0.10) 0%, transparent 70%)',
           }}
         />
 
@@ -65,7 +65,7 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
             <p style={{ marginTop: '16px', fontSize: '13px', color: '#9A8E78', letterSpacing: '0.04em' }}>
               {updatedLabel} : {updatedDate}
             </p>
-            <div style={{ marginTop: '28px', height: '1px', background: 'linear-gradient(to right, rgba(212,136,30,0.5), transparent)' }} />
+            <div style={{ marginTop: '28px', height: '1px', background: 'linear-gradient(to right, rgba(200,164,93,0.5), transparent)' }} />
           </motion.div>
 
           {/* Contenu */}
@@ -114,13 +114,13 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
         .legal-prose a {
           color: ${GOLD};
           text-decoration: none;
-          border-bottom: 1px solid rgba(212,136,30,0.3);
+          border-bottom: 1px solid rgba(200,164,93,0.3);
         }
         .legal-prose a:hover { border-bottom-color: ${GOLD}; }
         .legal-prose strong { color: ${INK}; font-weight: 600; }
         .legal-prose .todo {
-          background: rgba(212,136,30,0.1);
-          border: 1px dashed rgba(212,136,30,0.5);
+          background: rgba(200,164,93,0.1);
+          border: 1px dashed rgba(200,164,93,0.5);
           border-radius: 6px;
           padding: 2px 8px;
           font-size: 0.85rem;

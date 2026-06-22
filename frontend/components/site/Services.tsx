@@ -15,7 +15,7 @@ import {
 import { offeringsApi, type OfferingDto } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 
-const GOLD = '#D4881E';
+const GOLD = '#C8A45D';
 const CREAM = '#F7F5F2';
 const TEXT = '#101010';
 
@@ -259,7 +259,7 @@ export default function Services() {
         .service-card-premium:hover {
           transform: translateY(-14px);
           box-shadow: 0 40px 90px rgba(0,0,0,0.12);
-          border-color: rgba(212,136,30,0.28) !important;
+          border-color: rgba(200,164,93,0.28) !important;
         }
 
         .service-card-premium:hover .service-line {
@@ -272,7 +272,7 @@ export default function Services() {
 
         .signature-card-premium:hover {
           transform: translateY(-6px);
-          box-shadow: 0 38px 100px rgba(212,136,30,0.18);
+          box-shadow: 0 38px 100px rgba(200,164,93,0.18);
         }
 
         .services-main-cta {
@@ -281,7 +281,7 @@ export default function Services() {
 
         .services-main-cta:hover {
           transform: translateY(-3px);
-          box-shadow: 0 20px 54px rgba(212,136,30,0.36);
+          box-shadow: 0 20px 54px rgba(200,164,93,0.36);
         }
 
         @media (max-width: 980px) {
@@ -334,7 +334,7 @@ function SignatureCard({
         borderRadius: '18px',
         overflow: 'hidden',
         background:
-          'linear-gradient(110deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.7) 50%, rgba(212,136,30,0.10) 100%)',
+          'linear-gradient(110deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.7) 50%, rgba(200,164,93,0.10) 100%)',
         boxShadow: '0 28px 80px rgba(0,0,0,0.10)',
         padding: '34px 38px',
       }}
@@ -347,7 +347,7 @@ function SignatureCard({
           position: 'absolute',
           inset: 0,
           background:
-            'radial-gradient(circle at 90% 40%, rgba(212,136,30,0.18), transparent 38%)',
+            'radial-gradient(circle at 90% 40%, rgba(200,164,93,0.18), transparent 38%)',
           pointerEvents: 'none',
         }}
       />
@@ -369,7 +369,7 @@ function SignatureCard({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              backgroundColor: 'rgba(212,136,30,0.35)',
+              backgroundColor: 'rgba(200,164,93,0.35)',
               color: TEXT,
               borderRadius: '6px',
               padding: '8px 13px',
@@ -498,7 +498,7 @@ function OfferCard({ offer, lang, index }: { offer: OfferingDto; lang: string; i
           position: 'absolute',
           inset: 0,
           background:
-            'radial-gradient(circle at top right, rgba(212,136,30,0.06), transparent 60%)',
+            'radial-gradient(circle at top right, rgba(200,164,93,0.06), transparent 60%)',
           pointerEvents: 'none',
         }}
       />

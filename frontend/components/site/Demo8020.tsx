@@ -22,7 +22,7 @@ import { useLanguage } from '@/context/LanguageContext';
  * vivre ici — l'expérience vécue, c'est /embed.
  */
 
-const GOLD = '#D4881E';
+const GOLD = '#C8A45D';
 const CHARBON = '#0B0B0B';
 
 /* 3 univers : le diaporama prouve que la techno marche partout, pas juste l'auto.
@@ -110,7 +110,7 @@ export default function Demo8020() {
               fontWeight: 500,
               letterSpacing: '0.45em',
               textTransform: 'uppercase',
-              color: 'rgba(212,136,30,0.85)',
+              color: 'rgba(200,164,93,0.85)',
               marginBottom: '24px',
             }}
           >
@@ -148,7 +148,7 @@ export default function Demo8020() {
             alignItems: 'stretch',
             borderRadius: '16px',
             overflow: 'hidden',
-            border: '1px solid rgba(212,136,30,0.18)',
+            border: '1px solid rgba(200,164,93,0.18)',
             boxShadow: '0 40px 120px rgba(0,0,0,0.4)',
           }}
         >
@@ -279,8 +279,8 @@ export default function Demo8020() {
                   height: '12px',
                   borderRadius: '50%',
                   background:
-                    'radial-gradient(circle at 35% 30%, rgba(247,224,180,0.95), rgba(212,136,30,0.9))',
-                  boxShadow: '0 0 14px rgba(212,136,30,0.6)',
+                    'radial-gradient(circle at 35% 30%, rgba(247,224,180,0.95), rgba(200,164,93,0.9))',
+                  boxShadow: '0 0 14px rgba(200,164,93,0.6)',
                   flexShrink: 0,
                 }}
               />
@@ -293,7 +293,7 @@ export default function Demo8020() {
                   fontSize: '9px',
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
-                  color: 'rgba(212,136,30,0.8)',
+                  color: 'rgba(200,164,93,0.8)',
                 }}
               >
                 {t('20 % · IA', '20% · AI')}
@@ -332,13 +332,13 @@ export default function Demo8020() {
                   </div>
                   {/* Réponse Luxedia */}
                   <div style={{ alignSelf: 'flex-start', maxWidth: '94%' }}>
-                    <p style={{ margin: '0 0 4px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(212,136,30,0.6)' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,164,93,0.6)' }}>
                       Luxedia
                     </p>
                     <div
                       style={{
-                        background: 'rgba(212,136,30,0.14)',
-                        border: '1px solid rgba(212,136,30,0.3)',
+                        background: 'rgba(200,164,93,0.14)',
+                        border: '1px solid rgba(200,164,93,0.3)',
                         borderRadius: '14px 14px 14px 4px',
                         padding: '11px 14px',
                         fontSize: '13px',
@@ -418,7 +418,7 @@ export default function Demo8020() {
 
       <style>{`
         .demo-cta:hover {
-          box-shadow: 0 0 32px rgba(212,136,30,0.45);
+          box-shadow: 0 0 32px rgba(200,164,93,0.45);
           transform: translateY(-2px);
         }
         @media (max-width: 880px) {

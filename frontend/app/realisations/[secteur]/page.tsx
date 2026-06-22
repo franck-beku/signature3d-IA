@@ -17,7 +17,7 @@ import Footer from '@/components/site/Footer'
 import { projectsApi, sectorsApi, type ProjectCardDto, type SectorDto } from '@/lib/api'
 
 /* ── Charte V2 ── */
-const GOLD = '#D4881E'
+const GOLD = '#C8A45D'
 const CREAM = '#F7F5F2'
 const INK = '#101010'
 const CHARCOAL = '#0B0B0B'
@@ -71,7 +71,7 @@ export default function SecteurPage() {
           aria-hidden
           style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'radial-gradient(50% 28% at 50% 6%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(50% 28% at 50% 6%, rgba(200,164,93,0.10) 0%, transparent 70%)',
           }}
         />
 
@@ -150,7 +150,7 @@ export default function SecteurPage() {
                         {/* Badge offre */}
                         {exp.offeringName && (
                           <div style={{ position: 'absolute', top: '14px', left: '14px' }}>
-                            <span style={{ borderRadius: '999px', backgroundColor: 'rgba(212,136,30,0.92)', padding: '5px 12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#FFFFFF' }}>
+                            <span style={{ borderRadius: '999px', backgroundColor: 'rgba(200,164,93,0.92)', padding: '5px 12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#FFFFFF' }}>
                               {exp.offeringName}
                             </span>
                           </div>

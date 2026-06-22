@@ -16,7 +16,7 @@ import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 
 /* ── Charte V2 ── */
-const GOLD = '#D4881E'
+const GOLD = '#C8A45D'
 const CREAM = '#F7F5F2'
 const INK = '#101010'
 
@@ -60,7 +60,7 @@ export default function FaqPage() {
           aria-hidden
           style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'radial-gradient(45% 30% at 50% 12%, rgba(212,136,30,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(45% 30% at 50% 12%, rgba(200,164,93,0.10) 0%, transparent 70%)',
           }}
         />
         <div className="container-main" style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
@@ -133,7 +133,7 @@ export default function FaqPage() {
                     transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
                     style={{
                       backgroundColor: isOpen ? '#FFFFFF' : 'rgba(255,255,255,0.5)',
-                      border: `1px solid ${isOpen ? 'rgba(212,136,30,0.35)' : '#E8E2D4'}`,
+                      border: `1px solid ${isOpen ? 'rgba(200,164,93,0.35)' : '#E8E2D4'}`,
                       borderRadius: '16px',
                       overflow: 'hidden',
                       transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
@@ -252,7 +252,7 @@ export default function FaqPage() {
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               textDecoration: 'none',
-              boxShadow: '0 18px 40px -16px rgba(212,136,30,0.55)',
+              boxShadow: '0 18px 40px -16px rgba(200,164,93,0.55)',
             }}
             className="faq-cta"
           >
@@ -265,7 +265,7 @@ export default function FaqPage() {
       <Footer />
 
       <style>{`
-        .faq-cta:hover { transform: translateY(-1px); box-shadow: 0 22px 48px -16px rgba(212,136,30,0.6) !important; }
+        .faq-cta:hover { transform: translateY(-1px); box-shadow: 0 22px 48px -16px rgba(200,164,93,0.6) !important; }
       `}</style>
     </main>
   )

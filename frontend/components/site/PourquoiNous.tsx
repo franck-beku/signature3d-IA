@@ -9,8 +9,8 @@ import { motion } from 'framer-motion'
 import { Brain, Box, Layers, Check } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
-const GOLD      = '#D4881E'
-const GOLD_DARK = '#B8720F'
+const GOLD      = '#C8A45D'
+const GOLD_DARK = '#A8863F'
 const DARK      = '#1A1400'
 
 const content = {
@@ -54,7 +54,7 @@ export default function PourquoiNous() {
 
   return (
     <section id="services" style={{ backgroundColor: '#FFFFFF', padding: '104px 0 96px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 50% 100%, rgba(212,136,30,0.04) 0%, transparent 60%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 50% 100%, rgba(200,164,93,0.04) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
       <div className="container-main" style={{ position: 'relative', zIndex: 1 }}>
 
@@ -78,9 +78,9 @@ export default function PourquoiNous() {
                 </div>
               )}
 
-              <span style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.35em', fontWeight: 700, color: service.featured ? 'rgba(212,136,30,0.8)' : GOLD, marginBottom: '20px', display: 'block' }}>{service.tag}</span>
+              <span style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.35em', fontWeight: 700, color: service.featured ? 'rgba(200,164,93,0.8)' : GOLD, marginBottom: '20px', display: 'block' }}>{service.tag}</span>
 
-              <div style={{ width: '52px', height: '52px', borderRadius: '12px', border: service.featured ? '1px solid rgba(212,136,30,0.25)' : '1.5px solid #E8E2D4', backgroundColor: service.featured ? 'rgba(212,136,30,0.1)' : '#F5F0E8', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+              <div style={{ width: '52px', height: '52px', borderRadius: '12px', border: service.featured ? '1px solid rgba(200,164,93,0.25)' : '1.5px solid #E8E2D4', backgroundColor: service.featured ? 'rgba(200,164,93,0.1)' : '#F5F0E8', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
                 <service.icon size={22} strokeWidth={1.4} style={{ color: service.featured ? GOLD : GOLD_DARK }} />
               </div>
 
@@ -91,7 +91,7 @@ export default function PourquoiNous() {
               <ul style={{ borderTop: service.featured ? '1px solid rgba(255,255,255,0.08)' : '1px solid #F0EBE0', paddingTop: '20px', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {service.features.map((f) => (
                   <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12.5px', color: service.featured ? 'rgba(255,255,255,0.65)' : '#5A4E3A', fontWeight: 400 }}>
-                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, backgroundColor: service.featured ? 'rgba(212,136,30,0.18)' : 'rgba(212,136,30,0.08)', border: service.featured ? '1px solid rgba(212,136,30,0.3)' : '1px solid rgba(212,136,30,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, backgroundColor: service.featured ? 'rgba(200,164,93,0.18)' : 'rgba(200,164,93,0.08)', border: service.featured ? '1px solid rgba(200,164,93,0.3)' : '1px solid rgba(200,164,93,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Check size={9} style={{ color: GOLD }} strokeWidth={2.5} />
                     </div>
                     {f}
@@ -104,7 +104,7 @@ export default function PourquoiNous() {
       </div>
 
       <style>{`
-        .service-card:not([style*="scale(1.03)"]):hover { transform: translateY(-4px) !important; border-color: rgba(212,136,30,0.3) !important; box-shadow: 0 16px 48px rgba(0,0,0,0.08) !important; }
+        .service-card:not([style*="scale(1.03)"]):hover { transform: translateY(-4px) !important; border-color: rgba(200,164,93,0.3) !important; box-shadow: 0 16px 48px rgba(0,0,0,0.08) !important; }
         .service-card[style*="scale(1.03)"]:hover { transform: scale(1.03) translateY(-4px) !important; box-shadow: 0 40px 96px rgba(26,20,0,0.22) !important; }
         @media (max-width: 900px) { .services-grid-custom { grid-template-columns: 1fr !important; max-width: 480px; margin: 0 auto; } .service-card[style*="scale(1.03)"] { transform: scale(1) !important; } }
       `}</style>
