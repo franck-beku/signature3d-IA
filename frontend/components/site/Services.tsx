@@ -355,7 +355,7 @@ export default function Services() {
           border-radius: 4px;
           padding: 16px 36px;
           font-size: 12px;
-          font-weight: 800;
+          font-weight: 700;
           letter-spacing: 0.16em;
           text-transform: uppercase;
           text-decoration: none;
@@ -415,7 +415,7 @@ function SignatureCard({
       className="signature-card-premium"
       style={{
         position: 'relative',
-        border: `1px solid ${GOLD}`,
+        border: '1px solid rgba(200,164,93,0.65)',
         borderRadius: '18px',
         overflow: 'hidden',
         background:

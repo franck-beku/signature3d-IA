@@ -207,6 +207,7 @@ export default function NosUnivers() {
                 backgroundColor: CREAM,
                 border: `1px solid ${BORDER}`,
                 overflow: 'hidden',
+                borderRadius: '18px',
                 minHeight: '430px',
                 display: 'flex',
                 flexDirection: 'column',

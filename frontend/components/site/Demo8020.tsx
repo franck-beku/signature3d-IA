@@ -185,7 +185,7 @@ export default function Demo8020() {
           border-radius: 4px;
           text-decoration: none;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 700;
           letter-spacing: 0.13em;
           text-transform: uppercase;
           transition: all 0.3s ease;

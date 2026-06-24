@@ -216,7 +216,7 @@ export default function Hero() {
                 borderRadius: '4px',
                 padding: '15px 30px',
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 700,
                 letterSpacing: '0.15em',
                 textTransform: 'uppercase',
                 textDecoration: 'none',

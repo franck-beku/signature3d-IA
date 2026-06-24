@@ -291,7 +291,7 @@ export default function Realisations() {
           padding: 15px 26px;
           margin-top: 26px;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 700;
           letter-spacing: 0.13em;
           text-transform: uppercase;
           text-decoration: none;

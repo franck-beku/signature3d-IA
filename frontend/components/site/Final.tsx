@@ -233,7 +233,7 @@ export default function ContactFinal() {
           padding: 19px 40px;
           cursor: pointer;
           font-size: 12px;
-          font-weight: 800;
+          font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           transition: all 0.3s ease;
@@ -1279,7 +1279,7 @@ function ContactModal({
               padding: 15px 18px;
               cursor: pointer;
               font-size: 13px;
-              font-weight: 800;
+              font-weight: 700;
               letter-spacing: 0.08em;
               transition: all 0.3s ease;
             }
