@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import LuxuryCursor from "@/components/site/LuxuryCursor";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,6 +34,29 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       }}>
         <LanguageProvider>
           {children}
+          <LuxuryCursor />
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9999,
+              pointerEvents: 'none',
+              opacity: 0.032,
+            }}
+          >
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <filter id="grain">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.65"
+                  numOctaves="3"
+                  stitchTiles="stitch"
+                />
+              </filter>
+              <rect width="100%" height="100%" filter="url(#grain)" />
+            </svg>
+          </div>
         </LanguageProvider>
       </body>
     </html>

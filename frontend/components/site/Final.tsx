@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useInView } from 'framer-motion';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { leadsApi, projectsApi } from '@/lib/api';
@@ -27,6 +27,8 @@ const PHONE_SCREEN = '/assets/univers/auto.jpg';
 export default function ContactFinal() {
   const { t } = useLanguage();
   const reduce = useReducedMotion();
+  const h2Ref = useRef<HTMLHeadingElement>(null);
+  const h2InView = useInView(h2Ref, { once: true, margin: '-80px' });
   const [open, setOpen] = useState(false);
   const [featuredSlug, setFeaturedSlug] = useState(FALLBACK_SLUG);
 
@@ -90,10 +92,27 @@ export default function ContactFinal() {
               ✦ {t('Prêt à transformer votre espace ?', 'Ready to transform your space?')}
             </p>
 
-            <h2>
-              {t('Parlons de', "Let's talk about")}
-              <br />
-              <span>{t('votre projet.', 'your project.')}</span>
+            <h2 ref={h2Ref}>
+              <span style={{ display: 'block', overflow: 'hidden' }}>
+                <motion.span
+                  style={{ display: 'block' }}
+                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                >
+                  {t('Parlons de', "Let's talk about")}
+                </motion.span>
+              </span>
+              <span style={{ display: 'block', overflow: 'hidden' }}>
+                <motion.span
+                  style={{ display: 'block' }}
+                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.24 }}
+                >
+                  <span>{t('votre projet.', 'your project.')}</span>
+                </motion.span>
+              </span>
             </h2>
 
             <div className="final-line" />
@@ -168,7 +187,7 @@ export default function ContactFinal() {
           z-index: 1;
           max-width: 1580px;
           margin: 0 auto;
-          padding: 112px 54px 84px;
+          padding: 152px 54px 112px;
         }
 
         .final-grid {

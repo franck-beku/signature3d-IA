@@ -205,7 +205,7 @@ export default function Services() {
         style={{
           maxWidth: '1240px',
           margin: '0 auto',
-          padding: '120px 32px',
+          padding: '160px 32px',
           position: 'relative',
           zIndex: 1,
         }}

@@ -161,9 +161,10 @@ export default function Hero() {
 
           {/* Titre */}
           <h1
+            className="hero-h1"
             style={{
               fontFamily: 'var(--font-cormorant), serif',
-              fontWeight: 300,
+              fontWeight: 200,
               color: '#F7F5F2',
               lineHeight: 1.12,
               letterSpacing: '0.01em',
@@ -334,6 +335,7 @@ export default function Hero() {
         }
         @media (max-width: 640px) {
           .hero-progress { display: none !important; }
+          .hero-h1 { font-weight: 300 !important; }
         }
       `}</style>
     </section>

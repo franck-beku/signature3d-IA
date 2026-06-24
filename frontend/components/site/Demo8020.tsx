@@ -1,8 +1,25 @@
 'use client';
 
+import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+
+function useCountUp(target: number, inView: boolean, duration = 1400) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    let start: number | null = null;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      setCount(Math.round(progress * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [inView, target, duration]);
+  return count;
+}
 
 const GOLD = '#C8A45D';
 const WHITE = '#FCFBF8';
@@ -12,6 +29,10 @@ const BORDER = '#E7DED0';
 
 export default function Demo8020() {
   const { t } = useLanguage();
+  const statsRef = useRef<HTMLDivElement>(null);
+  const statsInView = useInView(statsRef, { once: true, margin: '-80px' });
+  const count80 = useCountUp(80, statsInView);
+  const count20 = useCountUp(20, statsInView, 1100);
 
   const fade = {
     hidden: { opacity: 0, y: 24 },
@@ -37,7 +58,7 @@ export default function Demo8020() {
         style={{
           maxWidth: '1240px',
           margin: '0 auto',
-          padding: '120px 32px',
+          padding: '160px 32px',
         }}
         className="demo8020-wrap"
       >
@@ -72,9 +93,9 @@ export default function Demo8020() {
             </Link>
           </div>
 
-          <div className="demo8020-center">
+          <div className="demo8020-center" ref={statsRef}>
             <div className="demo8020-stat left">
-              <strong>80%</strong>
+              <strong>{count80}%</strong>
               <span>{t('De l’impact', 'Impact')}</span>
               <p>
                 {t(
@@ -89,7 +110,7 @@ export default function Demo8020() {
             </div>
 
             <div className="demo8020-stat right">
-              <strong>20%</strong>
+              <strong>{count20}%</strong>
               <span>{t("De l’effort", 'Effort')}</span>
               <p>
                 {t(

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
 /**
@@ -27,6 +27,8 @@ const BORDER = '#E7DED0';   // filets haut/bas très discrets
 export default function Manifeste() {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
+  const h2Ref = useRef<HTMLHeadingElement>(null);
+  const h2InView = useInView(h2Ref, { once: true, margin: '-80px' });
 
   // Légère parallaxe : le bloc texte monte doucement au scroll.
   const { scrollYProgress } = useScroll({
@@ -81,7 +83,7 @@ export default function Manifeste() {
           zIndex: 1,
           maxWidth: '1240px',
           margin: '0 auto',
-          padding: '110px 32px',       // ← PADDING réduit (était 150px)
+          padding: '160px 32px',
         }}
         className="manifeste-wrap"
       >
@@ -114,28 +116,54 @@ export default function Manifeste() {
             </p>
 
             <h2
+              ref={h2Ref}
               style={{
                 fontFamily: 'var(--font-cormorant), serif',
                 fontWeight: 400,
                 color: INK,
-                lineHeight: 1.08,                          // ← resserré
+                lineHeight: 1.08,
                 letterSpacing: '-0.02em',
-                fontSize: 'clamp(2.4rem, 4.2vw, 4.2rem)',  // ← titre réduit (était 5.2rem)
+                fontSize: 'clamp(2.4rem, 4.2vw, 4.2rem)',
                 margin: 0,
-                maxWidth: '720px',                         // ← largeur resserrée
+                maxWidth: '720px',
               }}
             >
-              {t('Nous ne créons pas simplement des visites.', 'We do not simply create tours.')}
-              <br />
-              {t('Nous ', 'We ')}
-              <span style={{ color: GOLD }}>
-                {t('transformons des espaces', 'transform spaces')}
+              <span style={{ display: 'block', overflow: 'hidden' }}>
+                <motion.span
+                  style={{ display: 'block' }}
+                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+                >
+                  {t('Nous ne créons pas simplement des visites.', 'We do not simply create tours.')}
+                </motion.span>
               </span>
-              <br />
-              {t(
-                'en expériences immersives qui captivent, informent et convertissent.',
-                'into immersive experiences that captivate, inform and convert.'
-              )}
+              <span style={{ display: 'block', overflow: 'hidden' }}>
+                <motion.span
+                  style={{ display: 'block' }}
+                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.14 }}
+                >
+                  {t('Nous ', 'We ')}
+                  <span style={{ color: GOLD }}>
+                    {t('transformons des espaces', 'transform spaces')}
+                  </span>
+                </motion.span>
+              </span>
+              <span style={{ display: 'block', overflow: 'hidden' }}>
+                <motion.span
+                  style={{ display: 'block' }}
+                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.28 }}
+                >
+                  {t(
+                    'en expériences immersives qui captivent, informent et convertissent.',
+                    'into immersive experiences that captivate, inform and convert.'
+                  )}
+                </motion.span>
+              </span>
             </h2>
           </motion.div>
 
@@ -214,7 +242,7 @@ export default function Manifeste() {
       <style>{`
         @media (max-width: 900px) {
           .manifeste-wrap {
-            padding: 90px 24px !important;
+            padding: 120px 24px !important;
           }
           .manifeste-grid {
             grid-template-columns: 1fr !important;
@@ -228,7 +256,7 @@ export default function Manifeste() {
         }
         @media (max-width: 640px) {
           .manifeste-wrap {
-            padding: 72px 22px !important;
+            padding: 96px 22px !important;
           }
         }
       `}</style>

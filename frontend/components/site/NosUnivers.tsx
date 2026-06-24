@@ -111,7 +111,7 @@ export default function NosUnivers() {
           zIndex: 1,
           maxWidth: '1320px',
           margin: '0 auto',
-          padding: '120px 32px 130px',
+          padding: '160px 32px 170px',
         }}
         className="univers-wrap"
       >
@@ -348,7 +348,7 @@ export default function NosUnivers() {
 
         @media (max-width: 780px) {
           .univers-wrap {
-            padding: 90px 24px 100px !important;
+            padding: 120px 24px 130px !important;
           }
 
           .univers-header {
