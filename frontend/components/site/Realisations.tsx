@@ -380,7 +380,7 @@ export default function Realisations() {
           color: #FFFFFF;
           padding: 8px 14px;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           backdrop-filter: blur(8px);
@@ -409,7 +409,7 @@ export default function Realisations() {
         .card-sector {
           color: ${GOLD};
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           margin: 12px 0 14px;
@@ -436,7 +436,7 @@ export default function Realisations() {
           align-items: center;
           gap: 10px;
           font-size: 12px;
-          font-weight: 800;
+          font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: ${GOLD};
@@ -469,7 +469,7 @@ export default function Realisations() {
           color: ${INK};
           text-decoration: none;
           font-size: 13px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.16em;
           text-transform: uppercase;
           transition: color 0.25s ease, gap 0.25s ease;

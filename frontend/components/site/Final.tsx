@@ -186,7 +186,7 @@ export default function ContactFinal() {
           margin: 0 0 28px;
           color: ${GOLD};
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.25em;
           text-transform: uppercase;
           line-height: 1.8;
@@ -197,8 +197,8 @@ export default function ContactFinal() {
           font-family: var(--font-cormorant), serif;
           font-size: clamp(4.2rem, 6vw, 6.9rem);
           font-weight: 400;
-          line-height: 0.92;
-          letter-spacing: -0.055em;
+          line-height: 1.0;
+          letter-spacing: -0.03em;
           color: ${INK};
         }
 
@@ -301,7 +301,7 @@ export default function ContactFinal() {
           margin: 0 0 7px;
           color: ${MUTED};
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.2em;
           text-transform: uppercase;
         }
@@ -782,7 +782,7 @@ function PhoneMockup({
           justify-content: space-between;
           color: #FFFFFF;
           font-size: 12px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.12em;
           text-transform: uppercase;
         }
@@ -947,7 +947,7 @@ function QrCard({
           color: ${INK};
           text-align: center;
           font-size: 13px;
-          font-weight: 900;
+          font-weight: 600;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }

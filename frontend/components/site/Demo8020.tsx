@@ -210,13 +210,13 @@ export default function Demo8020() {
           width: 220px;
           height: 220px;
           border-radius: 50%;
-          border: 2px solid ${GOLD};
+          border: 1px solid #E7DED0;
           display: flex;
           align-items: center;
           justify-content: center;
           background:
-            radial-gradient(circle, rgba(200,164,93,0.12), transparent 65%);
-          box-shadow: 0 24px 80px rgba(200,164,93,0.18);
+            radial-gradient(circle, rgba(200,164,93,0.06), transparent 65%);
+          box-shadow: 0 24px 80px rgba(0,0,0,0.06);
         }
 
         .demo8020-circle span {
@@ -241,7 +241,7 @@ export default function Demo8020() {
         .demo8020-stat span {
           display: block;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: ${GOLD};
@@ -254,6 +254,15 @@ export default function Demo8020() {
           color: ${MUTED};
           margin: 0 auto;
           max-width: 190px;
+        }
+
+        .demo8020-stat.right strong {
+          font-size: 2.4rem;
+          color: ${MUTED};
+        }
+
+        .demo8020-stat.right span {
+          color: ${MUTED};
         }
 
         .demo8020-benefits {

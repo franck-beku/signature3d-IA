@@ -256,7 +256,7 @@ export default function NosUnivers() {
                     <h3
                       style={{
                         fontSize: '14px',
-                        fontWeight: 800,
+                        fontWeight: 600,
                         letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         color: INK,
@@ -297,7 +297,7 @@ export default function NosUnivers() {
                       gap: '10px',
                       color: GOLD,
                       fontSize: '11px',
-                      fontWeight: 800,
+                      fontWeight: 600,
                       letterSpacing: '0.16em',
                       textTransform: 'uppercase',
                     }}

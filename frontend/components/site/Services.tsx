@@ -477,7 +477,7 @@ function SignatureCard({
           border-radius: 6px;
           padding: 8px 13px;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.16em;
           text-transform: uppercase;
           margin-bottom: 22px;
@@ -628,7 +628,7 @@ function OfferCard({
           margin: 0 0 10px;
           color: ${GOLD};
           font-size: 10px;
-          font-weight: 800;
+          font-weight: 600;
           letter-spacing: 0.22em;
           text-transform: uppercase;
         }

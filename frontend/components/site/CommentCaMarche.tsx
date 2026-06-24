@@ -183,7 +183,7 @@ export default function CommentCaMarche() {
 
         .ccm-line {
           position: absolute;
-          top: 38px;
+          top: 69px;
           left: 12%;
           right: 12%;
           height: 1px;

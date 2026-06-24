@@ -205,7 +205,7 @@ export default function Hero() {
           >
             {/* Primaire — plein doré */}
             <Link
-              href="/realisations"
+              href="/contact"
               className="hero-cta-primary"
               style={{
                 display: 'inline-flex',
