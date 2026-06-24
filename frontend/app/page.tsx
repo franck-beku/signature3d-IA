@@ -5,7 +5,7 @@ import Navbar from '@/components/site/Navbar'
 import Hero from '@/components/site/Hero'
 import Manifeste from '@/components/site/Manifeste'
 import NosUnivers from '@/components/site/NosUnivers'
-import Luxedia from '@/components/site/Luxedia'
+import Realisations from '@/components/site/Realisations'
 import Demo8020 from '@/components/site/Demo8020'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
 import Services from '@/components/site/Services'
@@ -26,7 +26,7 @@ export default function Home() {
       <Hero />
       <Manifeste />
       <NosUnivers />
-      <Luxedia />
+      <Realisations />
       <Demo8020 />
       <CommentCaMarche />
       <Services />

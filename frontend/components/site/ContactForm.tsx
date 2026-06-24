@@ -47,7 +47,7 @@ const content = {
     sectorPrefix: 'Secteur',
     infos: [
       { icon: Mail,   label: 'Email',        value: 'info@signatureimmersion.ca' },
-      { icon: Phone,  label: 'Téléphone',    value: '+1 (819) 000-0000' },
+      { icon: Phone,  label: 'Téléphone',    value: '+1 (819) 695-0540' },
       { icon: MapPin, label: 'Localisation', value: 'Trois-Rivières, Québec' },
     ],
   },

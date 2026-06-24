@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -11,23 +11,77 @@ import {
   Check,
   Info,
   RotateCw,
+  type LucideIcon,
 } from 'lucide-react';
 import { offeringsApi, type OfferingDto } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
 
 const GOLD = '#C8A45D';
+const GOLD_DARK = '#A8863F';
+const WHITE = '#FCFBF8';
 const CREAM = '#F7F5F2';
-const TEXT = '#101010';
+const INK = '#101010';
+const MUTED = '#6B6458';
+const BORDER = '#E2D8C8';
+
+type OfferingView = {
+  id: number;
+  name: string;
+  slug: string;
+  level: string;
+  shortDescription: string;
+  displayOrder: number;
+};
 
 type Detail = {
-  icon: typeof Box;
+  icon: LucideIcon;
   featuresFr: string[];
   featuresEn: string[];
 };
 
-/* Détails d'affichage (icône + features) par offre.
-   Indexés par NOM et par NIVEAU : si une offre est renommée dans le dashboard,
-   on retombe sur le niveau (plus stable) plutôt que sur de fausses features. */
+const FALLBACK_OFFERINGS: OfferingView[] = [
+  {
+    id: 1,
+    name: '360°',
+    slug: '360',
+    level: 'Découverte',
+    shortDescription: 'Une expérience visuelle simple et accessible pour présenter rapidement votre espace.',
+    displayOrder: 1,
+  },
+  {
+    id: 2,
+    name: 'Matterport',
+    slug: 'matterport',
+    level: 'Professionnel',
+    shortDescription: 'Une visite 3D réaliste pour explorer votre espace avec fluidité et précision.',
+    displayOrder: 2,
+  },
+  {
+    id: 3,
+    name: 'Luxedia IA',
+    slug: 'luxedia-ia',
+    level: 'Intelligence',
+    shortDescription: 'Un assistant intelligent qui répond aux visiteurs et enrichit leur expérience.',
+    displayOrder: 3,
+  },
+  {
+    id: 4,
+    name: '360° + IA',
+    slug: '360-ia',
+    level: 'Premium',
+    shortDescription: 'Une visite 360° accompagnée par Luxedia pour guider et informer vos visiteurs.',
+    displayOrder: 4,
+  },
+  {
+    id: 5,
+    name: 'Matterport + IA',
+    slug: 'matterport-ia',
+    level: 'Signature',
+    shortDescription: "Notre expérience complète : l'espace immersif et l'intelligence réunis.",
+    displayOrder: 5,
+  },
+];
+
 const BY_NAME: Record<string, Detail> = {
   '360°': {
     icon: RotateCw,
@@ -58,26 +112,25 @@ const BY_NAME: Record<string, Detail> = {
 
 const BY_LEVEL: Record<string, Detail> = {
   découverte: BY_NAME['360°'],
-  professionnel: BY_NAME['Matterport'],
+  professionnel: BY_NAME.Matterport,
   intelligence: BY_NAME['Luxedia IA'],
   premium: BY_NAME['360° + IA'],
   signature: BY_NAME['Matterport + IA'],
 };
 
-/* Résout les détails sans jamais inventer de fausses promesses :
-   1) par nom exact, 2) par niveau, 3) fallback neutre (icône seule, 0 feature). */
-function resolveDetail(o: OfferingDto): Detail {
+function resolveDetail(o: OfferingView): Detail {
   const byName = BY_NAME[o.name];
   if (byName) return byName;
+
   const byLevel = BY_LEVEL[(o.level ?? '').trim().toLowerCase()];
   if (byLevel) return byLevel;
+
   return { icon: Sparkles, featuresFr: [], featuresEn: [] };
 }
 
 export default function Services() {
   const { t, lang } = useLanguage();
-  const [offerings, setOfferings] = useState<OfferingDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [offerings, setOfferings] = useState<OfferingView[]>(FALLBACK_OFFERINGS);
 
   useEffect(() => {
     let active = true;
@@ -85,13 +138,23 @@ export default function Services() {
     offeringsApi
       .getActive()
       .then((res) => {
-        if (active && Array.isArray(res)) {
-          setOfferings([...res].sort((a, b) => a.displayOrder - b.displayOrder));
+        if (active && Array.isArray(res) && res.length > 0) {
+          setOfferings(
+            [...res]
+              .sort((a, b) => a.displayOrder - b.displayOrder)
+              .map((o: OfferingDto) => ({
+                id: o.id,
+                name: o.name,
+                slug: o.slug,
+                level: o.level ?? '',
+                shortDescription: o.shortDescription ?? '',
+                displayOrder: o.displayOrder,
+              }))
+          );
         }
       })
-      .catch(() => {})
-      .finally(() => {
-        if (active) setLoading(false);
+      .catch(() => {
+        setOfferings(FALLBACK_OFFERINGS);
       });
 
     return () => {
@@ -99,8 +162,9 @@ export default function Services() {
     };
   }, []);
 
-  const isSignature = (o: OfferingDto) =>
-    (o.level ?? '').trim().toLowerCase() === 'signature';
+  const isSignature = (o: OfferingView) =>
+    (o.level ?? '').trim().toLowerCase() === 'signature' ||
+    o.name.toLowerCase().includes('matterport + ia');
 
   const signature = offerings.find(isSignature);
   const standard = offerings.filter((o) => !isSignature(o));
@@ -116,139 +180,128 @@ export default function Services() {
 
   return (
     <section
-      aria-label={t('Services', 'Services')}
+      id="services"
+      aria-label={t('Nos offres', 'Our offers')}
       style={{
-        backgroundColor: CREAM,
-        color: TEXT,
+        backgroundColor: WHITE,
+        color: INK,
         position: 'relative',
         overflow: 'hidden',
+        borderBottom: `1px solid ${BORDER}`,
       }}
     >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'radial-gradient(circle at 50% 0%, rgba(200,164,93,0.08) 0%, transparent 48%)',
+          pointerEvents: 'none',
+        }}
+      />
+
       <div
         style={{
           maxWidth: '1240px',
           margin: '0 auto',
-          padding: '105px 32px',
+          padding: '120px 32px',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         <motion.div
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, amount: 0.4 }}
           variants={fade}
-          style={{ textAlign: 'center', marginBottom: '56px' }}
+          className="services-header"
         >
-          <p
-            style={{
-              fontSize: '12px',
-              fontWeight: 700,
-              letterSpacing: '0.45em',
-              textTransform: 'uppercase',
-              color: GOLD,
-              marginBottom: '22px',
-            }}
-          >
-            {t('Nos offres', 'Our offers')}
-          </p>
+          <p className="services-label">{t('Nos offres', 'Our offers')}</p>
 
-          <h2
-            style={{
-              fontFamily: 'var(--font-cormorant), serif',
-              fontWeight: 500,
-              color: TEXT,
-              fontSize: 'clamp(2.1rem, 4.3vw, 4rem)',
-              lineHeight: 1.08,
-              margin: '0 auto',
-              maxWidth: '980px',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            {t(
-              'Une gamme, du plus simple au plus complet.',
-              'A range, from the simplest to the most complete.'
-            )}
+          <h2 className="services-title">
+            {t('Choisissez votre', 'Choose your')}
+            <br />
+            <span>{t("niveau d’immersion.", 'level of immersion.')}</span>
           </h2>
 
-          <p
-            style={{
-              marginTop: '18px',
-              fontSize: '18px',
-              color: 'rgba(16,16,16,0.65)',
-              fontWeight: 300,
-            }}
-          >
+          <p className="services-subtitle">
             {t(
-              'Choisissez l’expérience qui correspond à vos objectifs.',
-              'Choose the experience that matches your goals.'
+              'De la visite simple à l’expérience intelligente complète, chaque offre s’adapte à votre espace, votre secteur et vos objectifs.',
+              'From a simple tour to a complete intelligent experience, each offer adapts to your space, sector and objectives.'
             )}
           </p>
         </motion.div>
 
-        {loading ? (
-          <p style={{ textAlign: 'center', color: 'rgba(16,16,16,0.5)' }}>
-            {t('Chargement…', 'Loading…')}
+        {signature && <SignatureCard offer={signature} t={t} lang={lang} />}
+
+        <div className="services-grid-premium">
+          {standard.map((offer, index) => (
+            <OfferCard key={offer.id} offer={offer} lang={lang} index={index} />
+          ))}
+        </div>
+
+        <div className="services-footer-note">
+          <p>
+            <Info size={15} />
+            {t(
+              'Chaque projet est unique — le tarif dépend de votre espace.',
+              'Every project is unique — pricing depends on your space.'
+            )}
           </p>
-        ) : offerings.length === 0 ? (
-          <p style={{ textAlign: 'center', color: 'rgba(16,16,16,0.5)' }}>
-            {t('Offres bientôt disponibles.', 'Offers coming soon.')}
-          </p>
-        ) : (
-          <>
-            {signature && <SignatureCard offer={signature} t={t} lang={lang} />}
 
-            <div className="services-grid-premium">
-              {standard.map((offer, index) => (
-                <OfferCard key={offer.id} offer={offer} lang={lang} index={index} />
-              ))}
-            </div>
-
-            <div style={{ textAlign: 'center', marginTop: '42px' }}>
-              <p
-                style={{
-                  color: 'rgba(16,16,16,0.58)',
-                  fontSize: '15px',
-                  marginBottom: '22px',
-                }}
-              >
-                <Info size={15} style={{ display: 'inline', marginRight: 8, color: GOLD }} />
-                {t(
-                  'Chaque projet est unique — le tarif dépend de votre espace.',
-                  'Every project is unique — pricing depends on your space.'
-                )}
-              </p>
-
-              <Link
-                href="/contact"
-                className="services-main-cta"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  backgroundColor: GOLD,
-                  color: '#111',
-                  borderRadius: '8px',
-                  padding: '16px 36px',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  textDecoration: 'none',
-                }}
-              >
-                {t('Demander une soumission', 'Request a quote')}
-                <span>→</span>
-              </Link>
-            </div>
-          </>
-        )}
+          <Link href="/contact" className="services-main-cta">
+            {t('Demander une soumission', 'Request a quote')}
+            <span>→</span>
+          </Link>
+        </div>
       </div>
 
       <style>{`
+        .services-header {
+          text-align: center;
+          margin-bottom: 58px;
+        }
+
+        .services-label {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: ${GOLD};
+          margin-bottom: 20px;
+        }
+
+        .services-title {
+          font-family: var(--font-cormorant), serif;
+          font-weight: 400;
+          color: ${INK};
+          font-size: clamp(2.3rem, 4vw, 4.3rem);
+          line-height: 1.05;
+          margin: 0 auto;
+          max-width: 920px;
+          letter-spacing: -0.02em;
+        }
+
+        .services-title span {
+          color: ${GOLD};
+          font-style: italic;
+        }
+
+        .services-subtitle {
+          margin: 22px auto 0;
+          max-width: 660px;
+          font-size: 17px;
+          line-height: 1.75;
+          color: ${MUTED};
+          font-weight: 300;
+        }
+
         .services-grid-premium {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 24px;
-          margin-top: 26px;
+          margin-top: 28px;
         }
 
         .service-card-premium {
@@ -257,9 +310,9 @@ export default function Services() {
         }
 
         .service-card-premium:hover {
-          transform: translateY(-14px);
-          box-shadow: 0 40px 90px rgba(0,0,0,0.12);
-          border-color: rgba(200,164,93,0.28) !important;
+          transform: translateY(-12px);
+          box-shadow: 0 34px 86px rgba(0,0,0,0.11);
+          border-color: rgba(200,164,93,0.36) !important;
         }
 
         .service-card-premium:hover .service-line {
@@ -275,11 +328,43 @@ export default function Services() {
           box-shadow: 0 38px 100px rgba(200,164,93,0.18);
         }
 
+        .services-footer-note {
+          text-align: center;
+          margin-top: 46px;
+        }
+
+        .services-footer-note p {
+          color: rgba(16,16,16,0.58);
+          font-size: 15px;
+          margin-bottom: 24px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .services-footer-note svg {
+          color: ${GOLD};
+        }
+
         .services-main-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background-color: ${INK};
+          color: #FFFFFF;
+          border-radius: 4px;
+          padding: 16px 36px;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          text-decoration: none;
           transition: all 0.3s ease;
         }
 
         .services-main-cta:hover {
+          background-color: ${GOLD};
+          color: ${INK};
           transform: translateY(-3px);
           box-shadow: 0 20px 54px rgba(200,164,93,0.36);
         }
@@ -305,7 +390,7 @@ function SignatureCard({
   t,
   lang,
 }: {
-  offer: OfferingDto;
+  offer: OfferingView;
   t: (fr: string, en: string) => string;
   lang: string;
 }) {
@@ -334,24 +419,11 @@ function SignatureCard({
         borderRadius: '18px',
         overflow: 'hidden',
         background:
-          'linear-gradient(110deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.7) 50%, rgba(200,164,93,0.10) 100%)',
+          'linear-gradient(110deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.78) 50%, rgba(200,164,93,0.12) 100%)',
         boxShadow: '0 28px 80px rgba(0,0,0,0.10)',
-        padding: '34px 38px',
+        padding: '36px 40px',
       }}
     >
-      <motion.div
-        aria-hidden="true"
-        animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(circle at 90% 40%, rgba(200,164,93,0.18), transparent 38%)',
-          pointerEvents: 'none',
-        }}
-      />
-
       <div
         className="signature-inner"
         style={{
@@ -364,48 +436,11 @@ function SignatureCard({
         }}
       >
         <div>
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: 'rgba(200,164,93,0.35)',
-              color: TEXT,
-              borderRadius: '6px',
-              padding: '8px 13px',
-              fontSize: '11px',
-              fontWeight: 800,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              marginBottom: '22px',
-            }}
-          >
-            ★ {offer.level || 'Signature'}
-          </span>
+          <span className="signature-badge">★ {offer.level || 'Signature'}</span>
 
-          <h3
-            style={{
-              fontFamily: 'var(--font-cormorant), serif',
-              fontSize: 'clamp(2rem, 3vw, 3rem)',
-              fontWeight: 500,
-              lineHeight: 1.08,
-              color: TEXT,
-              margin: '0 0 18px',
-            }}
-          >
-            {offer.name}
-          </h3>
+          <h3 className="signature-title">{offer.name}</h3>
 
-          <p
-            style={{
-              color: 'rgba(16,16,16,0.72)',
-              fontSize: '17px',
-              lineHeight: 1.75,
-              fontWeight: 300,
-              margin: 0,
-              maxWidth: '420px',
-            }}
-          >
+          <p className="signature-text">
             {offer.shortDescription ||
               t(
                 "Notre expérience complète : l'espace et l'intelligence réunis.",
@@ -417,29 +452,15 @@ function SignatureCard({
         <div className="signature-features">
           {signatureItems.map((item, index) => {
             const Icon = icons[index] || Sparkles;
+
             return (
-              <div key={item} style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    width: '54px',
-                    height: '54px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(255,255,255,0.7)',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 12px',
-                  }}
-                >
+              <div key={item} className="signature-feature">
+                <div className="signature-feature-icon">
                   <Icon size={24} strokeWidth={1.4} color={GOLD} />
                 </div>
-                <p style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: TEXT }}>
-                  {item}
-                </p>
-                <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'rgba(16,16,16,0.55)' }}>
-                  {signatureSub[index]}
-                </p>
+
+                <p>{item}</p>
+                <span>{signatureSub[index]}</span>
               </div>
             );
           })}
@@ -447,10 +468,73 @@ function SignatureCard({
       </div>
 
       <style>{`
+        .signature-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background-color: rgba(200,164,93,0.24);
+          color: ${INK};
+          border-radius: 6px;
+          padding: 8px 13px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          margin-bottom: 22px;
+        }
+
+        .signature-title {
+          font-family: var(--font-cormorant), serif;
+          font-size: clamp(2rem, 3vw, 3rem);
+          font-weight: 500;
+          line-height: 1.08;
+          color: ${INK};
+          margin: 0 0 18px;
+        }
+
+        .signature-text {
+          color: rgba(16,16,16,0.72);
+          font-size: 17px;
+          line-height: 1.75;
+          font-weight: 300;
+          margin: 0;
+          max-width: 420px;
+        }
+
         .signature-features {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 18px;
+        }
+
+        .signature-feature {
+          text-align: center;
+        }
+
+        .signature-feature-icon {
+          width: 54px;
+          height: 54px;
+          border-radius: 50%;
+          background-color: rgba(255,255,255,0.86);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 12px;
+        }
+
+        .signature-feature p {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 700;
+          color: ${INK};
+        }
+
+        .signature-feature span {
+          display: block;
+          margin-top: 6px;
+          font-size: 13px;
+          color: rgba(16,16,16,0.55);
         }
 
         @media (max-width: 900px) {
@@ -467,7 +551,15 @@ function SignatureCard({
   );
 }
 
-function OfferCard({ offer, lang, index }: { offer: OfferingDto; lang: string; index: number }) {
+function OfferCard({
+  offer,
+  lang,
+  index,
+}: {
+  offer: OfferingView;
+  lang: string;
+  index: number;
+}) {
   const details = resolveDetail(offer);
   const Icon = details.icon;
   const features = lang === 'fr' ? details.featuresFr : details.featuresEn;
@@ -477,12 +569,16 @@ function OfferCard({ offer, lang, index }: { offer: OfferingDto; lang: string; i
       initial={{ opacity: 0, y: 26 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1], delay: index * 0.12 }}
+      transition={{
+        duration: 0.75,
+        ease: [0.22, 1, 0.36, 1],
+        delay: index * 0.1,
+      }}
       className="service-card-premium"
       style={{
         position: 'relative',
-        backgroundColor: 'rgba(255,255,255,0.82)',
-        border: '1px solid rgba(16,16,16,0.06)',
+        backgroundColor: CREAM,
+        border: `1px solid ${BORDER}`,
         borderRadius: '16px',
         boxShadow: '0 18px 50px rgba(0,0,0,0.06)',
         padding: '30px 26px',
@@ -491,115 +587,93 @@ function OfferCard({ offer, lang, index }: { offer: OfferingDto; lang: string; i
         transition: 'all 0.3s ease',
       }}
     >
-      {/* Halo doux (cohérence avec la Signature, en plus discret) */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(circle at top right, rgba(200,164,93,0.06), transparent 60%)',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        className="service-icon"
-        style={{
-          position: 'relative',
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          margin: '0 0 18px',
-          backgroundColor: '#fff',
-          boxShadow: '0 10px 28px rgba(0,0,0,0.08)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.35s ease',
-        }}
-      >
+      <div className="service-icon">
         <Icon size={25} strokeWidth={1.4} color={GOLD} />
       </div>
 
-      {offer.level && (
-        <p
-          style={{
-            margin: '0 0 10px',
-            color: GOLD,
-            fontSize: '10px',
-            fontWeight: 800,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-          }}
-        >
-          {offer.level}
-        </p>
-      )}
+      {offer.level && <p className="service-level">{offer.level}</p>}
 
-      <h3
-        style={{
-          fontFamily: 'var(--font-cormorant), serif',
-          fontSize: 'clamp(1.7rem, 2vw, 2.2rem)',
-          fontWeight: 500,
-          color: TEXT,
-          margin: '0 0 14px',
-        }}
-      >
-        {offer.name}
-      </h3>
+      <h3>{offer.name}</h3>
 
-      <div
-        className="service-line"
-        style={{
-          width: '34px',
-          height: '1px',
-          backgroundColor: GOLD,
-          margin: '0 0 20px',
-          transition: 'width 0.35s ease',
-        }}
-      />
+      <div className="service-line" />
 
-      <p
-        style={{
-          fontSize: '15px',
-          lineHeight: 1.75,
-          color: 'rgba(16,16,16,0.62)',
-          fontWeight: 300,
-          margin: '0 0 22px',
-          minHeight: '0',
-        }}
-      >
-        {offer.shortDescription}
-      </p>
+      <p className="service-description">{offer.shortDescription}</p>
 
       {features.length > 0 && (
-        <ul
-          style={{
-            listStyle: 'none',
-            padding: 0,
-            margin: 0,
-            textAlign: 'left',
-            display: 'grid',
-            gap: '10px',
-          }}
-        >
+        <ul className="service-features">
           {features.map((f) => (
-            <li
-              key={f}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                fontSize: '14px',
-                color: 'rgba(16,16,16,0.72)',
-              }}
-            >
+            <li key={f}>
               <Check size={15} strokeWidth={1.7} color={GOLD} />
               {f}
             </li>
           ))}
         </ul>
       )}
+
+      <style>{`
+        .service-icon {
+          position: relative;
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          margin: 0 0 18px;
+          background-color: #fff;
+          box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .service-level {
+          margin: 0 0 10px;
+          color: ${GOLD};
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+        }
+
+        .service-card-premium h3 {
+          font-family: var(--font-cormorant), serif;
+          font-size: clamp(1.7rem, 2vw, 2.2rem);
+          font-weight: 500;
+          color: ${INK};
+          margin: 0 0 14px;
+        }
+
+        .service-line {
+          width: 34px;
+          height: 1px;
+          background-color: ${GOLD};
+          margin: 0 0 20px;
+          transition: width 0.35s ease;
+        }
+
+        .service-description {
+          font-size: 15px;
+          line-height: 1.75;
+          color: rgba(16,16,16,0.62);
+          font-weight: 300;
+          margin: 0 0 22px;
+        }
+
+        .service-features {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          text-align: left;
+          display: grid;
+          gap: 10px;
+        }
+
+        .service-features li {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+          color: rgba(16,16,16,0.72);
+        }
+      `}</style>
     </motion.div>
   );
 }

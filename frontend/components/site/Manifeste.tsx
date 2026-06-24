@@ -5,149 +5,231 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
 /**
- * Manifeste — Acte 2 du film.
+ * Manifeste — Acte 2 du film (VERSION CLAIRE V2).
  *
- * Rôle : respiration éditoriale entre le Hero (visuel fort) et Nos univers (galerie).
- * Ton : conviction, pas argumentaire. On dit en quoi on croit, pas ce qu'on vend.
- * Direction : fond charbon (continuité du Hero), texte centré, Cormorant serif,
- *             un seul mot en or, apparition au scroll très sobre (pas d'effet tape-à-l'œil).
+ * Rôle : première respiration claire après le Hero immersif.
+ * Direction : fond CRÈME (#F7F5F2), pas de noir. Mise en page éditoriale
+ *             en deux colonnes — la vision à gauche, la mission + signature à droite.
  *
- * Construction en 3 temps :
- *  1. une accroche brève (eyebrow doré)
- *  2. la conviction principale, en grand, avec UN mot-clé en or
- *  3. une phrase d'ancrage plus discrète qui ramène au concret
+ * Place dans l'alternance des 3 niveaux de fond :
+ *   Hero (image) → MANIFESTE (crème #F7F5F2) → Nos univers (blanc) → ...
+ *
+ * Ajustements : titre ramené à 4.2rem max (plus "galerie", moins "zoomé"),
+ *               padding vertical réduit à 110px.
  */
 
-const GOLD = '#C8A45D';
-const CHARBON = '#0B0B0B';
+const GOLD = '#C8A45D';     // or champagne — accents uniquement
+const CREAM = '#F7F5F2';    // fond de la section (niveau "crème")
+const INK = '#101010';      // texte principal sombre sur fond clair
+const MUTED = '#5E5A52';    // texte secondaire (mission)
+const BORDER = '#E7DED0';   // filets haut/bas très discrets
 
 export default function Manifeste() {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Très légère parallaxe du bloc texte : il monte doucement au scroll.
+  // Légère parallaxe : le bloc texte monte doucement au scroll.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
   });
-  const y = useTransform(scrollYProgress, [0, 1], ['20px', '-20px']);
+  const y = useTransform(scrollYProgress, [0, 1], ['18px', '-18px']);
 
-  // Animation séquencée : chaque ligne apparaît l'une après l'autre.
+  // Apparition séquencée des éléments au scroll.
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: 0.22, delayChildren: 0.1 } },
+    show: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
   };
-  const line = {
+  const item = {
     hidden: { opacity: 0, y: 24 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 1, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const },
     },
   };
 
   return (
     <section
       ref={sectionRef}
-      aria-label={t('Notre conviction', 'Our conviction')}
+      aria-label={t('Notre vision', 'Our vision')}
       style={{
         position: 'relative',
-        backgroundColor: CHARBON,
+        backgroundColor: CREAM,        // ← FOND CRÈME
+        color: INK,
         overflow: 'hidden',
+        borderTop: `1px solid ${BORDER}`,
+        borderBottom: `1px solid ${BORDER}`,
       }}
     >
-      {/* Filet doré central très fin, en haut — marque le début de l'acte. */}
+      {/* Halo doré très léger en fond, pour ne pas avoir un crème totalement plat. */}
       <div
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '1px',
-          height: '64px',
-          background: `linear-gradient(to bottom, ${GOLD}, rgba(200,164,93,0))`,
+          inset: 0,
+          background:
+            'radial-gradient(circle at 18% 20%, rgba(200,164,93,0.10) 0%, transparent 32%), radial-gradient(circle at 86% 70%, rgba(200,164,93,0.06) 0%, transparent 34%)',
+          pointerEvents: 'none',
         }}
       />
 
       <motion.div
-        style={{ y }}
-        className="manifeste-inner"
+        style={{
+          y,
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: '1240px',
+          margin: '0 auto',
+          padding: '110px 32px',       // ← PADDING réduit (était 150px)
+        }}
+        className="manifeste-wrap"
       >
         <motion.div
           variants={container}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, amount: 0.45 }}
           style={{
-            maxWidth: '900px',
-            margin: '0 auto',
-            padding: '220px 24px 260px',
-            textAlign: 'center',
+            display: 'grid',
+            gridTemplateColumns: '1.25fr 1px 0.9fr', // gauche / séparateur / droite
+            gap: '72px',
+            alignItems: 'center',
           }}
+          className="manifeste-grid"
         >
-          {/* 1 — Eyebrow */}
-          <motion.p
-            variants={line}
-            style={{
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.45em',
-              textTransform: 'uppercase',
-              color: 'rgba(200,164,93,0.85)',
-              marginBottom: '40px',
-            }}
-          >
-            {t('Notre conviction', 'Our conviction')}
-          </motion.p>
+          {/* ── Colonne gauche : la vision (grand titre Cormorant) ── */}
+          <motion.div variants={item}>
+            <p
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.34em',
+                textTransform: 'uppercase',
+                color: GOLD,            // eyebrow doré (accent)
+                marginBottom: '28px',
+              }}
+            >
+              {t('Notre vision', 'Our vision')}
+            </p>
 
-          {/* 2 — Conviction principale */}
-          <motion.h2
-            variants={line}
-            style={{
-              fontFamily: 'var(--font-cormorant), serif',
-              fontWeight: 300,
-              color: '#F7F5F2',
-              lineHeight: 1.25,
-              letterSpacing: '0.01em',
-              fontSize: 'clamp(1.9rem, 4vw, 3.4rem)',
-              margin: 0,
-            }}
-          >
-            {t('Un lieu ne se résume pas à des murs.', 'A place is more than walls.')}
-            <br />
-            {t('Il se ', 'It is meant to be ')}
-            <span style={{ color: GOLD, fontStyle: 'italic' }}>
-              {t('vit', 'lived')}
-            </span>
-            {t(' — bien avant qu’on y mette les pieds.', ' — long before you set foot in it.')}
-          </motion.h2>
+            <h2
+              style={{
+                fontFamily: 'var(--font-cormorant), serif',
+                fontWeight: 400,
+                color: INK,
+                lineHeight: 1.08,                          // ← resserré
+                letterSpacing: '-0.02em',
+                fontSize: 'clamp(2.4rem, 4.2vw, 4.2rem)',  // ← titre réduit (était 5.2rem)
+                margin: 0,
+                maxWidth: '720px',                         // ← largeur resserrée
+              }}
+            >
+              {t('Nous ne créons pas simplement des visites.', 'We do not simply create tours.')}
+              <br />
+              {t('Nous ', 'We ')}
+              <span style={{ color: GOLD }}>
+                {t('transformons des espaces', 'transform spaces')}
+              </span>
+              <br />
+              {t(
+                'en expériences immersives qui captivent, informent et convertissent.',
+                'into immersive experiences that captivate, inform and convert.'
+              )}
+            </h2>
+          </motion.div>
 
-          {/* 3 — Ancrage concret, plus discret */}
-          <motion.p
-            variants={line}
+          {/* ── Séparateur vertical doré (devient horizontal en mobile) ── */}
+          <motion.div
+            variants={item}
+            aria-hidden="true"
             style={{
-              marginTop: '60px',
-              maxWidth: '560px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              fontSize: 'clamp(16px, 1.8vw, 20px)',
-              fontWeight: 300,
-              lineHeight: 1.8,
-              color: 'rgba(247,245,242,0.78)',
+              width: '1px',
+              height: '320px',
+              background:
+                'linear-gradient(to bottom, transparent, rgba(200,164,93,0.55), transparent)',
             }}
-          >
-            {t(
-              'Nous transformons vos espaces en expériences que l’on explore à distance, à toute heure, depuis n’importe quel écran. Le réel, augmenté par l’intelligence artificielle.',
-              'We turn your spaces into experiences explored remotely, at any hour, from any screen. The real world, augmented by artificial intelligence.'
-            )}
-          </motion.p>
+            className="manifeste-separator"
+          />
+
+          {/* ── Colonne droite : la mission + signature ── */}
+          <motion.div variants={item} style={{ maxWidth: '390px' }}>
+            <p
+              style={{
+                fontSize: '16px',
+                lineHeight: 1.85,
+                color: MUTED,
+                margin: 0,
+              }}
+            >
+              {t(
+                'Chaque espace possède une histoire. Notre mission est de la révéler avec justesse, beauté et technologie.',
+                'Every space has a story. Our mission is to reveal it with precision, beauty and technology.'
+              )}
+            </p>
+
+            <p
+              style={{
+                fontSize: '16px',
+                lineHeight: 1.85,
+                color: MUTED,
+                marginTop: '34px',
+              }}
+            >
+              {t(
+                'Pour que vos visiteurs ne se contentent pas de voir, mais ressentent, comprennent et passent à l’action.',
+                'So your visitors do not merely look, but feel, understand and take action.'
+              )}
+            </p>
+
+            {/* Signature manuscrite (mot "Signature" en Cormorant italique doré) */}
+            <div
+              style={{
+                marginTop: '42px',
+                color: GOLD,
+                fontFamily: 'var(--font-cormorant), serif',
+                fontStyle: 'italic',
+                fontSize: '2.5rem',
+                lineHeight: 1,
+              }}
+            >
+              Signature
+            </div>
+
+            <p
+              style={{
+                marginTop: '14px',
+                fontSize: '13px',
+                color: INK,
+              }}
+            >
+              {t("L’équipe Signature Immersion", 'The Signature Immersion team')}
+            </p>
+          </motion.div>
         </motion.div>
       </motion.div>
 
+      {/* Responsive : en mobile, la grille passe en une seule colonne
+          et le séparateur vertical devient une ligne horizontale. */}
       <style>{`
+        @media (max-width: 900px) {
+          .manifeste-wrap {
+            padding: 90px 24px !important;
+          }
+          .manifeste-grid {
+            grid-template-columns: 1fr !important;
+            gap: 44px !important;
+          }
+          .manifeste-separator {
+            width: 100% !important;
+            height: 1px !important;
+            background: linear-gradient(to right, transparent, rgba(200,164,93,0.55), transparent) !important;
+          }
+        }
         @media (max-width: 640px) {
-          .manifeste-inner > div { padding-top: 140px !important; padding-bottom: 170px !important; }
+          .manifeste-wrap {
+            padding: 72px 22px !important;
+          }
         }
       `}</style>
     </section>

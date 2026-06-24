@@ -1,27 +1,17 @@
 'use client';
 
-import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Aperture, Layers, Sparkles, QrCode } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
-/**
- * Comment ça marche — Acte 6 du film.
- *
- * Section explicative (pas émotionnelle) : on montre le parcours concret en
- * 4 étapes ordonnées. Les numéros 01–04 sont justifiés : c'est une vraie
- * séquence où l'ordre porte de l'information.
- *
- * Direction : fond charbon (continuité), 4 colonnes reliées par une ligne
- * dorée fine qui se "trace" au scroll, icônes fines, apparition séquencée.
- * Étape 1 = « 3D ou 360° » (pas « Matterport » : on nomme le bénéfice, pas l'outil).
- */
-
 const GOLD = '#C8A45D';
-const CHARBON = '#0B0B0B';
+const CREAM = '#F7F5F2';
+const CARD = '#FCFBF8';
+const INK = '#101010';
+const MUTED = '#6B6458';
+const BORDER = '#E2D8C8';
 
 export default function CommentCaMarche() {
-  const ref = useRef<HTMLElement>(null);
   const { t } = useLanguage();
 
   const steps = [
@@ -30,220 +20,261 @@ export default function CommentCaMarche() {
       num: '01',
       title: t('Captation immersive', 'Immersive capture'),
       desc: t(
-        'Nous capturons votre espace en 3D ou 360°, pour une visite réaliste et fluide, accessible depuis n’importe quel appareil.',
-        'We capture your space in 3D or 360°, for a realistic, fluid tour accessible from any device.'
+        'Nous capturons votre espace en 3D ou 360°, pour une visite réaliste et fluide.',
+        'We capture your space in 3D or 360°, for a realistic and fluid tour.'
       ),
     },
     {
       icon: Layers,
       num: '02',
-      title: t('Intégration de vos contenus', 'Your content, integrated'),
+      title: t('Intégration des contenus', 'Content integration'),
       desc: t(
-        'Fiches, menus, documents et offres prennent vie directement à l’intérieur de la visite immersive.',
-        'Listings, menus, documents and offers come to life directly inside the immersive tour.'
+        'Vos documents, menus, fiches et offres prennent place dans l’expérience.',
+        'Your documents, menus, listings and offers are integrated into the experience.'
       ),
     },
     {
       icon: Sparkles,
       num: '03',
-      title: t('Intelligence Luxedia', 'Luxedia intelligence'),
+      title: t('Luxedia IA', 'Luxedia AI'),
       desc: t(
-        'Luxedia apprend votre univers pour guider chaque visiteur — informer, orienter, accompagner, à toute heure.',
-        'Luxedia learns your world to guide every visitor — inform, orient, accompany, around the clock.'
+        'Luxedia guide chaque visiteur, répond aux questions et oriente vers l’action.',
+        'Luxedia guides every visitor, answers questions and leads them to action.'
       ),
     },
     {
       icon: QrCode,
       num: '04',
-      title: t('Expérience livrée', 'Experience delivered'),
+      title: t('Livraison en ligne', 'Online delivery'),
       desc: t(
-        'Un lien unique et un QR code prêts à partager. Aucune installation — votre expérience est en ligne en quelques jours.',
-        'A unique link and a QR code ready to share. No installation — your experience is live within days.'
+        'Un lien unique et un QR code prêts à partager avec vos clients.',
+        'A unique link and QR code ready to share with your clients.'
       ),
     },
   ];
 
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
+    show: { transition: { staggerChildren: 0.14, delayChildren: 0.1 } },
   };
+
   const item = {
-    hidden: { opacity: 0, y: 28 },
+    hidden: { opacity: 0, y: 24 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
     },
   };
 
   return (
     <section
-      ref={ref}
       aria-label={t('Comment ça marche', 'How it works')}
-      style={{ backgroundColor: CHARBON, position: 'relative', overflow: 'hidden' }}
+      style={{
+        backgroundColor: CREAM,
+        color: INK,
+        position: 'relative',
+        overflow: 'hidden',
+        borderTop: `1px solid ${BORDER}`,
+        borderBottom: `1px solid ${BORDER}`,
+      }}
     >
       <div
         style={{
           maxWidth: '1240px',
           margin: '0 auto',
-          padding: '150px 32px',
+          padding: '120px 32px',
         }}
       >
-        {/* En-tête */}
         <motion.div
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, amount: 0.35 }}
           variants={container}
-          style={{ textAlign: 'center', marginBottom: '90px' }}
+          style={{
+            textAlign: 'center',
+            marginBottom: '76px',
+          }}
         >
-          <motion.p
-            variants={item}
-            style={{
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.45em',
-              textTransform: 'uppercase',
-              color: 'rgba(200,164,93,0.85)',
-              marginBottom: '24px',
-            }}
-          >
+          <motion.p variants={item} className="ccm-label">
             {t('Comment ça marche', 'How it works')}
           </motion.p>
-          <motion.h2
-            variants={item}
-            style={{
-              fontFamily: 'var(--font-cormorant), serif',
-              fontWeight: 300,
-              color: '#F7F5F2',
-              fontSize: 'clamp(2rem, 4vw, 3.4rem)',
-              lineHeight: 1.15,
-              margin: 0,
-            }}
-          >
-            {t('De votre espace à l’expérience.', 'From your space to the experience.')}
+
+          <motion.h2 variants={item} className="ccm-title">
+            {t('Un processus simple,', 'A simple process,')}
+            <br />
+            <span>{t('des résultats puissants.', 'powerful results.')}</span>
           </motion.h2>
         </motion.div>
 
-        {/* Les 4 étapes */}
         <motion.div
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.25 }}
           variants={container}
           className="ccm-steps"
-          style={{
-            position: 'relative',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '32px',
-          }}
         >
-          {/* Ligne connectrice dorée qui se trace au scroll (desktop) */}
-          <motion.div
-            aria-hidden="true"
-            className="ccm-line"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.4, ease: 'easeInOut', delay: 0.3 }}
-            style={{
-              position: 'absolute',
-              top: '34px',
-              left: '12%',
-              right: '12%',
-              height: '1px',
-              background:
-                'linear-gradient(to right, rgba(200,164,93,0) 0%, rgba(200,164,93,0.5) 15%, rgba(200,164,93,0.5) 85%, rgba(200,164,93,0) 100%)',
-              transformOrigin: 'left',
-            }}
-          />
+          <div className="ccm-line" aria-hidden="true" />
 
           {steps.map((s) => {
             const Icon = s.icon;
+
             return (
-              <motion.div
-                key={s.num}
-                variants={item}
-                className="ccm-step"
-                style={{ position: 'relative', textAlign: 'center' }}
-              >
-                {/* Pastille icône */}
-                <div
-                  style={{
-                    position: 'relative',
-                    zIndex: 1,
-                    width: '68px',
-                    height: '68px',
-                    margin: '0 auto 28px',
-                    borderRadius: '50%',
-                    backgroundColor: CHARBON,
-                    border: '1px solid rgba(200,164,93,0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 0 30px rgba(200,164,93,0.12)',
-                  }}
-                >
-                  <Icon size={26} strokeWidth={1.3} style={{ color: GOLD }} />
+              <motion.div key={s.num} variants={item} className="ccm-step">
+                <div className="ccm-icon">
+                  <Icon size={26} strokeWidth={1.4} />
                 </div>
 
-                {/* Numéro */}
-                <p
-                  style={{
-                    fontFamily: 'var(--font-cormorant), serif',
-                    fontSize: '15px',
-                    letterSpacing: '0.3em',
-                    color: 'rgba(200,164,93,0.7)',
-                    margin: '0 0 12px',
-                  }}
-                >
-                  {s.num}
-                </p>
+                <p className="ccm-num">{s.num}</p>
 
-                {/* Titre */}
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-cormorant), serif',
-                    fontWeight: 400,
-                    fontSize: 'clamp(1.25rem, 2vw, 1.6rem)',
-                    color: '#F7F5F2',
-                    lineHeight: 1.25,
-                    margin: '0 0 14px',
-                  }}
-                >
-                  {s.title}
-                </h3>
+                <h3>{s.title}</h3>
 
-                {/* Description */}
-                <p
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: 300,
-                    lineHeight: 1.7,
-                    color: 'rgba(247,245,242,0.6)',
-                    margin: '0 auto',
-                    maxWidth: '240px',
-                  }}
-                >
-                  {s.desc}
-                </p>
+                <p className="ccm-desc">{s.desc}</p>
               </motion.div>
             );
           })}
         </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.75, delay: 0.25 }}
+          className="ccm-note"
+        >
+          {t(
+            'Un accompagnement complet, de la première discussion à la mise en ligne.',
+            'Full support, from the first conversation to launch.'
+          )}
+        </motion.p>
       </div>
 
       <style>{`
-        @media (max-width: 880px) {
-          .ccm-steps {
-            grid-template-columns: 1fr 1fr !important;
-            gap: 48px 24px !important;
-          }
-          .ccm-line { display: none !important; }
+        .ccm-label {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: ${GOLD};
+          margin-bottom: 20px;
         }
-        @media (max-width: 520px) {
-          .ccm-steps { grid-template-columns: 1fr !important; }
+
+        .ccm-title {
+          font-family: var(--font-cormorant), serif;
+          font-size: clamp(2.3rem, 4vw, 4.2rem);
+          font-weight: 400;
+          color: ${INK};
+          line-height: 1.05;
+          letter-spacing: -0.02em;
+          margin: 0;
+        }
+
+        .ccm-title span {
+          color: ${GOLD};
+          font-style: italic;
+        }
+
+        .ccm-steps {
+          position: relative;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 28px;
+        }
+
+        .ccm-line {
+          position: absolute;
+          top: 38px;
+          left: 12%;
+          right: 12%;
+          height: 1px;
+          background: linear-gradient(
+            to right,
+            transparent,
+            rgba(200,164,93,0.6),
+            transparent
+          );
+        }
+
+        .ccm-step {
+          position: relative;
+          z-index: 1;
+          text-align: center;
+          background: ${CARD};
+          border: 1px solid ${BORDER};
+          border-radius: 18px;
+          padding: 34px 24px 32px;
+          box-shadow: 0 18px 60px rgba(0,0,0,0.05);
+          transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .ccm-step:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 28px 80px rgba(0,0,0,0.09);
+          border-color: rgba(200,164,93,0.5);
+        }
+
+        .ccm-icon {
+          width: 70px;
+          height: 70px;
+          margin: 0 auto 24px;
+          border-radius: 50%;
+          background: #FFFFFF;
+          border: 1px solid rgba(200,164,93,0.55);
+          color: ${GOLD};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 14px 34px rgba(200,164,93,0.14);
+        }
+
+        .ccm-num {
+          font-family: var(--font-cormorant), serif;
+          font-size: 16px;
+          letter-spacing: 0.24em;
+          color: ${GOLD};
+          margin: 0 0 12px;
+        }
+
+        .ccm-step h3 {
+          font-family: var(--font-cormorant), serif;
+          font-size: clamp(1.3rem, 2vw, 1.65rem);
+          font-weight: 400;
+          color: ${INK};
+          line-height: 1.25;
+          margin: 0 0 14px;
+        }
+
+        .ccm-desc {
+          font-size: 14px;
+          line-height: 1.7;
+          color: ${MUTED};
+          margin: 0 auto;
+          max-width: 230px;
+        }
+
+        .ccm-note {
+          text-align: center;
+          color: ${MUTED};
+          font-size: 15px;
+          line-height: 1.8;
+          margin: 54px auto 0;
+          max-width: 560px;
+        }
+
+        @media (max-width: 980px) {
+          .ccm-steps {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .ccm-line {
+            display: none;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .ccm-steps {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </section>

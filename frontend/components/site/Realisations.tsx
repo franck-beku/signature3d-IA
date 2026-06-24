@@ -1,178 +1,501 @@
 /**
- * Réalisations — Signature 3D IA
- * Version: 5.0 — Multilingue FR/EN + données PostgreSQL
+ * Réalisations — Signature Immersion (TEASER ACCUEIL).
+ *
+ * 2 secteurs pour l'instant : Automobile + Immobilier.
+ * (Ajouter Restauration / Commerce plus tard, quand de vrais projets existent.)
+ *
+ * Choix :
+ *  - titres génériques par secteur (pas de marque enfermante type "Mercedes")
+ *  - image auto sans logo de marque en évidence (vue showroom / profil)
+ *  - liens vers les pages SECTEUR existantes (pas de 404)
+ *  - images Unsplash réalistes (remplaçables par tes vraies captures plus tard)
+ *
+ * Grille : 2 colonnes (centrées), passe à 1 colonne en mobile.
+ *
+ * Place dans l'alternance des fonds :
+ *   Nos univers (blanc) → RÉALISATIONS (beige #F1ECE4) → Démo (blanc) → ...
  */
 
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { ArrowRight, Lock, Play } from 'lucide-react'
-import Link from 'next/link'
-import { sectorsApi, type SectorDto } from '@/lib/api'
-import { useLanguage } from '@/context/LanguageContext'
+import { motion } from 'framer-motion';
+import { ArrowRight, Box, Car, Home, type LucideIcon } from 'lucide-react';
+import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
-const GOLD      = '#C8A45D'
-const GOLD_DARK = '#A8863F'
-const DARK      = '#1A1400'
+const GOLD = '#C8A45D';
+const GOLD_DARK = '#A8863F';
+const BEIGE = '#F1ECE4';
+const CARD = '#FCFBF8';
+const INK = '#101010';
+const MUTED = '#6B6458';
+const BORDER = '#E2D8C8';
 
-const DEFAULT_IMAGES: Record<string, string> = {
-  'Automobile':   'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=85&auto=format&fit=crop',
-  'Restaurant':   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=85&auto=format&fit=crop',
-  'Immobilier':   'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=85&auto=format&fit=crop',
-  'Hôtellerie':   'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=85&auto=format&fit=crop',
-  'Commerce':     'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=85&auto=format&fit=crop',
-  'Événementiel': 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=85&auto=format&fit=crop',
-}
+type ProjectCard = {
+  slug: string;
+  href: string;
+  sectorFr: string;
+  sectorEn: string;
+  titleFr: string;
+  titleEn: string;
+  descriptionFr: string;
+  descriptionEn: string;
+  image: string;
+  icon: LucideIcon;
+};
+
+const PROJECTS: ProjectCard[] = [
+  {
+    slug: 'auto',
+    href: '/realisations/automobile',
+    sectorFr: 'Automobile',
+    sectorEn: 'Automotive',
+    titleFr: 'Showroom automobile',
+    titleEn: 'Automotive showroom',
+    descriptionFr:
+      'Chaque véhicule mis en valeur dans une expérience immersive, explorable sous tous les angles.',
+    descriptionEn:
+      'Every vehicle showcased in an immersive experience, explorable from every angle.',
+    /* Vue de profil / intérieur showroom — pas de calandre ni logo en évidence. */
+    image:
+      'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=900&q=85&auto=format&fit=crop',
+    icon: Car,
+  },
+  {
+    slug: 'immobilier',
+    href: '/realisations/immobilier',
+    sectorFr: 'Immobilier',
+    sectorEn: 'Real estate',
+    titleFr: 'Propriété de prestige',
+    titleEn: 'Prestige property',
+    descriptionFr:
+      'Une visite immersive qui valorise chaque espace et donne envie de franchir la porte.',
+    descriptionEn:
+      'An immersive tour that highlights every space and makes you want to step inside.',
+    /* Intérieur lumineux, différent de la villa déjà très vue. */
+    image:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=85&auto=format&fit=crop',
+    icon: Home,
+  },
+];
 
 const content = {
   fr: {
-    label:       'Nos réalisations',
-    title:       'Expériences immersives livrées',
-    subtitle:    "Chaque expérience est unique, personnalisée et accessible depuis n'importe quel appareil.",
-    loading:     'Chargement...',
-    comingSoon:  'Prochainement',
-    comingSoon2: 'Bientôt disponible',
-    seeExp:      'Voir les expériences',
-    clients:     (n: number) => `${n} client${n > 1 ? 's' : ''}`,
+    label: 'Réalisations récentes',
+    title: 'Des projets concrets,',
+    title2: 'des expériences qui marquent.',
+    subtitle:
+      'Chaque projet est pensé pour sublimer un espace et captiver ceux qui le découvrent.',
+    seeProject: 'Découvrir le projet',
+    all: 'Voir toutes nos réalisations',
+    badge: 'Visite 3D',
   },
   en: {
-    label:       'Our portfolio',
-    title:       'Immersive experiences delivered',
-    subtitle:    'Each experience is unique, personalized and accessible from any device.',
-    loading:     'Loading...',
-    comingSoon:  'Coming soon',
-    comingSoon2: 'Coming soon',
-    seeExp:      'See experiences',
-    clients:     (n: number) => `${n} client${n > 1 ? 's' : ''}`,
+    label: 'Recent work',
+    title: 'Concrete projects,',
+    title2: 'experiences that resonate.',
+    subtitle:
+      'Every project is designed to elevate a space and captivate those who explore it.',
+    seeProject: 'Discover project',
+    all: 'View all projects',
+    badge: '3D tour',
   },
-}
+};
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-}
+  visible: { transition: { staggerChildren: 0.1 } },
+};
 
 const cardVariants = {
-  hidden:   { opacity: 0, y: 20 },
-  visible:  { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
-}
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
 
 export default function Realisations() {
-  const { lang } = useLanguage()
-  const c = content[lang]
-  const [sectors, setSectors] = useState<SectorDto[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    sectorsApi.getAll()
-      .then((data) => setSectors(data as SectorDto[]))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+  const { lang } = useLanguage();
+  const c = content[lang];
 
   return (
-    <section id="realisations" style={{ backgroundColor: '#FFFFFF', padding: '104px 0 96px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(200,164,93,0.04) 0%, transparent 60%)', pointerEvents: 'none' }} />
+    <section
+      id="realisations"
+      style={{
+        backgroundColor: BEIGE,
+        padding: '110px 0 120px',
+        position: 'relative',
+        overflow: 'hidden',
+        borderTop: `1px solid ${BORDER}`,
+        borderBottom: `1px solid ${BORDER}`,
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'radial-gradient(circle at 50% 0%, rgba(200,164,93,0.10) 0%, transparent 50%)',
+          pointerEvents: 'none',
+        }}
+      />
 
       <div className="container-main" style={{ position: 'relative', zIndex: 1 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+          className="realisations-header"
+        >
+          <div>
+            <p className="realisations-label">{c.label}</p>
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} style={{ textAlign: 'center', marginBottom: '52px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ width: '32px', height: '1px', backgroundColor: GOLD }} />
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.32em', textTransform: 'uppercase', color: GOLD }}>{c.label}</span>
-            <div style={{ width: '32px', height: '1px', backgroundColor: GOLD }} />
+            <h2 className="realisations-title">
+              {c.title}
+              <br />
+              <span>{c.title2}</span>
+            </h2>
           </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', fontWeight: 300, color: DARK, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '20px' }}>{c.title}</h2>
-          <p style={{ maxWidth: '460px', margin: '0 auto', fontSize: '15px', lineHeight: 1.75, color: '#6B6458', fontWeight: 300 }}>{c.subtitle}</p>
+
+          <div className="realisations-header-right">
+            <p>{c.subtitle}</p>
+
+            <Link href="/realisations" className="realisations-all-link">
+              {c.all}
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </motion.div>
 
-        {/* Grille */}
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '48px', color: '#C8C0B0', fontSize: '14px' }}>{c.loading}</div>
-        ) : (
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="realisations-grid-custom">
-            {sectors.map((sector) => {
-              const image     = DEFAULT_IMAGES[sector.name] ?? DEFAULT_IMAGES['Automobile']
-              const available = sector.clientCount > 0
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          className="realisations-grid-custom"
+        >
+          {PROJECTS.map((project) => {
+            const Icon = project.icon;
 
-              return (
-                <motion.div key={sector.id} variants={cardVariants} style={{ borderRadius: '16px', border: '1.5px solid #E8E2D4', overflow: 'hidden', backgroundColor: '#FFFFFF', transition: 'all 0.35s ease', opacity: available ? 1 : 0.7 }} className="card-realisation">
+            return (
+              <motion.article
+                key={project.slug}
+                variants={cardVariants}
+                className="card-realisation"
+              >
+                <Link href={project.href} className="card-link">
+                  <div className="card-image-wrap">
+                    <img
+                      src={project.image}
+                      alt={lang === 'fr' ? project.titleFr : project.titleEn}
+                      className="card-img"
+                    />
 
-                  <div style={{ position: 'relative', height: '230px', overflow: 'hidden' }}>
-                    <img src={image} alt={sector.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.6s ease' }} className="card-img" />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(26,20,0,0.75) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)' }} />
+                    <div className="card-image-overlay" />
 
-                    {/* Badge secteur */}
-                    <div style={{ position: 'absolute', top: '14px', left: '14px' }}>
-                      <span style={{ borderRadius: '6px', backgroundColor: 'rgba(26,20,0,0.75)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.9)', padding: '5px 12px', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-                        {sector.name}
-                      </span>
-                    </div>
-
-                    {/* Badge statut */}
-                    <div style={{ position: 'absolute', top: '14px', right: '14px' }}>
-                      {available ? (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '6px', backgroundColor: 'rgba(26,20,0,0.75)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.12)', padding: '5px 12px', fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.9)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: GOLD, animation: 'pulse 2s infinite', display: 'block' }} />
-                          {c.clients(sector.clientCount)}
-                        </span>
-                      ) : (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px', borderRadius: '6px', backgroundColor: 'rgba(26,20,0,0.75)', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.08)', padding: '5px 12px', fontSize: '9px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                          <Lock size={9} />
-                          {c.comingSoon}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Hover overlay */}
-                    {available && (
-                      <Link href={`/realisations/${sector.slug}`} style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s ease', backgroundColor: 'rgba(26,20,0,0.25)', textDecoration: 'none' }} className="card-overlay">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '8px', backgroundColor: GOLD, padding: '12px 24px', fontSize: '11px', fontWeight: 700, color: '#FFFFFF', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                          <Play size={11} style={{ fill: '#fff' }} />
-                          {c.seeExp}
-                        </div>
-                      </Link>
-                    )}
-
-                    {/* Titre secteur */}
-                    <div style={{ position: 'absolute', bottom: '14px', left: '16px', right: '16px' }}>
-                      <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#FFFFFF', fontFamily: 'var(--font-display)', letterSpacing: '-0.01em', lineHeight: 1.2, margin: 0 }}>{sector.name}</h3>
+                    <div className="card-badge">
+                      <Box size={14} />
+                      {c.badge}
                     </div>
                   </div>
 
-                  {/* Body */}
-                  <div style={{ padding: '18px 22px 22px' }}>
-                    <div style={{ height: '1px', backgroundColor: '#F0EBE0', marginBottom: '16px' }} />
-                    {available ? (
-                      <Link href={`/realisations/${sector.slug}`} className="voir-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: GOLD, textDecoration: 'none', transition: 'gap 0.2s ease' }}>
-                        {c.seeExp}
-                        <ArrowRight size={13} />
-                      </Link>
-                    ) : (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C8C0B0' }}>
-                        <Lock size={11} />
-                        {c.comingSoon2}
-                      </span>
-                    )}
+                  <div className="card-body">
+                    <div className="card-icon">
+                      <Icon size={25} color="#FFFFFF" strokeWidth={1.5} />
+                    </div>
+
+                    <p className="card-sector">
+                      {lang === 'fr' ? project.sectorFr : project.sectorEn}
+                    </p>
+
+                    <h3>{lang === 'fr' ? project.titleFr : project.titleEn}</h3>
+
+                    <p className="card-description">
+                      {lang === 'fr' ? project.descriptionFr : project.descriptionEn}
+                    </p>
+
+                    <span className="voir-link">
+                      {c.seeProject}
+                      <ArrowRight size={15} />
+                    </span>
                   </div>
-                </motion.div>
-              )
-            })}
-          </motion.div>
-        )}
+                </Link>
+              </motion.article>
+            );
+          })}
+        </motion.div>
+
+        <div className="realisations-bottom-link">
+          <span />
+          <Link href="/realisations">
+            {c.all}
+            <ArrowRight size={18} />
+          </Link>
+          <span />
+        </div>
       </div>
 
       <style>{`
-        .card-realisation:hover { box-shadow: 0 20px 56px rgba(0,0,0,0.1) !important; transform: translateY(-5px); border-color: rgba(200,164,93,0.25) !important; }
-        .card-realisation:hover .card-img { transform: scale(1.05); }
-        .card-realisation:hover .card-overlay { opacity: 1 !important; }
-        .voir-link:hover { gap: 10px !important; color: ${GOLD_DARK} !important; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-        @media (max-width: 1024px) { .realisations-grid-custom { grid-template-columns: repeat(2, 1fr) !important; } }
-        @media (max-width: 640px)  { .realisations-grid-custom { grid-template-columns: 1fr !important; } }
+        .realisations-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: end;
+          gap: 48px;
+          margin-bottom: 62px;
+        }
+
+        .realisations-label {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: ${GOLD};
+          margin-bottom: 18px;
+        }
+
+        .realisations-title {
+          font-family: var(--font-cormorant), serif;
+          font-size: clamp(2.4rem, 4vw, 4.4rem);
+          font-weight: 400;
+          color: ${INK};
+          letter-spacing: -0.02em;
+          line-height: 1.02;
+          margin: 0;
+        }
+
+        .realisations-title span {
+          font-style: italic;
+          color: ${GOLD};
+        }
+
+        .realisations-header-right p {
+          max-width: 390px;
+          font-size: 17px;
+          line-height: 1.7;
+          color: ${MUTED};
+          font-weight: 300;
+          margin: 0;
+        }
+
+        .realisations-all-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          color: ${INK};
+          border: 1px solid rgba(200,164,93,0.75);
+          border-radius: 4px;
+          padding: 15px 26px;
+          margin-top: 26px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          text-decoration: none;
+          transition: all 0.3s ease;
+        }
+
+        .realisations-all-link svg {
+          color: ${GOLD};
+        }
+
+        .realisations-all-link:hover {
+          background-color: ${INK};
+          color: #FFFFFF;
+          border-color: ${INK};
+        }
+
+        /* 2 cartes centrées, largeur maîtrisée pour ne pas les étirer. */
+        .realisations-grid-custom {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 28px;
+          max-width: 880px;
+          margin: 0 auto;
+        }
+
+        .card-realisation {
+          overflow: hidden;
+          background-color: ${CARD};
+          border: 1px solid ${BORDER};
+          border-radius: 18px;
+          box-shadow: 0 24px 70px rgba(0,0,0,0.08);
+          transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+        }
+
+        .card-realisation:hover {
+          transform: translateY(-10px);
+          box-shadow: 0 38px 96px rgba(0,0,0,0.14);
+          border-color: rgba(200,164,93,0.55);
+        }
+
+        .card-link {
+          display: block;
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .card-image-wrap {
+          position: relative;
+          height: 320px;
+          overflow: hidden;
+          background-color: #ddd;
+        }
+
+        .card-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.8s ease;
+        }
+
+        .card-realisation:hover .card-img {
+          transform: scale(1.06);
+        }
+
+        .card-image-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            to top,
+            rgba(16,16,16,0.48) 0%,
+            rgba(16,16,16,0.10) 55%,
+            transparent 100%
+          );
+        }
+
+        .card-badge {
+          position: absolute;
+          bottom: 18px;
+          left: 18px;
+          display: inline-flex;
+          align-items: center;
+          gap: 9px;
+          border-radius: 999px;
+          background-color: rgba(11,11,11,0.72);
+          color: #FFFFFF;
+          padding: 8px 14px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          backdrop-filter: blur(8px);
+        }
+
+        .card-body {
+          position: relative;
+          padding: 34px 30px 36px;
+        }
+
+        .card-icon {
+          position: absolute;
+          top: -30px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background-color: ${GOLD};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 14px 30px rgba(200,164,93,0.35);
+        }
+
+        .card-sector {
+          color: ${GOLD};
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          margin: 12px 0 14px;
+        }
+
+        .card-body h3 {
+          font-family: var(--font-cormorant), serif;
+          font-size: clamp(1.9rem, 2.4vw, 2.55rem);
+          font-weight: 400;
+          color: ${INK};
+          line-height: 1.08;
+          margin: 0 0 14px;
+        }
+
+        .card-description {
+          font-size: 15px;
+          line-height: 1.75;
+          color: ${MUTED};
+          margin: 0 0 28px;
+        }
+
+        .voir-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 12px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: ${GOLD};
+          transition: gap 0.25s ease, color 0.25s ease;
+        }
+
+        .card-realisation:hover .voir-link {
+          gap: 16px;
+          color: ${GOLD_DARK};
+        }
+
+        .realisations-bottom-link {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 28px;
+          margin-top: 54px;
+        }
+
+        .realisations-bottom-link span {
+          width: 140px;
+          height: 1px;
+          background: rgba(200,164,93,0.45);
+        }
+
+        .realisations-bottom-link a {
+          display: inline-flex;
+          align-items: center;
+          gap: 14px;
+          color: ${INK};
+          text-decoration: none;
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          transition: color 0.25s ease, gap 0.25s ease;
+        }
+
+        .realisations-bottom-link a:hover {
+          color: ${GOLD};
+          gap: 20px;
+        }
+
+        @media (max-width: 980px) {
+          .realisations-header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .realisations-grid-custom {
+            grid-template-columns: 1fr;
+            max-width: 460px;
+          }
+
+          .realisations-bottom-link span {
+            display: none;
+          }
+        }
       `}</style>
     </section>
-  )
+  );
 }
