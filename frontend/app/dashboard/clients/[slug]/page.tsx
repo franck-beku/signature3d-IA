@@ -11,8 +11,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, Copy, Code, FileText, ExternalLink as OpenIcon } from 'lucide-react'
-import { clientsApi, projectsApi, type ClientDto, type ProjectDto } from '@/lib/api'
+import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, Copy, Code, FileText, ExternalLink as OpenIcon, UserRound } from 'lucide-react'
+import { clientsApi, projectsApi, contactsApi, type ClientDto, type ProjectDto, type ContactDto, type CreateContactDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
 
 const GOLD = '#d4af37'
@@ -263,13 +263,25 @@ export default function ClientDetailPage() {
   const [docProject, setDocProject]           = useState<{ id: string; name: string } | null>(null)
   const [showContractModal, setShowContractModal] = useState(false)
   const [saving, setSaving]                   = useState(false)
+  const [contacts, setContacts]               = useState<ContactDto[]>([])
+  const [contactSaving, setContactSaving]     = useState(false)
+  const [showContactForm, setShowContactForm] = useState(false)
+  const [editContact, setEditContact]         = useState<ContactDto | null>(null)
+  const [deleteContactConfirm, setDeleteContactConfirm] = useState<string | null>(null)
+  const [contactForm, setContactForm]         = useState<CreateContactDto>({
+    name: '', position: '', email: '', phone: '', phoneExtension: '', isPrimary: false,
+  })
 
   useEffect(() => {
     clientsApi.getBySlug(slug)
       .then(async (c) => {
         setClient(c as ClientDto)
-        const projs = await projectsApi.getByClient(c.id)
+        const [projs, ctcts] = await Promise.all([
+          projectsApi.getByClient(c.id),
+          contactsApi.getByClient(c.id),
+        ])
         setProjects(projs as ProjectDto[])
+        setContacts(ctcts as ContactDto[])
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
@@ -336,6 +348,69 @@ export default function ClientDetailPage() {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const resetContactForm = () =>
+    setContactForm({ name: '', position: '', email: '', phone: '', phoneExtension: '', isPrimary: false })
+
+  const handleCreateContact = async () => {
+    if (!client || !contactForm.name.trim()) return
+    setContactSaving(true)
+    try {
+      if (contactForm.isPrimary) {
+        await Promise.all(
+          contacts.filter((c) => c.isPrimary).map((c) => contactsApi.update(c.id, { isPrimary: false }))
+        )
+        setContacts((prev) => prev.map((c) => ({ ...c, isPrimary: false })))
+      }
+      const created = await contactsApi.create(client.id, contactForm)
+      setContacts((prev) => [...prev, created as ContactDto])
+      setShowContactForm(false)
+      resetContactForm()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setContactSaving(false)
+    }
+  }
+
+  const handleUpdateContact = async () => {
+    if (!editContact || !editContact.name.trim()) return
+    setContactSaving(true)
+    try {
+      if (editContact.isPrimary) {
+        await Promise.all(
+          contacts.filter((c) => c.isPrimary && c.id !== editContact.id).map((c) =>
+            contactsApi.update(c.id, { isPrimary: false })
+          )
+        )
+        setContacts((prev) => prev.map((c) => c.id === editContact.id ? c : { ...c, isPrimary: false }))
+      }
+      const updated = await contactsApi.update(editContact.id, {
+        name: editContact.name,
+        position: editContact.position,
+        email: editContact.email,
+        phone: editContact.phone,
+        phoneExtension: editContact.phoneExtension,
+        isPrimary: editContact.isPrimary,
+      })
+      setContacts((prev) => prev.map((c) => c.id === editContact.id ? updated as ContactDto : c))
+      setEditContact(null)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setContactSaving(false)
+    }
+  }
+
+  const handleDeleteContact = async (id: string) => {
+    try {
+      await contactsApi.delete(id)
+      setContacts((prev) => prev.filter((c) => c.id !== id))
+      setDeleteContactConfirm(null)
+    } catch (err: any) {
+      setError(err.message)
     }
   }
 
@@ -455,6 +530,97 @@ export default function ClientDetailPage() {
                 }}>
                   <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{client.notes}</p>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Contacts */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', margin: 0 }}>
+                Contacts — {contacts.length}
+              </h2>
+              <button
+                onClick={() => { resetContactForm(); setShowContactForm(true) }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '7px 14px', borderRadius: '8px', border: `1px solid ${GOLD}`, color: GOLD, background: 'none', cursor: 'pointer' }}
+                className="add-contact-btn"
+              >
+                <Plus size={12} /> Ajouter un contact
+              </button>
+            </div>
+
+            {contacts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 32px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '14px' }}>
+                <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Aucun contact pour ce client</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+                {contacts.map((contact) => (
+                  <div key={contact.id} style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '34px', height: '34px', borderRadius: '8px', backgroundColor: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <UserRound size={15} style={{ color: GOLD }} />
+                        </div>
+                        <div>
+                          <p style={{ color: 'white', fontWeight: 500, fontSize: '13px', margin: 0 }}>{contact.name}</p>
+                          {contact.position && (
+                            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', margin: '2px 0 0' }}>{contact.position}</p>
+                          )}
+                        </div>
+                      </div>
+                      {contact.isPrimary && (
+                        <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(212,175,55,0.12)', color: GOLD, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          Principal
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+                      {contact.email && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Mail size={11} style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+                          <a href={`mailto:${contact.email}`} style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }} className="contact-link">{contact.email}</a>
+                        </div>
+                      )}
+                      {contact.phone && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Phone size={11} style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+                          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>
+                            {contact.phone}{contact.phoneExtension ? ` p. ${contact.phoneExtension}` : ''}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {deleteContactConfirm === contact.id ? (
+                      <div style={{ padding: '10px 12px', backgroundColor: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: '8px' }}>
+                        <p style={{ color: '#f87171', fontSize: '12px', margin: '0 0 10px' }}>Supprimer ce contact ?</p>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => setDeleteContactConfirm(null)} style={{ fontSize: '11px', padding: '5px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', background: 'none', cursor: 'pointer' }}>Annuler</button>
+                          <button onClick={() => handleDeleteContact(contact.id)} style={{ fontSize: '11px', padding: '5px 12px', borderRadius: '6px', backgroundColor: '#f87171', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Confirmer</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                          onClick={() => setEditContact({ ...contact })}
+                          style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: `1px solid rgba(212,175,55,0.2)`, color: GOLD, background: 'none', cursor: 'pointer' }}
+                          className="edit-btn"
+                        >
+                          <Pencil size={10} /> Modifier
+                        </button>
+                        <button
+                          onClick={() => setDeleteContactConfirm(contact.id)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', background: 'none', cursor: 'pointer' }}
+                          className="delete-btn"
+                        >
+                          <Trash2 size={10} /> Supprimer
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -606,6 +772,66 @@ export default function ClientDetailPage() {
         </div>
       )}
 
+      {/* Modal Add / Edit Contact */}
+      {(showContactForm || editContact) && (() => {
+        const isEdit  = !!editContact
+        const form    = isEdit ? editContact! : contactForm
+        const setForm = isEdit
+          ? (patch: Partial<ContactDto>) => setEditContact((prev) => prev ? { ...prev, ...patch } : prev)
+          : (patch: Partial<CreateContactDto>) => setContactForm((prev) => ({ ...prev, ...patch }))
+        return (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
+            <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '480px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <h2 style={{ color: 'white', fontWeight: 500, fontSize: '16px', margin: 0 }}>{isEdit ? 'Modifier le contact' : 'Nouveau contact'}</h2>
+                <button onClick={() => isEdit ? setEditContact(null) : setShowContactForm(false)} style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)' }} className="close-btn">
+                  <X size={14} />
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Nom *</label>
+                  <input type="text" value={form.name} onChange={(e) => setForm({ name: e.target.value })} placeholder="Prénom Nom" style={inputStyle} className="dash-input" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Fonction</label>
+                  <input type="text" value={form.position ?? ''} onChange={(e) => setForm({ position: e.target.value })} placeholder="Ex: Directeur marketing" style={inputStyle} className="dash-input" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Email</label>
+                    <input type="email" value={form.email ?? ''} onChange={(e) => setForm({ email: e.target.value })} placeholder="prenom@client.ca" style={inputStyle} className="dash-input" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Téléphone</label>
+                    <input type="tel" value={form.phone ?? ''} onChange={(e) => setForm({ phone: e.target.value })} placeholder="+1 (418) 000-0000" style={inputStyle} className="dash-input" />
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Poste / Extension</label>
+                  <input type="text" value={form.phoneExtension ?? ''} onChange={(e) => setForm({ phoneExtension: e.target.value })} placeholder="Ex: 224" style={inputStyle} className="dash-input" />
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 14px', borderRadius: '8px', border: `1px solid ${form.isPrimary ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.06)'}`, backgroundColor: form.isPrimary ? 'rgba(212,175,55,0.06)' : 'transparent', transition: 'all 0.2s ease' }}>
+                  <input type="checkbox" checked={!!form.isPrimary} onChange={(e) => setForm({ isPrimary: e.target.checked })} style={{ width: '15px', height: '15px', accentColor: GOLD, cursor: 'pointer' }} />
+                  <span style={{ color: form.isPrimary ? GOLD : 'rgba(255,255,255,0.4)', fontSize: '13px' }}>Contact principal</span>
+                </label>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+                  <button
+                    onClick={isEdit ? handleUpdateContact : handleCreateContact}
+                    disabled={contactSaving || !form.name.trim()}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: form.name.trim() ? GOLD : 'rgba(255,255,255,0.05)', color: form.name.trim() ? '#000' : 'rgba(255,255,255,0.2)', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: form.name.trim() && !contactSaving ? 'pointer' : 'not-allowed', opacity: contactSaving ? 0.7 : 1 }}
+                    className="save-btn"
+                  >
+                    <Check size={14} /> {contactSaving ? 'Sauvegarde...' : (isEdit ? 'Sauvegarder' : 'Créer')}
+                  </button>
+                  <button onClick={() => isEdit ? setEditContact(null) : setShowContactForm(false)} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer' }}>Annuler</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Modal Upload PDF Luxedia */}
       {docProject && (
         <DocumentUpload projectId={docProject.id} projectName={docProject.name} onClose={() => setDocProject(null)} />
@@ -643,8 +869,10 @@ export default function ClientDetailPage() {
         .save-btn:hover    { background-color: #c9a84c !important; }
         .add-btn:hover     { background-color: rgba(212,175,55,0.1) !important; }
         .del-btn:hover     { background-color: rgba(248,113,113,0.08) !important; }
-        .copy-btn:hover    { color: ${GOLD} !important; border-color: rgba(212,175,55,0.3) !important; }
-        .dash-input:focus  { border-color: ${GOLD} !important; }
+        .copy-btn:hover        { color: ${GOLD} !important; border-color: rgba(212,175,55,0.3) !important; }
+        .dash-input:focus      { border-color: ${GOLD} !important; }
+        .add-contact-btn:hover { background-color: rgba(212,175,55,0.1) !important; }
+        .contact-link:hover    { color: ${GOLD} !important; }
         @media (max-width: 900px) { .info-grid { grid-template-columns: repeat(2, 1fr) !important; } }
         @media (max-width: 540px) { .btn-row { grid-template-columns: 1fr !important; } }
       `}</style>

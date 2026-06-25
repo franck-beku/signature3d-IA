@@ -529,3 +529,60 @@ export const faqApi = {
   /** DASHBOARD — supprimer une FAQ */
   delete: (id: string) => apiFetch(`/api/faq/${id}`, { method: 'DELETE' }),
 }
+
+/* ══════════════════════════════════════
+   CONTACTS
+   ══════════════════════════════════════ */
+
+export interface ContactDto {
+  id: string
+  clientId: string
+  name: string
+  position?: string
+  email?: string
+  phone?: string
+  phoneExtension?: string
+  isPrimary: boolean
+}
+
+export interface CreateContactDto {
+  name: string
+  position?: string
+  email?: string
+  phone?: string
+  phoneExtension?: string
+  isPrimary: boolean
+}
+
+export interface UpdateContactDto {
+  name?: string
+  position?: string
+  email?: string
+  phone?: string
+  phoneExtension?: string
+  isPrimary?: boolean
+}
+
+export const contactsApi = {
+  /** Retourne les contacts d'un client */
+  getByClient: (clientId: string) =>
+    apiFetch<ContactDto[]>(`/api/contacts/client/${clientId}`),
+
+  /** Crée un contact pour un client */
+  create: (clientId: string, data: CreateContactDto) =>
+    apiFetch<ContactDto>(`/api/contacts/client/${clientId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /** Modifie un contact */
+  update: (id: string, data: UpdateContactDto) =>
+    apiFetch<ContactDto>(`/api/contacts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  /** Supprime un contact */
+  delete: (id: string) =>
+    apiFetch(`/api/contacts/${id}`, { method: 'DELETE' }),
+}
