@@ -30,6 +30,12 @@ interface AmbassadeurIAProps {
   buttons: Button[]
   projectSlug?: string
   language?: 'fr' | 'en'
+  luxediaAvatarUrl?:       string
+  luxediaClientLogoUrl?:   string
+  luxediaPrimaryColor?:    string
+  luxediaWidgetBgColor?:   string
+  luxediaBotMessageColor?: string
+  luxediaUserMessageColor?: string
 }
 
 const i18n = {
@@ -55,7 +61,21 @@ export default function AmbassadeurIA({
   buttons,
   projectSlug,
   language = 'fr',
+  luxediaAvatarUrl,
+  luxediaClientLogoUrl,
+  luxediaPrimaryColor,
+  luxediaWidgetBgColor,
+  luxediaBotMessageColor,
+  luxediaUserMessageColor,
 }: AmbassadeurIAProps) {
+  /* ── Constantes Luxedia — fallback vers valeurs en dur ── */
+  const primaryColor = luxediaPrimaryColor   ?? '#d4af37'
+  const widgetBg     = luxediaWidgetBgColor  ?? '#111111'
+  const botMsgColor  = luxediaBotMessageColor  ?? '#1a1a1a'
+  const userMsgColor = luxediaUserMessageColor ?? '#d4af37'
+  const avatarSrc    = luxediaAvatarUrl      ?? '/luxedia-avatar.png'
+  const logoSrc      = luxediaClientLogoUrl  ?? '/logo-dark.png'
+
   const [messages, setMessages]         = useState<Message[]>([
     { role: 'assistant', content: welcomeMessage },
   ])
@@ -96,15 +116,15 @@ export default function AmbassadeurIA({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', backgroundColor: '#111111' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', backgroundColor: widgetBg }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(26,26,26,0.5)', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: widgetBg === '#111111' ? 'rgba(26,26,26,0.5)' : `${widgetBg}CC`, justifyContent: 'space-between' }}>
 
         {/* ── Avatar Luxedia ── */}
-        <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.3)', flexShrink: 0 }}>
+        <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', border: `1px solid ${primaryColor}4D`, flexShrink: 0 }}>
           <Image
-            src="/luxedia-avatar.png"
+            src={avatarSrc}
             alt="Luxedia"
             width={36}
             height={36}
@@ -130,7 +150,7 @@ export default function AmbassadeurIA({
                 fontSize: '10px', fontWeight: 600, padding: '3px 8px',
                 borderRadius: '4px', border: 'none', cursor: 'pointer',
                 textTransform: 'uppercase', letterSpacing: '0.05em',
-                backgroundColor: lang === l ? '#d4af37' : 'transparent',
+                backgroundColor: lang === l ? primaryColor : 'transparent',
                 color: lang === l ? '#000' : 'rgba(255,255,255,0.3)',
                 transition: 'all 0.2s ease',
               }}
@@ -140,23 +160,23 @@ export default function AmbassadeurIA({
           ))}
         </div>
 
-        <Image src="/logo-dark.png" alt="Signature Immersion" width={90} height={36} style={{ height: '24px', width: 'auto', opacity: 0.7 }} />
+        <Image src={logoSrc} alt="Signature Immersion" width={90} height={36} style={{ height: '24px', width: 'auto', opacity: 0.7 }} />
       </div>
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {messages.map((msg, i) => (
-          <ChatBubble key={i} role={msg.role} content={msg.content} />
+          <ChatBubble key={i} role={msg.role} content={msg.content} botMsgColor={botMsgColor} userMsgColor={userMsgColor} />
         ))}
 
         {messages.length === 1 && (
-          <SuggestionsRapides suggestions={currentT.suggestions} onSelect={sendMessage} />
+          <SuggestionsRapides suggestions={currentT.suggestions} onSelect={sendMessage} primaryColor={primaryColor} />
         )}
 
         {isTyping && (
-          <div style={{ display: 'flex', gap: '6px', padding: '10px 12px', backgroundColor: '#1a1a1a', borderRadius: '12px', borderTopLeftRadius: '4px', width: 'fit-content' }}>
+          <div style={{ display: 'flex', gap: '6px', padding: '10px 12px', backgroundColor: botMsgColor, borderRadius: '12px', borderTopLeftRadius: '4px', width: 'fit-content' }}>
             {[0, 150, 300].map((delay) => (
-              <span key={delay} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'rgba(212,175,55,0.5)', display: 'inline-block', animation: `bounce 1s infinite ${delay}ms` }} />
+              <span key={delay} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: `${primaryColor}80`, display: 'inline-block', animation: `bounce 1s infinite ${delay}ms` }} />
             ))}
           </div>
         )}
@@ -164,7 +184,7 @@ export default function AmbassadeurIA({
       </div>
 
       {/* Action Buttons */}
-      <ActionButtons buttons={buttons} projectSlug={projectSlug} />
+      <ActionButtons buttons={buttons} projectSlug={projectSlug} primaryColor={primaryColor} />
 
       {/* Input */}
       <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(26,26,26,0.3)' }}>
@@ -180,7 +200,7 @@ export default function AmbassadeurIA({
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isTyping}
-            style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: input.trim() && !isTyping ? '#d4af37' : 'rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: input.trim() && !isTyping ? 'pointer' : 'not-allowed', transition: 'all 0.2s ease', flexShrink: 0 }}
+            style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: input.trim() && !isTyping ? primaryColor : `${primaryColor}4D`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: input.trim() && !isTyping ? 'pointer' : 'not-allowed', transition: 'all 0.2s ease', flexShrink: 0 }}
           >
             <Send size={12} style={{ color: '#000' }} />
           </button>

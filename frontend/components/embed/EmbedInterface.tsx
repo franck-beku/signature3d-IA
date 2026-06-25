@@ -27,6 +27,13 @@ interface EmbedInterfaceProps {
   projectSlug?:   string  // slug du projet pour l'API chat Groq + tracking visites
   experienceType?: string // 'Matterport' | 'Tour360' | 'IAOnly'
   experienceUrl?:  string | null // URL iframe pour Tour360 (Glo3D, etc.)
+  luxediaAvatarUrl?:       string
+  luxediaClientLogoUrl?:   string
+  luxediaPrimaryColor?:    string
+  luxediaWidgetBgColor?:   string
+  luxediaBotMessageColor?: string
+  luxediaUserMessageColor?: string
+  luxediaLanguage?:        string
 }
 
 /**
@@ -48,7 +55,11 @@ function resolveSource(): string {
 export default function EmbedInterface({
   matterportId, projectName, ambassadorName,
   welcomeMessage, buttons, projectSlug,
-  experienceType, experienceUrl
+  experienceType, experienceUrl,
+  luxediaAvatarUrl, luxediaClientLogoUrl,
+  luxediaPrimaryColor, luxediaWidgetBgColor,
+  luxediaBotMessageColor, luxediaUserMessageColor,
+  luxediaLanguage,
 }: EmbedInterfaceProps) {
   const [isMobileAIOpen, setIsMobileAIOpen] = useState(false)
 
@@ -118,16 +129,16 @@ export default function EmbedInterface({
       <div style={{ position: 'fixed', inset: 0, backgroundColor: '#0d0d0d', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: `${luxediaPrimaryColor ?? '#d4af37'}1A`, border: `1px solid ${luxediaPrimaryColor ?? '#d4af37'}33`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
-              <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" stroke="#d4af37" strokeWidth="1.5" fill="none"/>
-              <line x1="11" y1="2" x2="11" y2="11" stroke="#d4af37" strokeWidth="0.8"/>
-              <line x1="2" y1="7" x2="11" y2="11" stroke="#d4af37" strokeWidth="0.8"/>
-              <line x1="20" y1="7" x2="11" y2="11" stroke="#d4af37" strokeWidth="0.8"/>
+              <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="1.5" fill="none"/>
+              <line x1="11" y1="2" x2="11" y2="11" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="0.8"/>
+              <line x1="2" y1="7" x2="11" y2="11" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="0.8"/>
+              <line x1="20" y1="7" x2="11" y2="11" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="0.8"/>
             </svg>
           </div>
           <div>
-            <p style={{ color: '#d4af37', fontSize: '14px', fontWeight: 600, margin: 0 }}>{ambassadorName}</p>
+            <p style={{ color: luxediaPrimaryColor ?? '#d4af37', fontSize: '14px', fontWeight: 600, margin: 0 }}>{ambassadorName}</p>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: 0 }}>{projectName}</p>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -143,6 +154,13 @@ export default function EmbedInterface({
             welcomeMessage={welcomeMessage}
             buttons={buttons}
             projectSlug={projectSlug}
+            luxediaAvatarUrl={luxediaAvatarUrl}
+            luxediaClientLogoUrl={luxediaClientLogoUrl}
+            luxediaPrimaryColor={luxediaPrimaryColor}
+            luxediaWidgetBgColor={luxediaWidgetBgColor}
+            luxediaBotMessageColor={luxediaBotMessageColor}
+            luxediaUserMessageColor={luxediaUserMessageColor}
+            language={luxediaLanguage as 'fr' | 'en' | undefined}
           />
         </div>
 
@@ -173,13 +191,20 @@ export default function EmbedInterface({
           welcomeMessage={welcomeMessage}
           buttons={buttons}
           projectSlug={projectSlug}
+          luxediaAvatarUrl={luxediaAvatarUrl}
+          luxediaClientLogoUrl={luxediaClientLogoUrl}
+          luxediaPrimaryColor={luxediaPrimaryColor}
+          luxediaWidgetBgColor={luxediaWidgetBgColor}
+          luxediaBotMessageColor={luxediaBotMessageColor}
+          luxediaUserMessageColor={luxediaUserMessageColor}
+          language={luxediaLanguage as 'fr' | 'en' | undefined}
         />
       </div>
 
       {/* Mobile — bouton flottant */}
       <button
         onClick={() => setIsMobileAIOpen(true)}
-        style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 50, width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#d4af37', border: '1px solid rgba(212,175,55,0.5)', display: 'none', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(212,175,55,0.4)', cursor: 'pointer' }}
+        style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 50, width: '56px', height: '56px', borderRadius: '50%', backgroundColor: luxediaPrimaryColor ?? '#d4af37', border: `1px solid ${luxediaPrimaryColor ?? '#d4af37'}80`, display: 'none', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 30px ${luxediaPrimaryColor ?? '#d4af37'}66`, cursor: 'pointer' }}
         className="embed-mobile-btn"
         aria-label="Ouvrir l'assistant IA"
       >
@@ -195,7 +220,7 @@ export default function EmbedInterface({
       {isMobileAIOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, backgroundColor: '#111', display: 'flex', flexDirection: 'column' }} className="embed-mobile-panel">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-            <span style={{ color: '#d4af37', fontSize: '14px', fontWeight: 500 }}>{ambassadorName}</span>
+            <span style={{ color: luxediaPrimaryColor ?? '#d4af37', fontSize: '14px', fontWeight: 500 }}>{ambassadorName}</span>
             <button onClick={() => setIsMobileAIOpen(false)} style={{ color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', padding: '4px' }}>✕</button>
           </div>
           <div style={{ flex: 1, overflow: 'hidden' }}>
@@ -204,6 +229,13 @@ export default function EmbedInterface({
               welcomeMessage={welcomeMessage}
               buttons={buttons}
               projectSlug={projectSlug}
+              luxediaAvatarUrl={luxediaAvatarUrl}
+              luxediaClientLogoUrl={luxediaClientLogoUrl}
+              luxediaPrimaryColor={luxediaPrimaryColor}
+              luxediaWidgetBgColor={luxediaWidgetBgColor}
+              luxediaBotMessageColor={luxediaBotMessageColor}
+              luxediaUserMessageColor={luxediaUserMessageColor}
+              language={luxediaLanguage as 'fr' | 'en' | undefined}
             />
           </div>
         </div>

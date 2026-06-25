@@ -16,9 +16,10 @@ interface Button {
 interface Props {
   buttons: Button[]
   projectSlug?: string
+  primaryColor?: string
 }
 
-export default function ActionButtons({ buttons, projectSlug }: Props) {
+export default function ActionButtons({ buttons, projectSlug, primaryColor = '#d4af37' }: Props) {
 
   const handleClick = async (button: Button) => {
     /* ── Tracker le clic dans analytics ── */
@@ -39,8 +40,6 @@ export default function ActionButtons({ buttons, projectSlug }: Props) {
       }
     }
   }
-
-  const GOLD = '#d4af37'
 
   if (!buttons || buttons.length === 0) return null
 
@@ -72,9 +71,9 @@ export default function ActionButtons({ buttons, projectSlug }: Props) {
       </div>
       <style>{`
         .action-quick-btn:hover {
-          border-color: rgba(212,175,55,0.4) !important;
-          color: ${GOLD} !important;
-          background-color: rgba(212,175,55,0.05) !important;
+          border-color: ${primaryColor}66 !important;
+          color: ${primaryColor} !important;
+          background-color: ${primaryColor}0D !important;
         }
       `}</style>
     </div>

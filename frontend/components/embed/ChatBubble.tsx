@@ -1,9 +1,11 @@
 interface ChatBubbleProps {
   role: 'user' | 'assistant'
   content: string
+  botMsgColor?: string
+  userMsgColor?: string
 }
 
-export default function ChatBubble({ role, content }: ChatBubbleProps) {
+export default function ChatBubble({ role, content, botMsgColor = '#1a1a1a', userMsgColor = '#d4af37' }: ChatBubbleProps) {
   const isAssistant = role === 'assistant'
   return (
     <div style={{ display: 'flex', width: '100%', justifyContent: isAssistant ? 'flex-start' : 'flex-end' }}>
@@ -13,12 +15,12 @@ export default function ChatBubble({ role, content }: ChatBubbleProps) {
         lineHeight: 1.6,
         borderRadius: '14px',
         ...(isAssistant ? {
-          backgroundColor: '#1a1a1a',
+          backgroundColor: botMsgColor,
           color: 'rgba(255,255,255,0.8)',
           borderTopLeftRadius: '4px',
           maxWidth: '90%',
         } : {
-          backgroundColor: '#d4af37',
+          backgroundColor: userMsgColor,
           color: '#000',
           borderTopRightRadius: '4px',
           fontWeight: 500,

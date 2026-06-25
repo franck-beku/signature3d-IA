@@ -22,6 +22,13 @@ interface EmbedData {
     action: 'link' | 'form' | 'call'
     order:  number
   }[]
+  luxediaAvatarUrl?:       string | null
+  luxediaClientLogoUrl?:   string | null
+  luxediaPrimaryColor?:    string | null
+  luxediaWidgetBgColor?:   string | null
+  luxediaBotMessageColor?: string | null
+  luxediaUserMessageColor?: string | null
+  luxediaLanguage?:        string | null
 }
 
 async function getEmbedData(slug: string): Promise<EmbedData | null> {
@@ -87,6 +94,13 @@ export default async function EmbedSlugPage({
           url:    b.url ?? null,
           action: b.action,
         }))}
+      luxediaAvatarUrl={project.luxediaAvatarUrl ?? undefined}
+      luxediaClientLogoUrl={project.luxediaClientLogoUrl ?? undefined}
+      luxediaPrimaryColor={project.luxediaPrimaryColor ?? undefined}
+      luxediaWidgetBgColor={project.luxediaWidgetBgColor ?? undefined}
+      luxediaBotMessageColor={project.luxediaBotMessageColor ?? undefined}
+      luxediaUserMessageColor={project.luxediaUserMessageColor ?? undefined}
+      luxediaLanguage={project.luxediaLanguage ?? undefined}
     />
   )
 }
