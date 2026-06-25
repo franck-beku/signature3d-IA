@@ -205,6 +205,13 @@ export interface ProjectDto {
   buttons: ProjectButtonDto[]
   details: ProjectDetailDto[]
   createdAt: string
+  luxediaPrimaryColor?: string
+  luxediaWidgetBgColor?: string
+  luxediaBotMessageColor?: string
+  luxediaUserMessageColor?: string
+  luxediaAvatarUrl?: string
+  luxediaClientLogoUrl?: string
+  luxediaLanguage?: string
 }
 
 export interface ProjectCardDto {
@@ -252,6 +259,13 @@ export const projectsApi = {
     sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
     details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
+    luxediaPrimaryColor?: string
+    luxediaWidgetBgColor?: string
+    luxediaBotMessageColor?: string
+    luxediaUserMessageColor?: string
+    luxediaAvatarUrl?: string
+    luxediaClientLogoUrl?: string
+    luxediaLanguage?: string
   }) => apiFetch<ProjectDto>('/api/projects', { method: 'POST', body: JSON.stringify(data) }),
   
   /** Modifie un projet */
@@ -264,6 +278,13 @@ export const projectsApi = {
     sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
     details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
+    luxediaPrimaryColor?: string
+    luxediaWidgetBgColor?: string
+    luxediaBotMessageColor?: string
+    luxediaUserMessageColor?: string
+    luxediaAvatarUrl?: string
+    luxediaClientLogoUrl?: string
+    luxediaLanguage?: string
   }) => apiFetch<ProjectDto>(`/api/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   /** Supprime un projet */
   delete: (id: string) =>

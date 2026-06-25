@@ -83,6 +83,15 @@ export default function ProjectForm({ projectId }: Props) {
   const [buttons, setButtons]                 = useState<ButtonRow[]>([])
   const [details, setDetails]                 = useState<DetailRow[]>([])
 
+  // Champs Luxedia
+  const [luxediaPrimaryColor, setLuxediaPrimaryColor]         = useState('#d4af37')
+  const [luxediaWidgetBgColor, setLuxediaWidgetBgColor]       = useState('#111111')
+  const [luxediaBotMessageColor, setLuxediaBotMessageColor]   = useState('#1a1a1a')
+  const [luxediaUserMessageColor, setLuxediaUserMessageColor] = useState('#d4af37')
+  const [luxediaAvatarUrl, setLuxediaAvatarUrl]               = useState('')
+  const [luxediaClientLogoUrl, setLuxediaClientLogoUrl]       = useState('')
+  const [luxediaLanguage, setLuxediaLanguage]                 = useState('fr')
+
   // Chargement initial : listes déroulantes + projet (si édition)
   useEffect(() => {
     const loadAll = async () => {
@@ -118,6 +127,13 @@ export default function ProjectForm({ projectId }: Props) {
             setDisplayOrder(p.displayOrder)
             setButtons(p.buttons.map((b) => ({ label: b.label, url: b.url ?? '', action: b.action, order: b.order })))
             setDetails(p.details.map((d) => ({ label: d.label, value: d.value, displayOrder: d.displayOrder, isVisible: d.isVisible })))
+            setLuxediaPrimaryColor(p.luxediaPrimaryColor ?? '#d4af37')
+            setLuxediaWidgetBgColor(p.luxediaWidgetBgColor ?? '#111111')
+            setLuxediaBotMessageColor(p.luxediaBotMessageColor ?? '#1a1a1a')
+            setLuxediaUserMessageColor(p.luxediaUserMessageColor ?? '#d4af37')
+            setLuxediaAvatarUrl(p.luxediaAvatarUrl ?? '')
+            setLuxediaClientLogoUrl(p.luxediaClientLogoUrl ?? '')
+            setLuxediaLanguage(p.luxediaLanguage ?? 'fr')
           } else {
             setError('Projet introuvable.')
           }
@@ -165,6 +181,13 @@ export default function ProjectForm({ projectId }: Props) {
           sectorId: sectorId || undefined, offeringId: offeringId || undefined,
           buttons: cleanButtons,
           details: cleanDetails,
+          luxediaPrimaryColor: luxediaPrimaryColor || undefined,
+          luxediaWidgetBgColor: luxediaWidgetBgColor || undefined,
+          luxediaBotMessageColor: luxediaBotMessageColor || undefined,
+          luxediaUserMessageColor: luxediaUserMessageColor || undefined,
+          luxediaAvatarUrl: luxediaAvatarUrl || undefined,
+          luxediaClientLogoUrl: luxediaClientLogoUrl || undefined,
+          luxediaLanguage: luxediaLanguage || undefined,
         })
       } else {
         await projectsApi.create({
@@ -304,7 +327,63 @@ export default function ProjectForm({ projectId }: Props) {
           </div>
         </div>
 
-        {/* SECTION 3 — Boutons d'action */}
+        {/* SECTION 3 — Personnalisation Luxedia */}
+        <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+          <p style={sectionTitle}>Personnalisation Luxedia</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+            {/* 4 color pickers en grille 2 colonnes */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {([
+                ['Couleur principale', luxediaPrimaryColor, setLuxediaPrimaryColor],
+                ['Fond du widget', luxediaWidgetBgColor, setLuxediaWidgetBgColor],
+                ['Bulle Luxedia', luxediaBotMessageColor, setLuxediaBotMessageColor],
+                ['Bulle utilisateur', luxediaUserMessageColor, setLuxediaUserMessageColor],
+              ] as [string, string, React.Dispatch<React.SetStateAction<string>>][]).map(([label, val, set]) => (
+                <div key={label}>
+                  <label style={labelStyle}>{label}</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="color" value={val}
+                      onChange={(e) => set(e.target.value)}
+                      style={{ width: '38px', height: '36px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', cursor: 'pointer', padding: '2px 3px', backgroundColor: '#1a1a1a', flexShrink: 0 }}
+                    />
+                    <input
+                      type="text" value={val}
+                      onChange={(e) => set(e.target.value)}
+                      placeholder="#d4af37"
+                      style={inputStyle} className="dash-input"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* URLs */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label style={labelStyle}>Avatar Luxedia (URL)</label>
+                <input type="text" value={luxediaAvatarUrl} onChange={(e) => setLuxediaAvatarUrl(e.target.value)} placeholder="https://... ou /luxedia-avatar.png" style={inputStyle} className="dash-input" />
+              </div>
+              <div>
+                <label style={labelStyle}>Logo client (URL)</label>
+                <input type="text" value={luxediaClientLogoUrl} onChange={(e) => setLuxediaClientLogoUrl(e.target.value)} placeholder="https://... ou /logo-dark.png" style={inputStyle} className="dash-input" />
+              </div>
+            </div>
+
+            {/* Langue */}
+            <div style={{ maxWidth: '200px' }}>
+              <label style={labelStyle}>Langue</label>
+              <select value={luxediaLanguage} onChange={(e) => setLuxediaLanguage(e.target.value)} style={inputStyle} className="dash-input">
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        {/* SECTION 4 — Boutons d'action */}
         <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <p style={{ ...sectionTitle, margin: 0 }}>Boutons d'action</p>
