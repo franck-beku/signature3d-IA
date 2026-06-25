@@ -21,8 +21,13 @@ const qrSrc = (slug: string) =>
     `${SITE_URL}/embed/${slug}`
   )}`;
 
-const LAPTOP_SCREEN = '/assets/univers/immobilier.jpg';
-const PHONE_SCREEN = '/assets/univers/auto.jpg';
+// Intérieur luxueux sombre — salon/suite hôtel, lumière chaude nocturne
+const LAPTOP_SCREEN =
+  'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=85&auto=format&fit=crop';
+
+// Ambiance bar/réception hôtel de nuit — vertical sombre et chaud
+const PHONE_SCREEN =
+  'https://images.unsplash.com/photo-1551918120-9739cb430186?w=600&q=85&auto=format&fit=crop';
 
 export default function ContactFinal() {
   const { t } = useLanguage();

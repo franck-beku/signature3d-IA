@@ -35,7 +35,8 @@ export default function Manifeste() {
     target: sectionRef,
     offset: ['start end', 'end start'],
   });
-  const y = useTransform(scrollYProgress, [0, 1], ['18px', '-18px']);
+  const yLeft  = useTransform(scrollYProgress, [0, 1], ['40px', '-40px']);
+  const yRight = useTransform(scrollYProgress, [0, 1], ['20px', '-20px']);
 
   // Apparition séquencée des éléments au scroll.
   const container = {
@@ -78,7 +79,6 @@ export default function Manifeste() {
 
       <motion.div
         style={{
-          y,
           position: 'relative',
           zIndex: 1,
           maxWidth: '1240px',
@@ -101,7 +101,7 @@ export default function Manifeste() {
           className="manifeste-grid"
         >
           {/* ── Colonne gauche : la vision (grand titre Cormorant) ── */}
-          <motion.div variants={item}>
+          <motion.div variants={item} style={{ y: yLeft }}>
             <p
               style={{
                 fontSize: '11px',
@@ -181,7 +181,7 @@ export default function Manifeste() {
           />
 
           {/* ── Colonne droite : la mission + signature ── */}
-          <motion.div variants={item} style={{ maxWidth: '390px' }}>
+          <motion.div variants={item} style={{ maxWidth: '390px', y: yRight }}>
             <p
               style={{
                 fontSize: '16px',

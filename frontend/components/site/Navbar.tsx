@@ -63,7 +63,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <Image src="/logo-dark.png" alt="Signature Immersion" width={200} height={64} priority style={{ height: '48px', width: 'auto' }} />
+            <Image src="/logo-signature.png" alt="Signature Immersion" width={200} height={64} priority style={{ height: '44px', width: 'auto', display: 'block' }} />
           </Link>
 
           {/* Desktop nav */}
