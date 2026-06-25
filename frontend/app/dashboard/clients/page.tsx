@@ -10,14 +10,9 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import { Plus, Search, ChevronUp, ChevronDown, ChevronRight, Trash2, Pencil, AlertTriangle, X, Check } from 'lucide-react'
 import Link from 'next/link'
 import { clientsApi, sectorsApi, type ClientDto, type SectorDto } from '@/lib/api'
+import { getPriority } from '@/lib/priority'
 
 const GOLD = '#d4af37'
-
-const priorityLabel = (p: number) => {
-  if (p === 1) return { label: 'Haute',   bg: 'rgba(248,113,113,0.1)', color: '#f87171' }
-  if (p === 2) return { label: 'Moyenne', bg: 'rgba(250,204,21,0.1)',  color: '#facc15' }
-  return              { label: 'Normale', bg: 'rgba(74,222,128,0.1)',  color: '#4ade80' }
-}
 
 const statusLabel = (s: string) => {
   if (s === 'Actif')     return { label: 'Actif',      bg: 'rgba(74,222,128,0.1)',   color: '#4ade80' }
@@ -199,7 +194,7 @@ export default function ClientsPage() {
                 </thead>
                 <tbody>
                   {filtered.map((c, i) => {
-                    const priority = priorityLabel(c.priority)
+                    const priority = getPriority(c.priority)
                     const status   = statusLabel(c.status)
                     const isDeletePending = deleteConfirm === c.id
                     return (
@@ -220,7 +215,7 @@ export default function ClientsPage() {
                             <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: status.bg, color: status.color }}>{status.label}</span>
                           </td>
                           <td style={{ padding: '14px 16px' }}>
-                            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: priority.bg, color: priority.color }}>{priority.label}</span>
+                            <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: priority.bgColor, color: priority.color }}>{priority.label}</span>
                           </td>
                           <td style={{ padding: '14px 16px' }}><span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{c.projectCount}</span></td>
                           <td style={{ padding: '14px 16px' }}>

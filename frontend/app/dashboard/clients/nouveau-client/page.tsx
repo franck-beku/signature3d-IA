@@ -11,14 +11,11 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { clientsApi, sectorsApi, type SectorDto } from '@/lib/api'
+import { getPriority } from '@/lib/priority'
 
 const GOLD = '#d4af37'
 
-const PRIORITES = [
-  { value: 1, label: 'Haute',   color: '#f87171' },
-  { value: 2, label: 'Moyenne', color: '#facc15' },
-  { value: 3, label: 'Normale', color: '#4ade80' },
-]
+const PRIORITES = [1, 2, 3].map((v) => ({ value: v, ...getPriority(v) }))
 
 const inputStyle = {
   width: '100%',
@@ -218,7 +215,7 @@ export default function NouveauClientPage() {
                           style={{
                             flex: 1, padding: '10px 8px', borderRadius: '8px',
                             border: `1px solid ${form.priority === p.value ? p.color : 'rgba(255,255,255,0.08)'}`,
-                            backgroundColor: form.priority === p.value ? `${p.color}18` : 'transparent',
+                            backgroundColor: form.priority === p.value ? p.bgColor : 'transparent',
                             color: form.priority === p.value ? p.color : 'rgba(255,255,255,0.4)',
                             fontSize: '12px', fontWeight: 600,
                             cursor: 'pointer', transition: 'all 0.2s ease',

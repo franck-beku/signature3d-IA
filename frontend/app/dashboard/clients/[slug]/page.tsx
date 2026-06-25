@@ -13,6 +13,7 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, Copy, Code, FileText, ExternalLink as OpenIcon } from 'lucide-react'
 import { clientsApi, projectsApi, type ClientDto, type ProjectDto } from '@/lib/api'
+import { getPriority } from '@/lib/priority'
 
 const GOLD = '#d4af37'
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'https://signature3dia.com'
@@ -30,11 +31,6 @@ const statusStyle = (s: string) => {
   return                                       { bg: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }
 }
 
-const priorityLabel = (p: number) => {
-  if (p === 1) return { label: 'Priorité haute',    color: '#f87171' }
-  if (p === 2) return { label: 'Priorité moyenne',  color: '#facc15' }
-  return               { label: 'Priorité normale', color: '#4ade80' }
-}
 
 const clientStatusStyle = (s: string) => {
   if (s === 'Actif')   return { bg: 'rgba(74,222,128,0.1)', color: '#4ade80' }
@@ -304,7 +300,7 @@ export default function ClientDetailPage() {
     )
   }
 
-  const priority   = priorityLabel(client.priority)
+  const priority = getPriority(client.priority)
   const contractSt = clientStatusStyle(client.status)
   const urgent     = isDeliveryUrgent(client.deliveryDate)
 
@@ -373,7 +369,7 @@ export default function ClientDetailPage() {
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>{client.name}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
                 <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.3em', margin: 0 }}>{client.sectorName}</p>
-                <span style={{ color: priority.color, fontSize: '11px' }}>· {priority.label}</span>
+                <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: priority.bgColor, color: priority.color, fontWeight: 500 }}>{priority.label}</span>
               </div>
             </div>
           </div>
@@ -451,7 +447,14 @@ export default function ClientDetailPage() {
             {client.notes && (
               <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                 <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Notes internes</p>
-                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{client.notes}</p>
+                <div style={{
+                  borderLeft: `3px solid ${priority.borderColor}`,
+                  backgroundColor: priority.bgColor,
+                  borderRadius: '0 8px 8px 0',
+                  padding: '12px 14px',
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{client.notes}</p>
+                </div>
               </div>
             )}
           </div>
