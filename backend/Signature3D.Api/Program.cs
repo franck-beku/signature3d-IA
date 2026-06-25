@@ -114,6 +114,7 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IDocumentService,  DocumentService>();
 builder.Services.AddScoped<IChatService,      ChatService>();
 builder.Services.AddScoped<IQrCodeService,    QrCodeService>();
+builder.Services.AddScoped<IContactService,   ContactService>();
 builder.Services.AddScoped<IOfferingService,  OfferingService>();
 builder.Services.AddScoped<IFaqService, FaqService>();
 

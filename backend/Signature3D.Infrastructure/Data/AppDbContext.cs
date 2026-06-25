@@ -28,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<ProjectDetail> ProjectDetails => Set<ProjectDetail>();
     public DbSet<QrCode> QrCodes => Set<QrCode>();
+    public DbSet<Contact> Contacts => Set<Contact>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -204,6 +205,22 @@ modelBuilder.Entity<Lead>(e =>
         modelBuilder.Entity<QrCode>(e =>
         {
             e.HasKey(x => x.Id);
+        });
+
+        /* ── Contact ── */
+        modelBuilder.Entity<Contact>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(256);
+            e.Property(x => x.Position).HasMaxLength(256);
+            e.Property(x => x.Email).HasMaxLength(256);
+            e.Property(x => x.Phone).HasMaxLength(64);
+            e.Property(x => x.PhoneExtension).HasMaxLength(32);
+
+            e.HasOne(x => x.Client)
+             .WithMany(x => x.Contacts)
+             .HasForeignKey(x => x.ClientId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

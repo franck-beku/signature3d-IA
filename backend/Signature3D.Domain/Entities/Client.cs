@@ -21,4 +21,5 @@ public class Client : BaseEntity
     public Guid SectorId { get; set; }
     public Sector Sector { get; set; } = null!;
     public ICollection<Project> Projects { get; set; } = [];
+    public ICollection<Contact> Contacts { get; set; } = [];
 }
