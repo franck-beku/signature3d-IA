@@ -16,6 +16,19 @@ public class Project : BaseEntity
     public ProjectStatus Status { get; set; } = ProjectStatus.Draft;
     public string? Notes { get; set; }
 
+    /* === Luxedia config === */
+    public string? LuxediaAvatarUrl { get; set; }
+    public string? LuxediaClientLogoUrl { get; set; }
+    public string? LuxediaPrimaryColor { get; set; }
+    public string? LuxediaWidgetBgColor { get; set; }
+    public string? LuxediaBotMessageColor { get; set; }
+    public string? LuxediaUserMessageColor { get; set; }
+    public string? LuxediaWidgetPosition { get; set; }
+    public string? LuxediaButtonIcon { get; set; }
+    public string? LuxediaLanguage { get; set; }
+    public string? LuxediaTone { get; set; }
+    public string? LuxediaPersonalityInstructions { get; set; }
+
     /* ── Champs V2 (vitrine) ── */
     public string? ShortDescription { get; set; }    // description courte (galerie)
     public string? CoverImage { get; set; }          // image de couverture (galerie)

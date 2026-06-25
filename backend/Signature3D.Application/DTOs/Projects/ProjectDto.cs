@@ -30,6 +30,19 @@ public class ProjectDto
     public Guid? OfferingId { get; set; }
     public string? OfferingName { get; set; }
 
+    /* === Luxedia config === */
+    public string? LuxediaAvatarUrl { get; set; }
+    public string? LuxediaClientLogoUrl { get; set; }
+    public string? LuxediaPrimaryColor { get; set; }
+    public string? LuxediaWidgetBgColor { get; set; }
+    public string? LuxediaBotMessageColor { get; set; }
+    public string? LuxediaUserMessageColor { get; set; }
+    public string? LuxediaWidgetPosition { get; set; }
+    public string? LuxediaButtonIcon { get; set; }
+    public string? LuxediaLanguage { get; set; }
+    public string? LuxediaTone { get; set; }
+    public string? LuxediaPersonalityInstructions { get; set; }
+
     public List<ProjectButtonDto> Buttons { get; set; } = [];
     public List<ProjectDetailDto> Details { get; set; } = [];
     public DateTime CreatedAt { get; set; }
@@ -58,6 +71,19 @@ public class CreateProjectDto
     public Guid? SectorId { get; set; }
     public Guid? OfferingId { get; set; }
 
+    /* === Luxedia config === */
+    public string? LuxediaAvatarUrl { get; set; }
+    public string? LuxediaClientLogoUrl { get; set; }
+    public string? LuxediaPrimaryColor { get; set; }
+    public string? LuxediaWidgetBgColor { get; set; }
+    public string? LuxediaBotMessageColor { get; set; }
+    public string? LuxediaUserMessageColor { get; set; }
+    public string? LuxediaWidgetPosition { get; set; }
+    public string? LuxediaButtonIcon { get; set; }
+    public string? LuxediaLanguage { get; set; }
+    public string? LuxediaTone { get; set; }
+    public string? LuxediaPersonalityInstructions { get; set; }
+
     public List<CreateButtonDto> Buttons { get; set; } = [];
     public List<CreateDetailDto> Details { get; set; } = [];
 }
@@ -83,6 +109,19 @@ public class UpdateProjectDto
     public int DisplayOrder { get; set; }
     public Guid? SectorId { get; set; }
     public Guid? OfferingId { get; set; }
+
+    /* === Luxedia config === */
+    public string? LuxediaAvatarUrl { get; set; }
+    public string? LuxediaClientLogoUrl { get; set; }
+    public string? LuxediaPrimaryColor { get; set; }
+    public string? LuxediaWidgetBgColor { get; set; }
+    public string? LuxediaBotMessageColor { get; set; }
+    public string? LuxediaUserMessageColor { get; set; }
+    public string? LuxediaWidgetPosition { get; set; }
+    public string? LuxediaButtonIcon { get; set; }
+    public string? LuxediaLanguage { get; set; }
+    public string? LuxediaTone { get; set; }
+    public string? LuxediaPersonalityInstructions { get; set; }
 
     public List<CreateButtonDto> Buttons { get; set; } = [];
     public List<CreateDetailDto> Details { get; set; } = [];

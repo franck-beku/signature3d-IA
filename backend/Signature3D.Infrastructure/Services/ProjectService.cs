@@ -91,6 +91,17 @@ public class ProjectService : IProjectService
             DisplayOrder = dto.DisplayOrder,
             SectorId = dto.SectorId,
             OfferingId = dto.OfferingId,
+            LuxediaAvatarUrl               = dto.LuxediaAvatarUrl,
+            LuxediaClientLogoUrl           = dto.LuxediaClientLogoUrl,
+            LuxediaPrimaryColor            = dto.LuxediaPrimaryColor,
+            LuxediaWidgetBgColor           = dto.LuxediaWidgetBgColor,
+            LuxediaBotMessageColor         = dto.LuxediaBotMessageColor,
+            LuxediaUserMessageColor        = dto.LuxediaUserMessageColor,
+            LuxediaWidgetPosition          = dto.LuxediaWidgetPosition,
+            LuxediaButtonIcon              = dto.LuxediaButtonIcon,
+            LuxediaLanguage                = dto.LuxediaLanguage,
+            LuxediaTone                    = dto.LuxediaTone,
+            LuxediaPersonalityInstructions = dto.LuxediaPersonalityInstructions,
             Buttons = dto.Buttons.Select((b, i) => new ProjectButton
             {
                 Label = b.Label,
@@ -147,6 +158,17 @@ public class ProjectService : IProjectService
         project.DisplayOrder = dto.DisplayOrder;
         project.SectorId = dto.SectorId;
         project.OfferingId = dto.OfferingId;
+        project.LuxediaAvatarUrl               = dto.LuxediaAvatarUrl;
+        project.LuxediaClientLogoUrl           = dto.LuxediaClientLogoUrl;
+        project.LuxediaPrimaryColor            = dto.LuxediaPrimaryColor;
+        project.LuxediaWidgetBgColor           = dto.LuxediaWidgetBgColor;
+        project.LuxediaBotMessageColor         = dto.LuxediaBotMessageColor;
+        project.LuxediaUserMessageColor        = dto.LuxediaUserMessageColor;
+        project.LuxediaWidgetPosition          = dto.LuxediaWidgetPosition;
+        project.LuxediaButtonIcon              = dto.LuxediaButtonIcon;
+        project.LuxediaLanguage                = dto.LuxediaLanguage;
+        project.LuxediaTone                    = dto.LuxediaTone;
+        project.LuxediaPersonalityInstructions = dto.LuxediaPersonalityInstructions;
         project.UpdatedAt = DateTime.UtcNow;
 
         if (Enum.TryParse<ProjectStatus>(dto.Status, out var status))
@@ -314,6 +336,17 @@ public class ProjectService : IProjectService
         SectorName = p.Sector?.Name,
         OfferingId = p.OfferingId,
         OfferingName = p.Offering?.Name,
+        LuxediaAvatarUrl               = p.LuxediaAvatarUrl,
+        LuxediaClientLogoUrl           = p.LuxediaClientLogoUrl,
+        LuxediaPrimaryColor            = p.LuxediaPrimaryColor,
+        LuxediaWidgetBgColor           = p.LuxediaWidgetBgColor,
+        LuxediaBotMessageColor         = p.LuxediaBotMessageColor,
+        LuxediaUserMessageColor        = p.LuxediaUserMessageColor,
+        LuxediaWidgetPosition          = p.LuxediaWidgetPosition,
+        LuxediaButtonIcon              = p.LuxediaButtonIcon,
+        LuxediaLanguage                = p.LuxediaLanguage,
+        LuxediaTone                    = p.LuxediaTone,
+        LuxediaPersonalityInstructions = p.LuxediaPersonalityInstructions,
         Buttons = p.Buttons?.OrderBy(b => b.Order).Select(b => new ProjectButtonDto
         {
             Id = b.Id,
