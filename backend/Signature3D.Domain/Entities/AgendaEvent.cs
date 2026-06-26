@@ -10,6 +10,7 @@ public class AgendaEvent : BaseEntity
     public EventType Type { get; set; } = EventType.RendezVousCommercial;
     public string? Location { get; set; }
     public string? Notes { get; set; }
+    public string? CustomType { get; set; }
 
     /* Relations optionnelles — OnDelete: SetNull (l'événement survit à la suppression du lié) */
     public Guid? ClientId { get; set; }

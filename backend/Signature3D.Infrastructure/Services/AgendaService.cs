@@ -57,6 +57,8 @@ public class AgendaService : IAgendaService
         if (!Enum.TryParse<EventType>(dto.Type, out var eventType))
             throw new ArgumentException($"Type d'événement invalide : '{dto.Type}'.");
 
+        var customType = eventType == EventType.Autre ? dto.CustomType : null;
+
         var e = new AgendaEvent
         {
             Title = dto.Title,
@@ -65,6 +67,7 @@ public class AgendaService : IAgendaService
             Type = eventType,
             Location = dto.Location,
             Notes = dto.Notes,
+            CustomType = customType,
             ClientId = dto.ClientId,
             ProjectId = dto.ProjectId,
             ContactId = dto.ContactId
@@ -94,6 +97,7 @@ public class AgendaService : IAgendaService
         e.Type = eventType;
         e.Location = dto.Location;
         e.Notes = dto.Notes;
+        e.CustomType = eventType == EventType.Autre ? dto.CustomType : null;
         e.ClientId = dto.ClientId;
         e.ProjectId = dto.ProjectId;
         e.ContactId = dto.ContactId;
@@ -127,6 +131,7 @@ public class AgendaService : IAgendaService
         Type = e.Type.ToString(),
         Location = e.Location,
         Notes = e.Notes,
+        CustomType = e.CustomType,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt,
         ClientId = e.ClientId,

@@ -8,6 +8,7 @@ public class CreateAgendaEventDto
     public string Type { get; set; } = "RendezVousCommercial";
     public string? Location { get; set; }
     public string? Notes { get; set; }
+    public string? CustomType { get; set; }
 
     public Guid? ClientId { get; set; }
     public Guid? ProjectId { get; set; }

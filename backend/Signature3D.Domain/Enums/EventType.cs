@@ -11,5 +11,6 @@ public enum EventType
     AppelClient,
     SuiviClient,
     Presentation,
-    Validation
+    Validation,
+    Autre
 }
