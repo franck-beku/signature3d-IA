@@ -1,62 +1,111 @@
-/**
- * Agenda — Dashboard Signature 3D IA
- * Disponibilités + rendez-vous Alain & Franck
- * États vides propres — données réelles après backend
- */
-
 'use client'
 
-import { useState, useEffect } from 'react'
+import 'react-big-calendar/lib/css/react-big-calendar.css'
+import { useState, useEffect, useCallback } from 'react'
+import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
+import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import Sidebar from '@/components/dashboard/Sidebar'
-import { Calendar, Plus, Clock, User, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
+import { agendaApi, type AgendaEventDto, type AgendaEventType, type CreateAgendaEventDto } from '@/lib/api'
 
-const GOLD = '#d4af37'
+const GOLD = '#C8A45D'
 
-interface Evenement {
-  id: string
-  titre: string
-  date: string
-  heure: string
-  type: 'disponible' | 'indisponible' | 'client'
-  auteur: string
-  note?: string
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+  getDay,
+  locales: { fr },
+})
+
+const EVENT_TYPES: AgendaEventType[] = [
+  'RendezVousCommercial', 'CaptationMatterport', 'Captation360',
+  'Livraison', 'Urgent', 'ReunionInterne', 'AppelClient',
+  'SuiviClient', 'Presentation', 'Validation',
+]
+
+const TYPE_LABELS: Record<AgendaEventType, string> = {
+  RendezVousCommercial: 'Rendez-vous commercial',
+  CaptationMatterport:  'Captation Matterport',
+  Captation360:         'Captation 360°',
+  Livraison:            'Livraison',
+  Urgent:               'Urgent',
+  ReunionInterne:       'Réunion interne',
+  AppelClient:          'Appel client',
+  SuiviClient:          'Suivi client',
+  Presentation:         'Présentation',
+  Validation:           'Validation',
 }
 
-const TYPE_STYLE = {
-  disponible:   { bg: 'rgba(74,222,128,0.1)',  color: '#4ade80', label: 'Disponible'   },
-  indisponible: { bg: 'rgba(248,113,113,0.1)', color: '#f87171', label: 'Indisponible' },
-  client:       { bg: 'rgba(212,175,55,0.1)',  color: '#d4af37', label: 'Client'       },
+interface CalEvent {
+  title: string
+  start: Date
+  end: Date
+  resource: AgendaEventDto
+}
+
+const toCalEvent = (dto: AgendaEventDto): CalEvent => ({
+  title: dto.title,
+  start: new Date(dto.startDateTime),
+  end:   new Date(dto.endDateTime ?? dto.startDateTime),
+  resource: dto,
+})
+
+const EMPTY_FORM: CreateAgendaEventDto = {
+  title: '',
+  startDateTime: '',
+  endDateTime: '',
+  type: 'RendezVousCommercial',
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', backgroundColor: '#0d0d0d',
+  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
+  padding: '10px 14px', fontSize: '13px', color: 'white',
+  outline: 'none', boxSizing: 'border-box',
+  fontFamily: 'var(--font-body)',
 }
 
 export default function AgendaPage() {
-  const [evenements, setEvenements] = useState<Evenement[]>([])
-  const [showForm, setShowForm]     = useState(false)
-  const [userName, setUserName]     = useState('...')
-  const [form, setForm]             = useState({ titre: '', date: '', heure: '', type: 'disponible' as const, note: '' })
+  const [events,      setEvents]      = useState<CalEvent[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [showForm,    setShowForm]    = useState(false)
+  const [submitting,  setSubmitting]  = useState(false)
+  const [error,       setError]       = useState<string | null>(null)
+  const [form,        setForm]        = useState<CreateAgendaEventDto>(EMPTY_FORM)
 
-  useEffect(() => {
-    const stored = localStorage.getItem('user')
-    if (stored) setUserName(JSON.parse(stored).name)
+  const load = useCallback(async () => {
+    try {
+      setLoading(true)
+      const data = await agendaApi.getAll()
+      setEvents(data.map(toCalEvent))
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const handleAdd = () => {
-    if (!form.titre || !form.date) return
-    const ev: Evenement = {
-      id: Date.now().toString(),
-      titre: form.titre, date: form.date,
-      heure: form.heure, type: form.type,
-      auteur: userName, note: form.note,
+  useEffect(() => { load() }, [load])
+
+  const handleCreate = async () => {
+    if (!form.title || !form.startDateTime) return
+    try {
+      setSubmitting(true)
+      await agendaApi.create({
+        ...form,
+        endDateTime: form.endDateTime || undefined,
+      })
+      setForm(EMPTY_FORM)
+      setShowForm(false)
+      await load()
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSubmitting(false)
     }
-    setEvenements((prev) => [...prev, ev].sort((a, b) => a.date.localeCompare(b.date)))
-    setForm({ titre: '', date: '', heure: '', type: 'disponible', note: '' })
-    setShowForm(false)
   }
-
-  const handleDelete = (id: string) => {
-    setEvenements((prev) => prev.filter((e) => e.id !== id))
-  }
-
-  const inputStyle = { width: '100%', backgroundColor: '#0d0d0d', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '10px 14px', fontSize: '13px', color: 'white', outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'var(--font-body)' }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -68,131 +117,123 @@ export default function AgendaPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>Agenda</h1>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
-              Disponibilités & rendez-vous
+              Rendez-vous & événements
             </p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="new-btn">
+          <button onClick={() => setShowForm(!showForm)} className="new-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
             <Plus size={13} />
-            Ajouter un événement
+            Nouvel événement
           </button>
         </div>
 
         <div style={{ padding: '28px 40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-          {/* Légende */}
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            {Object.entries(TYPE_STYLE).map(([key, val]) => (
-              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: val.color, display: 'inline-block' }} />
-                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>{val.label}</span>
-              </div>
-            ))}
-          </div>
+          {error && (
+            <div style={{ backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ color: '#f87171', fontSize: '13px' }}>{error}</span>
+              <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171' }}><X size={14} /></button>
+            </div>
+          )}
 
-          {/* Formulaire ajout */}
+          {/* Formulaire création */}
           {showForm && (
             <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px' }}>
-              <h3 style={{ color: 'white', fontSize: '14px', fontWeight: 500, marginBottom: '20px' }}>Nouvel événement</h3>
+              <h3 style={{ color: 'white', fontSize: '14px', fontWeight: 500, margin: '0 0 20px' }}>Nouvel événement</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Titre *</label>
-                  <input type="text" value={form.titre} onChange={(e) => setForm({ ...form, titre: e.target.value })} placeholder="Ex: Rendez-vous Mercedes" style={inputStyle} />
+                  <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Rendez-vous Mercedes" style={inputStyle} />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Type</label>
-                  <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as any })} style={inputStyle}>
-                    <option value="disponible">Disponible</option>
-                    <option value="indisponible">Indisponible</option>
-                    <option value="client">Rendez-vous client</option>
+                  <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as AgendaEventType })} style={inputStyle}>
+                    {EVENT_TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Date *</label>
-                  <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} style={inputStyle} />
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Début *</label>
+                  <input type="datetime-local" value={form.startDateTime} onChange={e => setForm({ ...form, startDateTime: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Heure</label>
-                  <input type="time" value={form.heure} onChange={(e) => setForm({ ...form, heure: e.target.value })} style={inputStyle} />
+                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Fin</label>
+                  <input type="datetime-local" value={form.endDateTime ?? ''} onChange={e => setForm({ ...form, endDateTime: e.target.value })} style={inputStyle} />
                 </div>
               </div>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Note</label>
-                <input type="text" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Note optionnelle..." style={inputStyle} />
-              </div>
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={handleAdd} disabled={!form.titre || !form.date} style={{ backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-                  Ajouter
+                <button onClick={handleCreate} disabled={!form.title || !form.startDateTime || submitting} style={{ backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>
+                  {submitting ? 'Création…' : 'Créer'}
                 </button>
-                <button onClick={() => setShowForm(false)} style={{ backgroundColor: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+                <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }} style={{ backgroundColor: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
                   Annuler
                 </button>
               </div>
             </div>
           )}
 
-          {/* Liste événements */}
-          {evenements.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 20px', textAlign: 'center', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '14px' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '14px', backgroundColor: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Calendar size={24} style={{ color: 'rgba(212,175,55,0.4)' }} />
-              </div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>
-                Aucun événement
-              </p>
-              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px', lineHeight: 1.6, maxWidth: '300px' }}>
-                Ajoutez vos disponibilités et rendez-vous clients pour coordonner avec votre associé.
-              </p>
+          {/* Calendrier */}
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: `2px solid rgba(200,164,93,0.2)`, borderTopColor: GOLD, animation: 'spin 0.8s linear infinite' }} />
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {evenements.map((ev) => {
-                const style = TYPE_STYLE[ev.type]
-                return (
-                  <div key={ev.id} style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease' }} className="event-row">
-                    <div style={{ width: '4px', height: '40px', borderRadius: '2px', backgroundColor: style.color, flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: 'white', fontSize: '14px', fontWeight: 500, margin: 0 }}>{ev.titre}</p>
-                      {ev.note && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '3px 0 0' }}>{ev.note}</p>}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <Calendar size={12} style={{ color: 'rgba(255,255,255,0.3)' }} />
-                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{new Date(ev.date).toLocaleDateString('fr-CA')}</span>
-                      </div>
-                      {ev.heure && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <Clock size={12} style={{ color: 'rgba(255,255,255,0.3)' }} />
-                          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{ev.heure}</span>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <User size={12} style={{ color: 'rgba(255,255,255,0.3)' }} />
-                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{ev.auteur.split(' ')[0]}</span>
-                      </div>
-                      <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: style.bg, color: style.color }}>
-                        {style.label}
-                      </span>
-                      <button onClick={() => handleDelete(ev.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', transition: 'all 0.2s ease' }} className="del-btn">
-                        <X size={12} />
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
+            <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '20px' }} className="rbc-wrapper">
+              <Calendar
+                localizer={localizer}
+                events={events}
+                defaultView={Views.MONTH}
+                views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
+                culture="fr"
+                style={{ height: 650 }}
+                messages={{
+                  today:    "Aujourd'hui",
+                  previous: 'Précédent',
+                  next:     'Suivant',
+                  month:    'Mois',
+                  week:     'Semaine',
+                  day:      'Jour',
+                  agenda:   'Agenda',
+                  noEventsInRange: 'Aucun événement sur cette période.',
+                  date:     'Date',
+                  time:     'Heure',
+                  event:    'Événement',
+                }}
+              />
             </div>
           )}
-
-          <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: '12px', textAlign: 'center' }}>
-            Les événements seront sauvegardés après l&apos;intégration du backend PostgreSQL.
-          </p>
         </div>
       </main>
 
       <style>{`
-        .new-btn:hover { background-color: #c9a84c !important; }
-        .event-row:hover { border-color: rgba(212,175,55,0.15) !important; }
-        .del-btn:hover { color: #f87171 !important; border-color: rgba(248,113,113,0.3) !important; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .new-btn:hover { background-color: #b8943d !important; }
         @media (max-width: 540px) { .form-row { grid-template-columns: 1fr !important; } }
+
+        /* Intégration dark du calendrier react-big-calendar */
+        .rbc-wrapper .rbc-calendar { color: rgba(255,255,255,0.85); }
+        .rbc-wrapper .rbc-toolbar button { color: rgba(255,255,255,0.6); background: transparent; border-color: rgba(255,255,255,0.1); }
+        .rbc-wrapper .rbc-toolbar button:hover,
+        .rbc-wrapper .rbc-toolbar button.rbc-active { background: rgba(200,164,93,0.12); color: #C8A45D; border-color: rgba(200,164,93,0.3); }
+        .rbc-wrapper .rbc-toolbar-label { color: white; font-size: 16px; }
+        .rbc-wrapper .rbc-month-view,
+        .rbc-wrapper .rbc-time-view,
+        .rbc-wrapper .rbc-agenda-view { background: transparent; border-color: rgba(255,255,255,0.06); }
+        .rbc-wrapper .rbc-header { color: rgba(255,255,255,0.4); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; border-color: rgba(255,255,255,0.06); padding: 8px 4px; }
+        .rbc-wrapper .rbc-day-bg + .rbc-day-bg,
+        .rbc-wrapper .rbc-month-row + .rbc-month-row { border-color: rgba(255,255,255,0.05); }
+        .rbc-wrapper .rbc-off-range-bg { background: rgba(255,255,255,0.02); }
+        .rbc-wrapper .rbc-today { background: rgba(200,164,93,0.05); }
+        .rbc-wrapper .rbc-date-cell { color: rgba(255,255,255,0.5); font-size: 12px; }
+        .rbc-wrapper .rbc-date-cell.rbc-now { color: #C8A45D; font-weight: 600; }
+        .rbc-wrapper .rbc-event { background-color: rgba(200,164,93,0.25); border: 1px solid rgba(200,164,93,0.5); color: #C8A45D; border-radius: 4px; font-size: 11px; }
+        .rbc-wrapper .rbc-event.rbc-selected { background-color: rgba(200,164,93,0.4); }
+        .rbc-wrapper .rbc-time-header-content,
+        .rbc-wrapper .rbc-time-content { border-color: rgba(255,255,255,0.06); }
+        .rbc-wrapper .rbc-timeslot-group { border-color: rgba(255,255,255,0.04); }
+        .rbc-wrapper .rbc-time-slot { color: rgba(255,255,255,0.2); font-size: 11px; }
+        .rbc-wrapper .rbc-agenda-date-cell,
+        .rbc-wrapper .rbc-agenda-time-cell { color: rgba(255,255,255,0.4); font-size: 12px; border-color: rgba(255,255,255,0.05); }
+        .rbc-wrapper .rbc-agenda-event-cell { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.05); }
+        .rbc-wrapper .rbc-show-more { color: #C8A45D; background: transparent; font-size: 11px; }
       `}</style>
     </div>
   )

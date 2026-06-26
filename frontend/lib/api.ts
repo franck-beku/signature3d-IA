@@ -616,3 +616,93 @@ export const contactsApi = {
   delete: (id: string) =>
     apiFetch(`/api/contacts/${id}`, { method: 'DELETE' }),
 }
+
+/* ══════════════════════════════════════
+   AGENDA
+   ══════════════════════════════════════ */
+
+export type AgendaEventType =
+  | 'RendezVousCommercial'
+  | 'CaptationMatterport'
+  | 'Captation360'
+  | 'Livraison'
+  | 'Urgent'
+  | 'ReunionInterne'
+  | 'AppelClient'
+  | 'SuiviClient'
+  | 'Presentation'
+  | 'Validation'
+
+export interface AgendaEventDto {
+  id: string
+  title: string
+  startDateTime: string
+  endDateTime?: string
+  type: AgendaEventType
+  location?: string
+  notes?: string
+  createdAt: string
+  updatedAt: string
+  clientId?: string
+  clientName?: string
+  projectId?: string
+  projectName?: string
+  contactId?: string
+  contactName?: string
+}
+
+export interface CreateAgendaEventDto {
+  title: string
+  startDateTime: string
+  endDateTime?: string
+  type: AgendaEventType
+  location?: string
+  notes?: string
+  clientId?: string
+  projectId?: string
+  contactId?: string
+}
+
+export type UpdateAgendaEventDto = CreateAgendaEventDto
+
+export interface AgendaFilters {
+  clientId?: string
+  projectId?: string
+  from?: string
+  to?: string
+}
+
+export const agendaApi = {
+  /** Retourne tous les événements, avec filtres optionnels */
+  getAll: (filters?: AgendaFilters) => {
+    const params = new URLSearchParams()
+    if (filters?.clientId)  params.set('clientId',  filters.clientId)
+    if (filters?.projectId) params.set('projectId', filters.projectId)
+    if (filters?.from)      params.set('from',      filters.from)
+    if (filters?.to)        params.set('to',        filters.to)
+    const qs = params.size > 0 ? `?${params.toString()}` : ''
+    return apiFetch<AgendaEventDto[]>(`/api/agenda${qs}`)
+  },
+
+  /** Retourne un événement par son id */
+  getById: (id: string) =>
+    apiFetch<AgendaEventDto>(`/api/agenda/${id}`),
+
+  /** Crée un événement */
+  create: (data: CreateAgendaEventDto) =>
+    apiFetch<AgendaEventDto>('/api/agenda', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /** Modifie un événement */
+  update: (id: string, data: UpdateAgendaEventDto) =>
+    apiFetch<AgendaEventDto>(`/api/agenda/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  /** Supprime un événement */
+  delete: (id: string) =>
+    apiFetch(`/api/agenda/${id}`, { method: 'DELETE' }),
+}

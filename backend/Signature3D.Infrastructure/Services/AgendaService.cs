@@ -13,6 +13,9 @@ public class AgendaService : IAgendaService
 
     public AgendaService(AppDbContext db) => _db = db;
 
+    private static DateTime AsUtc(DateTime dt) =>
+        DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+
     public async Task<IEnumerable<AgendaEventDto>> GetAllAsync(
         Guid? clientId = null,
         Guid? projectId = null,
@@ -57,8 +60,8 @@ public class AgendaService : IAgendaService
         var e = new AgendaEvent
         {
             Title = dto.Title,
-            StartDateTime = dto.StartDateTime,
-            EndDateTime = dto.EndDateTime,
+            StartDateTime = AsUtc(dto.StartDateTime),
+            EndDateTime   = dto.EndDateTime.HasValue ? AsUtc(dto.EndDateTime.Value) : null,
             Type = eventType,
             Location = dto.Location,
             Notes = dto.Notes,
@@ -86,8 +89,8 @@ public class AgendaService : IAgendaService
             throw new ArgumentException($"Type d'événement invalide : '{dto.Type}'.");
 
         e.Title = dto.Title;
-        e.StartDateTime = dto.StartDateTime;
-        e.EndDateTime = dto.EndDateTime;
+        e.StartDateTime = AsUtc(dto.StartDateTime);
+        e.EndDateTime   = dto.EndDateTime.HasValue ? AsUtc(dto.EndDateTime.Value) : null;
         e.Type = eventType;
         e.Location = dto.Location;
         e.Notes = dto.Notes;
