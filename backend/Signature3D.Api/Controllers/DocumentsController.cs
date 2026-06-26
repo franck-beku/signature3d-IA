@@ -39,7 +39,7 @@ public class DocumentsController : ControllerBase
     /// Lance l'indexation RAG automatiquement après upload.
     /// </summary>
     [HttpPost("upload/{projectId:guid}")]
-    public async Task<IActionResult> Upload(Guid projectId, IFormFile file)
+    public async Task<IActionResult> Upload(Guid projectId, IFormFile file, [FromForm] bool isInternal = false)
     {
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "Fichier manquant." });
@@ -51,7 +51,7 @@ public class DocumentsController : ControllerBase
             return BadRequest(new { message = "Le fichier ne doit pas dépasser 20 MB." });
 
         using var stream = file.OpenReadStream();
-        var result = await _documentService.UploadAsync(projectId, stream, file.FileName);
+        var result = await _documentService.UploadAsync(projectId, stream, file.FileName, isInternal);
 
         if (!result.Success)
             return BadRequest(new { message = result.Error });
@@ -88,4 +88,21 @@ public class DocumentsController : ControllerBase
 
         return Ok(new { message = "Document indexé avec succès." });
     }
+
+    /// <summary>
+    /// Bascule un document entre interne (IsInternal=true) et base IA (IsInternal=false).
+    /// IA → interne : chunks supprimés, IsIndexed = false.
+    /// Interne → IA : ré-indexation lancée depuis StorageUrl.
+    /// PATCH /api/documents/{id}/category
+    /// </summary>
+    [HttpPatch("{id:guid}/category")]
+    public async Task<IActionResult> SetCategory(Guid id, [FromBody] SetCategoryRequest request)
+    {
+        var result = await _documentService.SetCategoryAsync(id, request.IsInternal);
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+        return NoContent();
+    }
 }
+
+public record SetCategoryRequest(bool IsInternal);

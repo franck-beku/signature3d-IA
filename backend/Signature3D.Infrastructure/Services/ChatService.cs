@@ -94,7 +94,7 @@ public class ChatService : IChatService
     {
         var chunks = await _db.DocumentChunks
             .Include(c => c.Document)
-            .Where(c => c.Document.ProjectId == projectId && c.Document.IsIndexed)
+            .Where(c => c.Document.ProjectId == projectId && c.Document.IsIndexed && !c.Document.IsInternal)
             .OrderBy(c => c.ChunkIndex)
             .ToListAsync();
 

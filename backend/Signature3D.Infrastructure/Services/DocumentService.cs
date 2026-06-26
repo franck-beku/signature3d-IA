@@ -46,13 +46,14 @@ public class DocumentService : IDocumentService
             StorageUrl = d.StorageUrl,
             SizeBytes  = d.SizeBytes,
             IsIndexed  = d.IsIndexed,
+            IsInternal = d.IsInternal,
             ChunkCount = d.Chunks?.Count ?? 0,
             CreatedAt  = d.CreatedAt
         }).ToList());
     }
 
     /// <summary>Upload un PDF dans Supabase Storage et lance l'indexation automatique.</summary>
-    public async Task<Result<DocumentDto>> UploadAsync(Guid projectId, Stream fileStream, string fileName)
+    public async Task<Result<DocumentDto>> UploadAsync(Guid projectId, Stream fileStream, string fileName, bool isInternal = false)
     {
         var project = await _db.Projects.FindAsync(projectId);
         if (project is null)
@@ -76,14 +77,16 @@ public class DocumentService : IDocumentService
             StorageUrl = uploadResult.Data!,
             SizeBytes  = fileBytes.Length,
             IsIndexed  = false,
+            IsInternal = isInternal,
             ProjectId  = projectId
         };
 
         _db.Documents.Add(document);
         await _db.SaveChangesAsync();
 
-        // Lancer l'indexation en arrière-plan avec les bytes déjà en mémoire
-        _ = Task.Run(() => IndexWithBytesAsync(document.Id, fileBytes));
+        // Indexation uniquement si le document est destiné à la base de connaissances IA
+        if (!isInternal)
+            _ = Task.Run(() => IndexWithBytesAsync(document.Id, fileBytes));
 
         return Result<DocumentDto>.Ok(new DocumentDto
         {
@@ -92,6 +95,7 @@ public class DocumentService : IDocumentService
             StorageUrl = document.StorageUrl,
             SizeBytes  = document.SizeBytes,
             IsIndexed  = document.IsIndexed,
+            IsInternal = document.IsInternal,
             ChunkCount = 0,
             CreatedAt  = document.CreatedAt
         });
@@ -129,6 +133,41 @@ public class DocumentService : IDocumentService
         var pdfBytes = await httpClient.GetByteArrayAsync(document.StorageUrl);
 
         return await IndexWithBytesAsync(documentId, pdfBytes);
+    }
+
+    /// <summary>Bascule un document entre interne et base de connaissances IA.</summary>
+    public async Task<Result> SetCategoryAsync(Guid documentId, bool isInternal)
+    {
+        var document = await _db.Documents
+            .Include(d => d.Chunks)
+            .FirstOrDefaultAsync(d => d.Id == documentId);
+
+        if (document is null)
+            return Result.Fail("Document introuvable.");
+
+        if (document.IsInternal == isInternal)
+            return Result.Ok(); // déjà dans le bon état
+
+        document.IsInternal = isInternal;
+
+        if (isInternal)
+        {
+            // IA → interne : supprimer les chunks, marquer non indexé
+            if (document.Chunks.Any())
+                _db.DocumentChunks.RemoveRange(document.Chunks);
+            document.IsIndexed = false;
+            document.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+        }
+        else
+        {
+            // interne → IA : sauvegarder d'abord, puis ré-indexer depuis StorageUrl
+            document.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+            _ = Task.Run(() => IndexAsync(documentId));
+        }
+
+        return Result.Ok();
     }
 
     /* ── Extraction + indexation interne ── */

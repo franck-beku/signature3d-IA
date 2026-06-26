@@ -10,6 +10,7 @@ public class DocumentDto
     public string StorageUrl { get; set; } = string.Empty;
     public long SizeBytes { get; set; }
     public bool IsIndexed { get; set; }
+    public bool IsInternal { get; set; }
     public int ChunkCount { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -6,6 +6,7 @@ public class Document : BaseEntity
     public string StorageUrl { get; set; } = string.Empty;
     public long SizeBytes { get; set; }
     public bool IsIndexed { get; set; } = false;
+    public bool IsInternal { get; set; } = false;
 
     /* Relations */
     public Guid ProjectId { get; set; }
