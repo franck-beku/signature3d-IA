@@ -29,6 +29,7 @@ public class AppDbContext : DbContext
     public DbSet<ProjectDetail> ProjectDetails => Set<ProjectDetail>();
     public DbSet<QrCode> QrCodes => Set<QrCode>();
     public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<AgendaEvent> AgendaEvents => Set<AgendaEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -221,6 +222,27 @@ modelBuilder.Entity<Lead>(e =>
              .WithMany(x => x.Contacts)
              .HasForeignKey(x => x.ClientId)
              .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        /* ── AgendaEvent ── */
+        modelBuilder.Entity<AgendaEvent>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Title).HasMaxLength(512);
+            e.Property(x => x.Location).HasMaxLength(512);
+            e.Property(x => x.Type).HasConversion<string>();
+
+            e.HasOne(x => x.Client).WithMany()
+             .HasForeignKey(x => x.ClientId).IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasOne(x => x.Project).WithMany()
+             .HasForeignKey(x => x.ProjectId).IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            e.HasOne(x => x.Contact).WithMany()
+             .HasForeignKey(x => x.ContactId).IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
