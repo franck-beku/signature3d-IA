@@ -2,6 +2,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Signature3D.Application.Common;
 using Signature3D.Application.DTOs.Documents;
 using Signature3D.Application.Interfaces;
@@ -19,15 +20,17 @@ public class DocumentService : IDocumentService
     private readonly AppDbContext _db;
     private readonly IStorageService _storage;
     private readonly IAIProvider _aiProvider;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     private const int MaxChunkSize = 800;   // ~600 tokens
     private const int ChunkOverlap = 100;   // chevauchement pour contexte
 
-    public DocumentService(AppDbContext db, IStorageService storage, IAIProvider aiProvider)
+    public DocumentService(AppDbContext db, IStorageService storage, IAIProvider aiProvider, IServiceScopeFactory scopeFactory)
     {
         _db = db;
         _storage = storage;
         _aiProvider = aiProvider;
+        _scopeFactory = scopeFactory;
     }
 
     /// <summary>Retourne tous les documents d'un projet.</summary>
@@ -64,9 +67,10 @@ public class DocumentService : IDocumentService
         await fileStream.CopyToAsync(ms);
         var fileBytes = ms.ToArray();
 
-        // Upload dans Supabase Storage
+        // Upload dans Supabase Storage — nom unique pour éviter les collisions
+        var storageFileName = $"{Guid.NewGuid()}-{fileName}";
         using var uploadStream = new MemoryStream(fileBytes);
-        var uploadResult = await _storage.UploadAsync(uploadStream, fileName, $"documents/{projectId}");
+        var uploadResult = await _storage.UploadAsync(uploadStream, storageFileName, $"documents/{projectId}");
         if (!uploadResult.Success)
             return Result<DocumentDto>.Fail(uploadResult.Error!);
 
@@ -86,7 +90,7 @@ public class DocumentService : IDocumentService
 
         // Indexation uniquement si le document est destiné à la base de connaissances IA
         if (!isInternal)
-            _ = Task.Run(() => IndexWithBytesAsync(document.Id, fileBytes));
+            _ = Task.Run(() => IndexWithBytesInScopeAsync(document.Id, fileBytes));
 
         return Result<DocumentDto>.Ok(new DocumentDto
         {
@@ -121,18 +125,16 @@ public class DocumentService : IDocumentService
     /// <summary>Re-indexe un document existant depuis Supabase Storage.</summary>
     public async Task<Result> IndexAsync(Guid documentId)
     {
-        var document = await _db.Documents
-            .Include(d => d.Chunks)
-            .FirstOrDefaultAsync(d => d.Id == documentId);
-
+        // Récupérer le StorageUrl dans le contexte de la requête (scope actif)
+        var document = await _db.Documents.FindAsync(documentId);
         if (document is null)
             return Result.Fail("Document introuvable.");
 
-        // Télécharger le PDF depuis Supabase Storage
         using var httpClient = new HttpClient();
         var pdfBytes = await httpClient.GetByteArrayAsync(document.StorageUrl);
 
-        return await IndexWithBytesAsync(documentId, pdfBytes);
+        // Indexation dans un scope dédié — même chemin que l'upload
+        return await IndexWithBytesInScopeAsync(documentId, pdfBytes);
     }
 
     /// <summary>Bascule un document entre interne et base de connaissances IA.</summary>
@@ -161,23 +163,31 @@ public class DocumentService : IDocumentService
         }
         else
         {
-            // interne → IA : sauvegarder d'abord, puis ré-indexer depuis StorageUrl
+            // interne → IA : sauvegarder d'abord, puis ré-indexer dans un scope dédié
+            var storageUrl = document.StorageUrl;
             document.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
-            _ = Task.Run(() => IndexAsync(documentId));
+            _ = Task.Run(async () =>
+            {
+                using var httpClient = new HttpClient();
+                var pdfBytes = await httpClient.GetByteArrayAsync(storageUrl);
+                await IndexWithBytesInScopeAsync(documentId, pdfBytes);
+            });
         }
 
         return Result.Ok();
     }
 
-    /* ── Extraction + indexation interne ── */
+    /* ── Extraction + indexation — toujours dans un scope dédié ── */
 
-    private async Task<Result> IndexWithBytesAsync(Guid documentId, byte[] pdfBytes)
+    private async Task<Result> IndexWithBytesInScopeAsync(Guid documentId, byte[] pdfBytes)
     {
         try
         {
-            // Recharger le document dans un nouveau contexte
-            var document = await _db.Documents
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var document = await db.Documents
                 .Include(d => d.Chunks)
                 .FirstOrDefaultAsync(d => d.Id == documentId);
 
@@ -185,7 +195,7 @@ public class DocumentService : IDocumentService
 
             // Supprimer les anciens chunks
             if (document.Chunks.Any())
-                _db.DocumentChunks.RemoveRange(document.Chunks);
+                db.DocumentChunks.RemoveRange(document.Chunks);
 
             // Extraire le texte avec iText7
             var extractedText = ExtractTextFromPdf(pdfBytes);
@@ -194,7 +204,7 @@ public class DocumentService : IDocumentService
             {
                 Console.WriteLine($"[DocumentService] Aucun texte extrait de {document.Name}");
                 document.IsIndexed = true;
-                await _db.SaveChangesAsync();
+                await db.SaveChangesAsync();
                 return Result.Ok();
             }
 
@@ -213,10 +223,10 @@ public class DocumentService : IDocumentService
                 Embedding  = null  // pgvector sera activé plus tard
             }).ToList();
 
-            _db.DocumentChunks.AddRange(chunkEntities);
+            db.DocumentChunks.AddRange(chunkEntities);
             document.IsIndexed  = true;
             document.UpdatedAt  = DateTime.UtcNow;
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             Console.WriteLine($"[DocumentService] ✅ {document.Name} indexé avec {chunks.Count} chunks");
             return Result.Ok();

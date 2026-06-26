@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using System.Text.Json;
 using Signature3D.Application.Common;
 using Signature3D.Application.Interfaces;
 using Signature3D.Infrastructure.Configurations;
@@ -82,16 +81,10 @@ public class SupabaseStorageService : IStorageService
 
             var filePath = path[prefix.Length..];
 
-            // Body JSON avec la liste des fichiers à supprimer
-            var body = JsonSerializer.Serialize(new { prefixes = new[] { filePath } });
-            var content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"object/{BucketName}/{filePath}");
+            var response = await _http.SendAsync(request);
 
-            var response = await _http.PostAsync(
-                $"object/{BucketName}",
-                content
-            );
-
-            // 200 ou 404 sont acceptables
+            // 200 ou 404 sont acceptables (404 = déjà supprimé, ne pas planter)
             if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
             {
                 var errorBody = await response.Content.ReadAsStringAsync();

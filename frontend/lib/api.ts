@@ -431,6 +431,7 @@ export interface DocumentDto {
   storageUrl: string
   sizeBytes: number
   isIndexed: boolean
+  isInternal: boolean
   chunkCount: number
   createdAt: string
 }
@@ -441,13 +442,14 @@ export const documentsApi = {
     apiFetch<DocumentDto[]>(`/api/documents/project/${projectId}`),
 
   /** Upload un PDF pour un projet */
-  upload: async (projectId: string, file: File): Promise<DocumentDto> => {
+  upload: async (projectId: string, file: File, isInternal?: boolean): Promise<DocumentDto> => {
     const token = typeof window !== 'undefined'
       ? localStorage.getItem('token')
       : null
 
     const formData = new FormData()
     formData.append('file', file)
+    formData.append('isInternal', String(isInternal ?? false))
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/documents/upload/${projectId}`,
@@ -475,6 +477,13 @@ export const documentsApi = {
   /** Re-indexe un document pour le RAG */
   reindex: (documentId: string) =>
     apiFetch(`/api/documents/${documentId}/index`, { method: 'POST' }),
+
+  /** Bascule un document entre interne et base de connaissances IA */
+  setCategory: (documentId: string, isInternal: boolean) =>
+    apiFetch(`/api/documents/${documentId}/category`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isInternal }),
+    }),
 }
 
 /* ══════════════════════════════════════

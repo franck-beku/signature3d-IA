@@ -39,7 +39,7 @@ public class DocumentsController : ControllerBase
     /// Lance l'indexation RAG automatiquement après upload.
     /// </summary>
     [HttpPost("upload/{projectId:guid}")]
-    public async Task<IActionResult> Upload(Guid projectId, IFormFile file, [FromForm] bool isInternal = false)
+    public async Task<IActionResult> Upload(Guid projectId, [FromForm] IFormFile file, [FromForm] bool isInternal = false)
     {
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "Fichier manquant." });

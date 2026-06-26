@@ -7,11 +7,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star } from 'lucide-react'
+import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star, FileText, Upload } from 'lucide-react'
 import Link from 'next/link'
 import {
   projectsApi, clientsApi, sectorsApi, offeringsApi,
-  type ProjectDto, type ClientDto, type SectorDto, type OfferingDto,
+  documentsApi,
+  type ProjectDto, type ClientDto, type SectorDto, type OfferingDto, type DocumentDto,
 } from '@/lib/api'
 
 const GOLD = '#d4af37'
@@ -83,6 +84,12 @@ export default function ProjectForm({ projectId }: Props) {
   const [buttons, setButtons]                 = useState<ButtonRow[]>([])
   const [details, setDetails]                 = useState<DetailRow[]>([])
 
+  // Documents (mode édition uniquement)
+  const [documents, setDocuments]               = useState<DocumentDto[]>([])
+  const [docsLoading, setDocsLoading]           = useState(false)
+  const [uploadingDoc, setUploadingDoc]         = useState(false)
+  const [uploadIsInternal, setUploadIsInternal] = useState(false)
+
   // Champs Luxedia
   const [luxediaPrimaryColor, setLuxediaPrimaryColor]         = useState('#d4af37')
   const [luxediaWidgetBgColor, setLuxediaWidgetBgColor]       = useState('#111111')
@@ -147,6 +154,15 @@ export default function ProjectForm({ projectId }: Props) {
     loadAll()
   }, [isEdit, projectId])
 
+  useEffect(() => {
+    if (!isEdit || !projectId) return
+    setDocsLoading(true)
+    documentsApi.getByProject(projectId)
+      .then((docs) => setDocuments(docs as DocumentDto[]))
+      .catch(() => {})
+      .finally(() => setDocsLoading(false))
+  }, [isEdit, projectId])
+
   const addButton = () => setButtons((prev) => [...prev, { label: '', url: '', action: 'link', order: prev.length }])
   const removeButton = (i: number) => setButtons((prev) => prev.filter((_, idx) => idx !== i))
   const updateButton = (i: number, field: keyof ButtonRow, value: string | number) =>
@@ -156,6 +172,40 @@ export default function ProjectForm({ projectId }: Props) {
   const removeDetail = (i: number) => setDetails((prev) => prev.filter((_, idx) => idx !== i))
   const updateDetail = (i: number, field: keyof DetailRow, value: string | number | boolean) =>
     setDetails((prev) => prev.map((d, idx) => idx === i ? { ...d, [field]: value } : d))
+
+  const handleUploadDocument = async (file: File) => {
+    if (!projectId) return
+    setUploadingDoc(true)
+    try {
+      const doc = await documentsApi.upload(projectId, file, uploadIsInternal)
+      setDocuments((prev) => [doc as DocumentDto, ...prev])
+      setUploadIsInternal(false)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setUploadingDoc(false)
+    }
+  }
+
+  const handleToggleCategory = async (doc: DocumentDto) => {
+    try {
+      await documentsApi.setCategory(doc.id, !doc.isInternal)
+      setDocuments((prev) => prev.map((d) =>
+        d.id === doc.id ? { ...d, isInternal: !d.isInternal, isIndexed: false } : d
+      ))
+    } catch (err: any) {
+      setError(err.message)
+    }
+  }
+
+  const handleDeleteDocument = async (id: string) => {
+    try {
+      await documentsApi.delete(id)
+      setDocuments((prev) => prev.filter((d) => d.id !== id))
+    } catch (err: any) {
+      setError(err.message)
+    }
+  }
 
   const handleSave = async () => {
     if (!name.trim()) { setError('Le nom du projet est obligatoire.'); return }
@@ -444,6 +494,72 @@ export default function ProjectForm({ projectId }: Props) {
             </div>
           )}
         </div>
+
+        {/* SECTION — Documents (édition uniquement) */}
+        {isEdit && (
+          <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+            <p style={sectionTitle}>Documents</p>
+
+            {/* Zone upload */}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: GOLD, background: 'none', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
+                  <Upload size={12} />
+                  {uploadingDoc ? 'Upload...' : 'Ajouter un PDF'}
+                  <input
+                    type="file" accept=".pdf" style={{ display: 'none' }}
+                    disabled={uploadingDoc}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadDocument(f); e.target.value = '' }}
+                  />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={uploadIsInternal} onChange={(e) => setUploadIsInternal(e.target.checked)} style={{ accentColor: GOLD }} />
+                  Document interne (non transmis à Luxedia)
+                </label>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', marginTop: '8px', marginBottom: 0 }}>PDF uniquement — max 20 MB</p>
+            </div>
+
+            {/* Liste */}
+            {docsLoading ? (
+              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px', margin: 0 }}>Chargement...</p>
+            ) : documents.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px', margin: 0 }}>Aucun document. Uploadez des PDFs pour alimenter Luxedia IA.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {documents.map((doc) => (
+                  <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#1a1a1a', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <FileText size={13} style={{ color: GOLD, flexShrink: 0 }} />
+                    <span style={{ flex: 1, fontSize: '12px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</span>
+                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>{(doc.sizeBytes / 1024).toFixed(0)} KB</span>
+                    <span style={{
+                      fontSize: '10px', padding: '2px 8px', borderRadius: '999px', flexShrink: 0,
+                      backgroundColor: doc.isInternal ? 'rgba(255,255,255,0.06)' : doc.isIndexed ? 'rgba(74,222,128,0.1)' : 'rgba(212,175,55,0.1)',
+                      color: doc.isInternal ? 'rgba(255,255,255,0.3)' : doc.isIndexed ? '#4ade80' : GOLD,
+                    }}>
+                      {doc.isInternal ? 'Interne' : doc.isIndexed ? 'Indexé' : 'En attente'}
+                    </span>
+                    <button
+                      onClick={() => handleToggleCategory(doc)}
+                      title={doc.isInternal ? 'Rendre disponible pour Luxedia' : 'Marquer interne'}
+                      style={{ fontSize: '10px', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#111', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
+                      className="add-btn"
+                    >
+                      {doc.isInternal ? '→ IA' : '→ Interne'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDocument(doc.id)}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', background: 'none', cursor: 'pointer', flexShrink: 0 }}
+                      className="del-btn" title="Supprimer"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* SECTION 5 — Publication */}
         <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px', marginBottom: '24px' }}>
