@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!checked && pathname !== '/dashboard/login') {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#0d0d0d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="dash" style={{ minHeight: '100vh', backgroundColor: 'var(--dash-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid rgba(212,175,55,0.2)', borderTopColor: '#d4af37', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0d0d0d' }}>
+    <div className="dash" style={{ minHeight: '100vh', backgroundColor: 'var(--dash-bg)' }}>
       {children}
     </div>
   )

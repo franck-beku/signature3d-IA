@@ -195,3 +195,22 @@ section {
 
 /* ─── Gold line ─── */
 .gold-line { height: 2px; background: linear-gradient(to right, transparent, #C8A45D, transparent); border-radius: 2px; }
+
+/* ─── Dashboard — thème clair (scopé à .dash pour ne pas fuir sur le site public) ─── */
+.dash {
+  --dash-bg:           #FFFFFF;
+  --dash-surface:      #FAFAFA;
+  --dash-input:        #F5F5F5;
+  --dash-text:         #1A1400;
+  --dash-text-muted:   rgba(26,20,0,0.70);
+  --dash-text-subtle:  rgba(26,20,0,0.60);
+  --dash-border:       rgba(0,0,0,0.06);
+  --dash-border-input: rgba(0,0,0,0.08);
+  --dash-gold:         #C8A45D;
+  --dash-gold-muted:   rgba(200,164,93,0.08);
+  --dash-gold-ring:    rgba(200,164,93,0.2);
+  --dash-success:      #16a34a;
+  --dash-success-bg:   rgba(22,163,74,0.08);
+  --dash-error:        #dc2626;
+  --dash-error-bg:     rgba(220,38,38,0.08);
+}
