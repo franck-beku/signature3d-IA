@@ -709,3 +709,18 @@ export const agendaApi = {
   delete: (id: string) =>
     apiFetch(`/api/agenda/${id}`, { method: 'DELETE' }),
 }
+
+// ─── Timeline ──────────────────────────────────────────────
+export interface TimelineItemDto {
+  date: string
+  type: string
+  title: string
+  description?: string
+  projectId?: string
+  projectName?: string
+}
+
+export const timelineApi = {
+  getByClient: (clientId: string) =>
+    apiFetch<TimelineItemDto[]>(`/api/clients/${clientId}/timeline`),
+}

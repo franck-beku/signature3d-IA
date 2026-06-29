@@ -12,10 +12,41 @@ import { useParams } from 'next/navigation'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, Copy, Code, FileText, ExternalLink as OpenIcon, UserRound } from 'lucide-react'
-import { clientsApi, projectsApi, contactsApi, type ClientDto, type ProjectDto, type ContactDto, type CreateContactDto } from '@/lib/api'
+import { clientsApi, projectsApi, contactsApi, timelineApi, type ClientDto, type ProjectDto, type ContactDto, type CreateContactDto, type TimelineItemDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 const GOLD = '#d4af37'
+
+const AGENDA_TYPE_LABELS: Record<string, string> = {
+  RendezVousCommercial: 'Rendez-vous commercial',
+  CaptationMatterport:  'Captation 3D Matterport',
+  Captation360:         'Captation 360°',
+  Livraison:            'Livraison du projet',
+  Urgent:               'Urgent',
+  ReunionInterne:       'Réunion interne',
+  AppelClient:          'Appel client',
+  SuiviClient:          'Suivi client',
+  Presentation:         'Présentation du projet',
+  Validation:           'Validation client',
+  Autre:                'Autre',
+}
+
+function getCategoryColor(type: string) {
+  if (type === 'EvenementAgenda') return '#22c55e'
+  if (['LuxediaConfigure','BaseConnaissancesAlimentee','PremierePublicationBaseIA',
+       'PremiereConversationLuxedia','IAPrete'].includes(type)) return '#a855f7'
+  return '#3b82f6'
+}
+
+function formatTimelineDate(item: TimelineItemDto) {
+  const d = new Date(item.date)
+  if (item.type === 'EvenementAgenda') {
+    return format(d, "d MMM yyyy', 'HH'h'mm", { locale: fr })
+  }
+  return format(d, 'd MMM yyyy', { locale: fr })
+}
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'https://signature3dia.com'
 const API_URL  = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5125'
 
@@ -268,6 +299,7 @@ export default function ClientDetailPage() {
   const [showContactForm, setShowContactForm] = useState(false)
   const [editContact, setEditContact]         = useState<ContactDto | null>(null)
   const [deleteContactConfirm, setDeleteContactConfirm] = useState<string | null>(null)
+  const [timeline, setTimeline]               = useState<TimelineItemDto[]>([])
   const [contactForm, setContactForm]         = useState<CreateContactDto>({
     name: '', position: '', email: '', phone: '', phoneExtension: '', isPrimary: false,
   })
@@ -276,12 +308,14 @@ export default function ClientDetailPage() {
     clientsApi.getBySlug(slug)
       .then(async (c) => {
         setClient(c as ClientDto)
-        const [projs, ctcts] = await Promise.all([
+        const [projs, ctcts, tl] = await Promise.all([
           projectsApi.getByClient(c.id),
           contactsApi.getByClient(c.id),
+          timelineApi.getByClient(c.id),
         ])
         setProjects(projs as ProjectDto[])
         setContacts(ctcts as ContactDto[])
+        setTimeline(tl as TimelineItemDto[])
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
@@ -530,6 +564,52 @@ export default function ClientDetailPage() {
                 }}>
                   <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{client.notes}</p>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Parcours du client */}
+          <div>
+            <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>
+              Parcours du client
+            </h2>
+            {timeline.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '14px' }}>
+                <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px', margin: 0 }}>Aucun événement dans l&apos;historique</p>
+              </div>
+            ) : (
+              <div style={{ position: 'relative', paddingLeft: '28px' }}>
+                <div style={{ position: 'absolute', left: '7px', top: '6px', bottom: '6px', width: '1px', backgroundColor: 'rgba(255,255,255,0.07)' }} />
+                {timeline.map((item, i) => {
+                  const color = getCategoryColor(item.type)
+                  const shadowRgb = color === '#22c55e' ? '34,197,94' : color === '#a855f7' ? '168,85,247' : '59,130,246'
+                  const desc = item.type === 'EvenementAgenda' && item.description
+                    ? (AGENDA_TYPE_LABELS[item.description] ?? item.description)
+                    : item.description
+                  return (
+                    <div key={i} style={{ position: 'relative', marginBottom: i < timeline.length - 1 ? '20px' : 0 }}>
+                      <div style={{
+                        position: 'absolute', left: '-24px', top: '4px',
+                        width: '10px', height: '10px', borderRadius: '50%',
+                        backgroundColor: color,
+                        boxShadow: `0 0 0 3px rgba(${shadowRgb},0.15)`,
+                      }} />
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
+                        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          {formatTimelineDate(item)}
+                        </span>
+                        <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '13px', fontWeight: 500 }}>
+                          {item.title}
+                        </span>
+                      </div>
+                      {desc && (
+                        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: '3px 0 0' }}>
+                          {desc}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
