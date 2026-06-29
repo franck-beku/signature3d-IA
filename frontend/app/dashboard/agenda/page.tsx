@@ -71,6 +71,11 @@ const toCalEvent = (dto: AgendaEventDto): CalEvent => ({
   resource: dto,
 })
 
+// Coupe une string ISO à "YYYY-MM-DDTHH:mm" pour datetime-local
+function toLocalInput(iso: string): string {
+  return iso.slice(0, 16)
+}
+
 const EMPTY_FORM: CreateAgendaEventDto = {
   title: '',
   startDateTime: '',
@@ -107,6 +112,7 @@ export default function AgendaPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error,      setError]      = useState<string | null>(null)
   const [form,       setForm]       = useState<CreateAgendaEventDto>(EMPTY_FORM)
+  const [editingId,  setEditingId]  = useState<string | null>(null)
 
   const [clients,  setClients]  = useState<ClientDto[]>([])
   const [projects, setProjects] = useState<ProjectDto[]>([])
@@ -140,20 +146,62 @@ export default function AgendaPage() {
     contactsApi.getByClient(form.clientId).then(setContacts).catch(() => setContacts([]))
   }, [form.clientId])
 
-  const handleCreate = async () => {
+  const resetForm = () => {
+    setForm(EMPTY_FORM)
+    setEditingId(null)
+    setShowForm(false)
+  }
+
+  const handleSelectEvent = (event: object) => {
+    const dto = (event as CalEvent).resource
+    setForm({
+      title:         dto.title,
+      startDateTime: toLocalInput(dto.startDateTime),
+      endDateTime:   dto.endDateTime ? toLocalInput(dto.endDateTime) : '',
+      type:          dto.type,
+      notes:         dto.notes ?? '',
+      customType:    dto.customType ?? '',
+      clientId:      dto.clientId,
+      projectId:     dto.projectId,
+      contactId:     dto.contactId,
+    })
+    setEditingId(dto.id)
+    setShowForm(true)
+  }
+
+  const handleSubmit = async () => {
     if (!form.title || !form.startDateTime) return
+    const payload = {
+      ...form,
+      endDateTime: form.endDateTime  || undefined,
+      customType:  form.type === 'Autre' ? (form.customType || undefined) : undefined,
+      clientId:    form.clientId  || undefined,
+      projectId:   form.projectId || undefined,
+      contactId:   form.contactId || undefined,
+    }
     try {
       setSubmitting(true)
-      await agendaApi.create({
-        ...form,
-        endDateTime:  form.endDateTime  || undefined,
-        customType:   form.type === 'Autre' ? (form.customType || undefined) : undefined,
-        clientId:     form.clientId  || undefined,
-        projectId:    form.projectId || undefined,
-        contactId:    form.contactId || undefined,
-      })
-      setForm(EMPTY_FORM)
-      setShowForm(false)
+      if (editingId) {
+        await agendaApi.update(editingId, payload)
+      } else {
+        await agendaApi.create(payload)
+      }
+      resetForm()
+      await load()
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!editingId) return
+    if (!window.confirm('Supprimer cet événement ?')) return
+    try {
+      setSubmitting(true)
+      await agendaApi.delete(editingId)
+      resetForm()
       await load()
     } catch (e: any) {
       setError(e.message)
@@ -175,7 +223,11 @@ export default function AgendaPage() {
               Rendez-vous & événements
             </p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className="new-btn" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+          <button
+            onClick={() => { resetForm(); setShowForm(true) }}
+            className="new-btn"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
+          >
             <Plus size={13} />
             Nouvel événement
           </button>
@@ -190,10 +242,12 @@ export default function AgendaPage() {
             </div>
           )}
 
-          {/* Formulaire création */}
+          {/* Formulaire création / édition */}
           {showForm && (
             <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px' }}>
-              <h3 style={{ color: 'white', fontSize: '14px', fontWeight: 500, margin: '0 0 20px' }}>Nouvel événement</h3>
+              <h3 style={{ color: 'white', fontSize: '14px', fontWeight: 500, margin: '0 0 20px' }}>
+                {editingId ? 'Modifier l\'événement' : 'Nouvel événement'}
+              </h3>
 
               {/* Ligne 1 : Titre + Type */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
@@ -288,16 +342,35 @@ export default function AgendaPage() {
                 </select>
               </div>
 
-              {/* Boutons */}
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={handleCreate} disabled={!form.title || !form.startDateTime || submitting}
-                  style={{ backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>
-                  {submitting ? 'Création…' : 'Créer'}
-                </button>
-                <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }}
-                  style={{ backgroundColor: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
-                  Annuler
-                </button>
+              {/* Boutons — Enregistrer/Créer à gauche, Supprimer isolé à droite */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!form.title || !form.startDateTime || submitting}
+                    style={{ backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}
+                  >
+                    {submitting ? (editingId ? 'Enregistrement…' : 'Création…') : (editingId ? 'Enregistrer' : 'Créer')}
+                  </button>
+                  <button
+                    onClick={resetForm}
+                    style={{ backgroundColor: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
+                  >
+                    Annuler
+                  </button>
+                </div>
+
+                {/* Supprimer — visible uniquement en mode édition, isolé à droite */}
+                {editingId && (
+                  <button
+                    onClick={handleDelete}
+                    disabled={submitting}
+                    style={{ backgroundColor: 'transparent', color: '#ef4444', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.3)', cursor: 'pointer', opacity: submitting ? 0.5 : 1 }}
+                    className="del-btn"
+                  >
+                    Supprimer
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -316,6 +389,7 @@ export default function AgendaPage() {
                 views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
                 culture="fr"
                 style={{ height: 650 }}
+                onSelectEvent={handleSelectEvent}
                 eventPropGetter={(event) => {
                   const color = TYPE_COLORS[(event as CalEvent).resource.type] ?? GOLD
                   return {
@@ -325,6 +399,7 @@ export default function AgendaPage() {
                       color: '#fff',
                       borderRadius: '4px',
                       fontSize: '11px',
+                      cursor: 'pointer',
                     },
                   }
                 }}
@@ -350,6 +425,7 @@ export default function AgendaPage() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .new-btn:hover { background-color: #b8943d !important; }
+        .del-btn:hover { background-color: rgba(239,68,68,0.08) !important; border-color: rgba(239,68,68,0.5) !important; }
         @media (max-width: 540px) { .form-row { grid-template-columns: 1fr !important; } }
 
         /* Intégration dark du calendrier react-big-calendar */
