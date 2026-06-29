@@ -7,7 +7,11 @@ import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Sidebar from '@/components/dashboard/Sidebar'
 import { Plus, X } from 'lucide-react'
-import { agendaApi, type AgendaEventDto, type AgendaEventType, type CreateAgendaEventDto } from '@/lib/api'
+import {
+  agendaApi, clientsApi, projectsApi, contactsApi,
+  type AgendaEventDto, type AgendaEventType, type CreateAgendaEventDto,
+  type ClientDto, type ProjectDto, type ContactDto,
+} from '@/lib/api'
 
 const GOLD = '#C8A45D'
 
@@ -72,6 +76,11 @@ const EMPTY_FORM: CreateAgendaEventDto = {
   startDateTime: '',
   endDateTime: '',
   type: 'RendezVousCommercial',
+  notes: '',
+  customType: '',
+  clientId: undefined,
+  projectId: undefined,
+  contactId: undefined,
 }
 
 const inputStyle: React.CSSProperties = {
@@ -82,13 +91,26 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'var(--font-body)',
 }
 
+const labelStyle: React.CSSProperties = {
+  display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)',
+  textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px',
+}
+
+const hintStyle: React.CSSProperties = {
+  fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: '6px 0 0',
+}
+
 export default function AgendaPage() {
-  const [events,      setEvents]      = useState<CalEvent[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [showForm,    setShowForm]    = useState(false)
-  const [submitting,  setSubmitting]  = useState(false)
-  const [error,       setError]       = useState<string | null>(null)
-  const [form,        setForm]        = useState<CreateAgendaEventDto>(EMPTY_FORM)
+  const [events,     setEvents]     = useState<CalEvent[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [showForm,   setShowForm]   = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error,      setError]      = useState<string | null>(null)
+  const [form,       setForm]       = useState<CreateAgendaEventDto>(EMPTY_FORM)
+
+  const [clients,  setClients]  = useState<ClientDto[]>([])
+  const [projects, setProjects] = useState<ProjectDto[]>([])
+  const [contacts, setContacts] = useState<ContactDto[]>([])
 
   const load = useCallback(async () => {
     try {
@@ -104,13 +126,31 @@ export default function AgendaPage() {
 
   useEffect(() => { load() }, [load])
 
+  // Chargement de la liste clients au montage
+  useEffect(() => {
+    clientsApi.getAll(1, 1000)
+      .then(r => setClients(r.items))
+      .catch(() => {})
+  }, [])
+
+  // Chargement projets + contacts quand le client change (charge uniquement, pas de réinitialisation)
+  useEffect(() => {
+    if (!form.clientId) { setProjects([]); setContacts([]); return }
+    projectsApi.getByClient(form.clientId).then(setProjects).catch(() => setProjects([]))
+    contactsApi.getByClient(form.clientId).then(setContacts).catch(() => setContacts([]))
+  }, [form.clientId])
+
   const handleCreate = async () => {
     if (!form.title || !form.startDateTime) return
     try {
       setSubmitting(true)
       await agendaApi.create({
         ...form,
-        endDateTime: form.endDateTime || undefined,
+        endDateTime:  form.endDateTime  || undefined,
+        customType:   form.type === 'Autre' ? (form.customType || undefined) : undefined,
+        clientId:     form.clientId  || undefined,
+        projectId:    form.projectId || undefined,
+        contactId:    form.contactId || undefined,
       })
       setForm(EMPTY_FORM)
       setShowForm(false)
@@ -154,31 +194,108 @@ export default function AgendaPage() {
           {showForm && (
             <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px' }}>
               <h3 style={{ color: 'white', fontSize: '14px', fontWeight: 500, margin: '0 0 20px' }}>Nouvel événement</h3>
+
+              {/* Ligne 1 : Titre + Type */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Titre *</label>
+                  <label style={labelStyle}>Titre *</label>
                   <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Rendez-vous Mercedes" style={inputStyle} />
+                  <p style={hintStyle}>Ce qui s&apos;affiche dans le calendrier</p>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Type</label>
+                  <label style={labelStyle}>Type</label>
                   <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as AgendaEventType })} style={inputStyle}>
                     {EVENT_TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
                   </select>
+                  <p style={hintStyle}>La catégorie de l&apos;événement</p>
+                  {form.type === 'Autre' && (
+                    <input
+                      type="text"
+                      value={form.customType ?? ''}
+                      onChange={e => setForm({ ...form, customType: e.target.value })}
+                      placeholder="Ex: Formation, Maintenance, Audit…"
+                      style={{ ...inputStyle, marginTop: '8px' }}
+                    />
+                  )}
                 </div>
+              </div>
+
+              {/* Ligne 2 : Début + Fin */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Début *</label>
+                  <label style={labelStyle}>Début *</label>
                   <input type="datetime-local" value={form.startDateTime} onChange={e => setForm({ ...form, startDateTime: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Fin</label>
+                  <label style={labelStyle}>Fin</label>
                   <input type="datetime-local" value={form.endDateTime ?? ''} onChange={e => setForm({ ...form, endDateTime: e.target.value })} style={inputStyle} />
                 </div>
               </div>
+
+              {/* Notes — pleine largeur */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={labelStyle}>Notes</label>
+                <textarea
+                  value={form.notes ?? ''}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  placeholder="Détails, choses à prévoir…"
+                  rows={3}
+                  style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
+                />
+              </div>
+
+              {/* Ligne 3 : Client + Projet */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
+                <div>
+                  <label style={labelStyle}>Client</label>
+                  <select
+                    value={form.clientId ?? ''}
+                    onChange={e => {
+                      const clientId = e.target.value || undefined
+                      setForm({ ...form, clientId, projectId: undefined, contactId: undefined })
+                    }}
+                    style={inputStyle}
+                  >
+                    <option value="">— Aucun —</option>
+                    {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Projet</label>
+                  <select
+                    value={form.projectId ?? ''}
+                    onChange={e => setForm({ ...form, projectId: e.target.value || undefined })}
+                    disabled={!form.clientId}
+                    style={{ ...inputStyle, opacity: form.clientId ? 1 : 0.4, cursor: form.clientId ? 'pointer' : 'not-allowed' }}
+                  >
+                    <option value="">{form.clientId ? '— Aucun —' : "Choisir un client d'abord"}</option>
+                    {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Ligne 4 : Contact */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={labelStyle}>Contact</label>
+                <select
+                  value={form.contactId ?? ''}
+                  onChange={e => setForm({ ...form, contactId: e.target.value || undefined })}
+                  disabled={!form.clientId}
+                  style={{ ...inputStyle, opacity: form.clientId ? 1 : 0.4, cursor: form.clientId ? 'pointer' : 'not-allowed' }}
+                >
+                  <option value="">{form.clientId ? '— Aucun —' : "Choisir un client d'abord"}</option>
+                  {contacts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+
+              {/* Boutons */}
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={handleCreate} disabled={!form.title || !form.startDateTime || submitting} style={{ backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>
+                <button onClick={handleCreate} disabled={!form.title || !form.startDateTime || submitting}
+                  style={{ backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>
                   {submitting ? 'Création…' : 'Créer'}
                 </button>
-                <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }} style={{ backgroundColor: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+                <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM) }}
+                  style={{ backgroundColor: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
                   Annuler
                 </button>
               </div>
