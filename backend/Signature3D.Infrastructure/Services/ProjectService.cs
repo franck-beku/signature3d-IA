@@ -86,8 +86,9 @@ public class ProjectService : IProjectService
             Status = ProjectStatus.Active,
             ShortDescription = dto.ShortDescription,
             CoverImage = dto.CoverImage,
-            IsPublished = dto.IsPublished,
-            IsFeatured = dto.IsFeatured,
+            IsPublished  = dto.IsPublished,
+            PublishedAt  = dto.IsPublished ? DateTime.UtcNow : null,
+            IsFeatured   = dto.IsFeatured,
             DisplayOrder = dto.DisplayOrder,
             SectorId = dto.SectorId,
             OfferingId = dto.OfferingId,
@@ -144,6 +145,7 @@ public class ProjectService : IProjectService
             return Result<ProjectDto>.Fail("Projet introuvable.");
 
         // Mettre à jour les champs
+        bool wasPublished = project.IsPublished;
         project.Name = dto.Name;
         project.MatterportId = dto.MatterportId;
         project.ExperienceType = Enum.TryParse<ExperienceType>(dto.ExperienceType, true, out var expType)
@@ -154,6 +156,8 @@ public class ProjectService : IProjectService
         project.ShortDescription = dto.ShortDescription;
         project.CoverImage = dto.CoverImage;
         project.IsPublished = dto.IsPublished;
+        if (!wasPublished && dto.IsPublished && project.PublishedAt is null)
+            project.PublishedAt = DateTime.UtcNow;
         project.IsFeatured = dto.IsFeatured;
         project.DisplayOrder = dto.DisplayOrder;
         project.SectorId = dto.SectorId;
@@ -329,8 +333,9 @@ public class ProjectService : IProjectService
         EmbedUrl = $"{_urls.EmbedBaseUrl}/{p.Slug}",
         ShortDescription = p.ShortDescription,
         CoverImage = p.CoverImage,
-        IsPublished = p.IsPublished,
-        IsFeatured = p.IsFeatured,
+        IsPublished  = p.IsPublished,
+        PublishedAt  = p.PublishedAt,
+        IsFeatured   = p.IsFeatured,
         DisplayOrder = p.DisplayOrder,
         SectorId = p.SectorId,
         SectorName = p.Sector?.Name,

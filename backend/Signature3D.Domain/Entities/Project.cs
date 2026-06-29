@@ -33,6 +33,7 @@ public class Project : BaseEntity
     public string? ShortDescription { get; set; }    // description courte (galerie)
     public string? CoverImage { get; set; }          // image de couverture (galerie)
     public bool IsPublished { get; set; }            // visible sur le site (défaut false → accord client requis)
+    public DateTime? PublishedAt { get; set; }       // date de première publication (conservée si dépublié)
     public bool IsFeatured { get; set; }             // mis en avant sur l'accueil
     public int DisplayOrder { get; set; }            // ordre d'affichage
 

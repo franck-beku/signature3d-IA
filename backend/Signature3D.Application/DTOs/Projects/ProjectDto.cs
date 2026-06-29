@@ -23,6 +23,7 @@ public class ProjectDto
     public string? ShortDescription { get; set; }
     public string? CoverImage { get; set; }
     public bool IsPublished { get; set; }
+    public DateTime? PublishedAt { get; set; }
     public bool IsFeatured { get; set; }
     public int DisplayOrder { get; set; }
     public Guid? SectorId { get; set; }
