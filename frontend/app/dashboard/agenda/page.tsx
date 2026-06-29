@@ -22,20 +22,35 @@ const localizer = dateFnsLocalizer({
 const EVENT_TYPES: AgendaEventType[] = [
   'RendezVousCommercial', 'CaptationMatterport', 'Captation360',
   'Livraison', 'Urgent', 'ReunionInterne', 'AppelClient',
-  'SuiviClient', 'Presentation', 'Validation',
+  'SuiviClient', 'Presentation', 'Validation', 'Autre',
 ]
 
 const TYPE_LABELS: Record<AgendaEventType, string> = {
   RendezVousCommercial: 'Rendez-vous commercial',
-  CaptationMatterport:  'Captation Matterport',
+  CaptationMatterport:  'Captation 3D Matterport',
   Captation360:         'Captation 360°',
-  Livraison:            'Livraison',
+  Livraison:            'Livraison du projet',
   Urgent:               'Urgent',
   ReunionInterne:       'Réunion interne',
   AppelClient:          'Appel client',
   SuiviClient:          'Suivi client',
-  Presentation:         'Présentation',
-  Validation:           'Validation',
+  Presentation:         'Présentation du projet',
+  Validation:           'Validation client',
+  Autre:                'Autre',
+}
+
+const TYPE_COLORS: Record<AgendaEventType, string> = {
+  RendezVousCommercial: '#22c55e',
+  CaptationMatterport:  '#3b82f6',
+  Captation360:         '#06b6d4',
+  Livraison:            '#f97316',
+  Urgent:               '#ef4444',
+  ReunionInterne:       '#6b7280',
+  AppelClient:          '#a855f7',
+  SuiviClient:          '#eab308',
+  Presentation:         '#6366f1',
+  Validation:           '#15803d',
+  Autre:                '#9ca3af',
 }
 
 interface CalEvent {
@@ -184,6 +199,18 @@ export default function AgendaPage() {
                 views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
                 culture="fr"
                 style={{ height: 650 }}
+                eventPropGetter={(event) => {
+                  const color = TYPE_COLORS[(event as CalEvent).resource.type] ?? GOLD
+                  return {
+                    style: {
+                      backgroundColor: color,
+                      borderColor: color,
+                      color: '#fff',
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                    },
+                  }
+                }}
                 messages={{
                   today:    "Aujourd'hui",
                   previous: 'Précédent',
@@ -224,8 +251,7 @@ export default function AgendaPage() {
         .rbc-wrapper .rbc-today { background: rgba(200,164,93,0.05); }
         .rbc-wrapper .rbc-date-cell { color: rgba(255,255,255,0.5); font-size: 12px; }
         .rbc-wrapper .rbc-date-cell.rbc-now { color: #C8A45D; font-weight: 600; }
-        .rbc-wrapper .rbc-event { background-color: rgba(200,164,93,0.25); border: 1px solid rgba(200,164,93,0.5); color: #C8A45D; border-radius: 4px; font-size: 11px; }
-        .rbc-wrapper .rbc-event.rbc-selected { background-color: rgba(200,164,93,0.4); }
+        .rbc-wrapper .rbc-event.rbc-selected { opacity: 0.85; }
         .rbc-wrapper .rbc-time-header-content,
         .rbc-wrapper .rbc-time-content { border-color: rgba(255,255,255,0.06); }
         .rbc-wrapper .rbc-timeslot-group { border-color: rgba(255,255,255,0.04); }

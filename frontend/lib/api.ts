@@ -632,6 +632,7 @@ export type AgendaEventType =
   | 'SuiviClient'
   | 'Presentation'
   | 'Validation'
+  | 'Autre'
 
 export interface AgendaEventDto {
   id: string
@@ -641,6 +642,7 @@ export interface AgendaEventDto {
   type: AgendaEventType
   location?: string
   notes?: string
+  customType?: string
   createdAt: string
   updatedAt: string
   clientId?: string
@@ -658,6 +660,7 @@ export interface CreateAgendaEventDto {
   type: AgendaEventType
   location?: string
   notes?: string
+  customType?: string
   clientId?: string
   projectId?: string
   contactId?: string
