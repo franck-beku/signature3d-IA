@@ -13,8 +13,6 @@ import {
   type ClientDto, type ProjectDto, type ContactDto,
 } from '@/lib/api'
 
-const GOLD = '#C8A45D'
-
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -71,7 +69,6 @@ const toCalEvent = (dto: AgendaEventDto): CalEvent => ({
   resource: dto,
 })
 
-// Coupe une string ISO à "YYYY-MM-DDTHH:mm" pour datetime-local
 function toLocalInput(iso: string): string {
   return iso.slice(0, 16)
 }
@@ -89,20 +86,20 @@ const EMPTY_FORM: CreateAgendaEventDto = {
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', backgroundColor: '#0d0d0d',
-  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
-  padding: '10px 14px', fontSize: '13px', color: 'white',
+  width: '100%', backgroundColor: 'var(--dash-input)',
+  border: '1px solid var(--dash-border-input)', borderRadius: '8px',
+  padding: '10px 14px', fontSize: '13px', color: 'var(--dash-text)',
   outline: 'none', boxSizing: 'border-box',
   fontFamily: 'var(--font-body)',
 }
 
 const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.3)',
+  display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)',
   textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px',
 }
 
 const hintStyle: React.CSSProperties = {
-  fontSize: '11px', color: 'rgba(255,255,255,0.2)', margin: '6px 0 0',
+  fontSize: '11px', color: 'var(--dash-text-muted)', margin: '6px 0 0',
 }
 
 export default function AgendaPage() {
@@ -132,14 +129,12 @@ export default function AgendaPage() {
 
   useEffect(() => { load() }, [load])
 
-  // Chargement de la liste clients au montage
   useEffect(() => {
     clientsApi.getAll(1, 1000)
       .then(r => setClients(r.items))
       .catch(() => {})
   }, [])
 
-  // Chargement projets + contacts quand le client change (charge uniquement, pas de réinitialisation)
   useEffect(() => {
     if (!form.clientId) { setProjects([]); setContacts([]); return }
     projectsApi.getByClient(form.clientId).then(setProjects).catch(() => setProjects([]))
@@ -213,20 +208,20 @@ export default function AgendaPage() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
+      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--dash-bg)' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>Agenda</h1>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Agenda</h1>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
               Rendez-vous & événements
             </p>
           </div>
           <button
             onClick={() => { resetForm(); setShowForm(true) }}
             className="new-btn"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--dash-gold)', color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
           >
             <Plus size={13} />
             Nouvel événement
@@ -236,16 +231,16 @@ export default function AgendaPage() {
         <div style={{ padding: '28px 40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           {error && (
-            <div style={{ backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: '#f87171', fontSize: '13px' }}>{error}</span>
-              <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171' }}><X size={14} /></button>
+            <div style={{ backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--dash-error)', fontSize: '13px' }}>{error}</span>
+              <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--dash-error)' }}><X size={14} /></button>
             </div>
           )}
 
           {/* Formulaire création / édition */}
           {showForm && (
-            <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px' }}>
-              <h3 style={{ color: 'white', fontSize: '14px', fontWeight: 500, margin: '0 0 20px' }}>
+            <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border-input)', borderRadius: '14px', padding: '24px' }}>
+              <h3 style={{ color: 'var(--dash-text)', fontSize: '14px', fontWeight: 500, margin: '0 0 20px' }}>
                 {editingId ? 'Modifier l\'événement' : 'Nouvel événement'}
               </h3>
 
@@ -342,30 +337,29 @@ export default function AgendaPage() {
                 </select>
               </div>
 
-              {/* Boutons — Enregistrer/Créer à gauche, Supprimer isolé à droite */}
+              {/* Boutons */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button
                     onClick={handleSubmit}
                     disabled={!form.title || !form.startDateTime || submitting}
-                    style={{ backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}
+                    style={{ backgroundColor: 'var(--dash-gold)', color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}
                   >
                     {submitting ? (editingId ? 'Enregistrement…' : 'Création…') : (editingId ? 'Enregistrer' : 'Créer')}
                   </button>
                   <button
                     onClick={resetForm}
-                    style={{ backgroundColor: 'transparent', color: 'rgba(255,255,255,0.4)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}
+                    style={{ backgroundColor: 'transparent', color: 'var(--dash-text-subtle)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', cursor: 'pointer' }}
                   >
                     Annuler
                   </button>
                 </div>
 
-                {/* Supprimer — visible uniquement en mode édition, isolé à droite */}
                 {editingId && (
                   <button
                     onClick={handleDelete}
                     disabled={submitting}
-                    style={{ backgroundColor: 'transparent', color: '#ef4444', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.3)', cursor: 'pointer', opacity: submitting ? 0.5 : 1 }}
+                    style={{ backgroundColor: 'transparent', color: 'var(--dash-error)', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--dash-error-ring)', cursor: 'pointer', opacity: submitting ? 0.5 : 1 }}
                     className="del-btn"
                   >
                     Supprimer
@@ -378,10 +372,10 @@ export default function AgendaPage() {
           {/* Calendrier */}
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: `2px solid rgba(200,164,93,0.2)`, borderTopColor: GOLD, animation: 'spin 0.8s linear infinite' }} />
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--dash-gold-ring)', borderTopColor: 'var(--dash-gold)', animation: 'spin 0.8s linear infinite' }} />
             </div>
           ) : (
-            <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '20px' }} className="rbc-wrapper">
+            <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '20px' }} className="rbc-wrapper">
               <Calendar
                 localizer={localizer}
                 events={events}
@@ -391,7 +385,7 @@ export default function AgendaPage() {
                 style={{ height: 650 }}
                 onSelectEvent={handleSelectEvent}
                 eventPropGetter={(event) => {
-                  const color = TYPE_COLORS[(event as CalEvent).resource.type] ?? GOLD
+                  const color = TYPE_COLORS[(event as CalEvent).resource.type] ?? 'var(--dash-gold)'
                   return {
                     style: {
                       backgroundColor: color,
@@ -425,33 +419,33 @@ export default function AgendaPage() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .new-btn:hover { background-color: #b8943d !important; }
-        .del-btn:hover { background-color: rgba(239,68,68,0.08) !important; border-color: rgba(239,68,68,0.5) !important; }
+        .del-btn:hover { background-color: var(--dash-error-bg) !important; border-color: var(--dash-error) !important; }
         @media (max-width: 540px) { .form-row { grid-template-columns: 1fr !important; } }
 
-        /* Intégration dark du calendrier react-big-calendar */
-        .rbc-wrapper .rbc-calendar { color: rgba(255,255,255,0.85); }
-        .rbc-wrapper .rbc-toolbar button { color: rgba(255,255,255,0.6); background: transparent; border-color: rgba(255,255,255,0.1); }
+        /* Intégration light du calendrier react-big-calendar */
+        .rbc-wrapper .rbc-calendar { color: var(--dash-text); }
+        .rbc-wrapper .rbc-toolbar button { color: var(--dash-text-subtle); background: transparent; border-color: var(--dash-border-input); }
         .rbc-wrapper .rbc-toolbar button:hover,
         .rbc-wrapper .rbc-toolbar button.rbc-active { background: rgba(200,164,93,0.12); color: #C8A45D; border-color: rgba(200,164,93,0.3); }
-        .rbc-wrapper .rbc-toolbar-label { color: white; font-size: 16px; }
+        .rbc-wrapper .rbc-toolbar-label { color: var(--dash-text); font-size: 16px; }
         .rbc-wrapper .rbc-month-view,
         .rbc-wrapper .rbc-time-view,
-        .rbc-wrapper .rbc-agenda-view { background: transparent; border-color: rgba(255,255,255,0.06); }
-        .rbc-wrapper .rbc-header { color: rgba(255,255,255,0.4); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; border-color: rgba(255,255,255,0.06); padding: 8px 4px; }
+        .rbc-wrapper .rbc-agenda-view { background: transparent; border-color: var(--dash-border); }
+        .rbc-wrapper .rbc-header { color: var(--dash-text-subtle); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; border-color: var(--dash-border); padding: 8px 4px; }
         .rbc-wrapper .rbc-day-bg + .rbc-day-bg,
-        .rbc-wrapper .rbc-month-row + .rbc-month-row { border-color: rgba(255,255,255,0.05); }
-        .rbc-wrapper .rbc-off-range-bg { background: rgba(255,255,255,0.02); }
+        .rbc-wrapper .rbc-month-row + .rbc-month-row { border-color: var(--dash-border); }
+        .rbc-wrapper .rbc-off-range-bg { background: var(--dash-hover); }
         .rbc-wrapper .rbc-today { background: rgba(200,164,93,0.05); }
-        .rbc-wrapper .rbc-date-cell { color: rgba(255,255,255,0.5); font-size: 12px; }
+        .rbc-wrapper .rbc-date-cell { color: var(--dash-text-subtle); font-size: 12px; }
         .rbc-wrapper .rbc-date-cell.rbc-now { color: #C8A45D; font-weight: 600; }
         .rbc-wrapper .rbc-event.rbc-selected { opacity: 0.85; }
         .rbc-wrapper .rbc-time-header-content,
-        .rbc-wrapper .rbc-time-content { border-color: rgba(255,255,255,0.06); }
-        .rbc-wrapper .rbc-timeslot-group { border-color: rgba(255,255,255,0.04); }
-        .rbc-wrapper .rbc-time-slot { color: rgba(255,255,255,0.2); font-size: 11px; }
+        .rbc-wrapper .rbc-time-content { border-color: var(--dash-border); }
+        .rbc-wrapper .rbc-timeslot-group { border-color: var(--dash-border); }
+        .rbc-wrapper .rbc-time-slot { color: var(--dash-text-muted); font-size: 11px; }
         .rbc-wrapper .rbc-agenda-date-cell,
-        .rbc-wrapper .rbc-agenda-time-cell { color: rgba(255,255,255,0.4); font-size: 12px; border-color: rgba(255,255,255,0.05); }
-        .rbc-wrapper .rbc-agenda-event-cell { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.05); }
+        .rbc-wrapper .rbc-agenda-time-cell { color: var(--dash-text-subtle); font-size: 12px; border-color: var(--dash-border); }
+        .rbc-wrapper .rbc-agenda-event-cell { color: var(--dash-text); border-color: var(--dash-border); }
         .rbc-wrapper .rbc-show-more { color: #C8A45D; background: transparent; font-size: 11px; }
       `}</style>
     </div>

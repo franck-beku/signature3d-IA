@@ -1,6 +1,6 @@
 /**
  * Nouveau Client — Dashboard
- * Version: 3.0 — Connecté au backend PostgreSQL
+ * Version: 3.1 — Thème clair (variables --dash-*)
  */
 
 'use client'
@@ -13,18 +13,16 @@ import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { clientsApi, sectorsApi, type SectorDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
 
-const GOLD = '#d4af37'
-
 const PRIORITES = [1, 2, 3].map((v) => ({ value: v, ...getPriority(v) }))
 
 const inputStyle = {
   width: '100%',
-  backgroundColor: '#1a1a1a',
-  border: '1px solid rgba(255,255,255,0.08)',
+  backgroundColor: 'var(--dash-input)',
+  border: '1px solid var(--dash-border-input)',
   borderRadius: '8px',
   padding: '11px 14px',
   fontSize: '13px',
-  color: 'white',
+  color: 'var(--dash-text)',
   outline: 'none',
   boxSizing: 'border-box' as const,
   fontFamily: 'var(--font-body)',
@@ -36,7 +34,7 @@ const labelStyle = {
   fontSize: '11px', fontWeight: 600,
   textTransform: 'uppercase' as const,
   letterSpacing: '0.2em',
-  color: 'rgba(255,255,255,0.3)',
+  color: 'var(--dash-text-muted)',
   marginBottom: '8px',
 }
 
@@ -76,7 +74,6 @@ export default function NouveauClientPage() {
     setError(null)
 
     try {
-      /* Si secteur custom — créer ou récupérer le secteur via l'API */
       let sectorId = form.sectorId
 
       if (!sectorId) {
@@ -84,7 +81,6 @@ export default function NouveauClientPage() {
         return
       }
 
-      /* Créer le client via l'API */
       await clientsApi.create({
         name:         form.name,
         email:        form.email,
@@ -116,16 +112,16 @@ export default function NouveauClientPage() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
+      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--dash-bg)' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <Link href="/dashboard/clients" style={{ color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', textDecoration: 'none' }} className="back-arrow">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
+          <Link href="/dashboard/clients" style={{ color: 'var(--dash-text-muted)', display: 'flex', alignItems: 'center', textDecoration: 'none' }} className="back-arrow">
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>Nouveau client</h1>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Nouveau client</h1>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
               Remplir les informations du client
             </p>
           </div>
@@ -136,25 +132,25 @@ export default function NouveauClientPage() {
           {/* Succès */}
           {saved ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 32px', textAlign: 'center' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '14px', backgroundColor: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <CheckCircle size={24} style={{ color: '#4ade80' }} />
+              <div style={{ width: '56px', height: '56px', borderRadius: '14px', backgroundColor: 'var(--dash-success-bg)', border: '1px solid var(--dash-success-ring)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                <CheckCircle size={24} style={{ color: 'var(--dash-success)' }} />
               </div>
-              <p style={{ color: 'white', fontSize: '16px', fontWeight: 500, marginBottom: '8px' }}>Client créé avec succès</p>
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>Redirection vers la liste des clients...</p>
+              <p style={{ color: 'var(--dash-text)', fontSize: '16px', fontWeight: 500, marginBottom: '8px' }}>Client créé avec succès</p>
+              <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>Redirection vers la liste des clients...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
               {/* Erreur */}
               {error && (
-                <div style={{ padding: '12px 16px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '10px', color: '#f87171', fontSize: '13px' }}>
+                <div style={{ padding: '12px 16px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '10px', color: 'var(--dash-error)', fontSize: '13px' }}>
                   {error}
                 </div>
               )}
 
               {/* Infos principales */}
-              <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px' }}>
-                <h2 style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+                <h2 style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
                   Informations du client
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }} className="form-grid">
@@ -183,8 +179,8 @@ export default function NouveauClientPage() {
               </div>
 
               {/* Dates & Statut */}
-              <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px' }}>
-                <h2 style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+                <h2 style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
                   Contrat & Priorité
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }} className="form-grid">
@@ -214,9 +210,9 @@ export default function NouveauClientPage() {
                           onClick={() => set('priority', p.value)}
                           style={{
                             flex: 1, padding: '10px 8px', borderRadius: '8px',
-                            border: `1px solid ${form.priority === p.value ? p.color : 'rgba(255,255,255,0.08)'}`,
+                            border: `1px solid ${form.priority === p.value ? p.color : 'var(--dash-border-input)'}`,
                             backgroundColor: form.priority === p.value ? p.bgColor : 'transparent',
-                            color: form.priority === p.value ? p.color : 'rgba(255,255,255,0.4)',
+                            color: form.priority === p.value ? p.color : 'var(--dash-text-subtle)',
                             fontSize: '12px', fontWeight: 600,
                             cursor: 'pointer', transition: 'all 0.2s ease',
                           }}
@@ -230,8 +226,8 @@ export default function NouveauClientPage() {
               </div>
 
               {/* Notes */}
-              <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '24px' }}>
-                <h2 style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+                <h2 style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
                   Notes internes
                 </h2>
                 <textarea
@@ -251,8 +247,8 @@ export default function NouveauClientPage() {
                   disabled={!isValid || saving}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
-                    backgroundColor: isValid && !saving ? GOLD : 'rgba(255,255,255,0.05)',
-                    color: isValid && !saving ? '#000' : 'rgba(255,255,255,0.2)',
+                    backgroundColor: isValid && !saving ? 'var(--dash-gold)' : 'var(--dash-border)',
+                    color: isValid && !saving ? '#000' : 'var(--dash-text-muted)',
                     fontSize: '13px', fontWeight: 600,
                     padding: '12px 24px', borderRadius: '8px',
                     border: 'none', cursor: isValid && !saving ? 'pointer' : 'not-allowed',
@@ -262,7 +258,7 @@ export default function NouveauClientPage() {
                 >
                   {saving ? 'Création...' : 'Créer le client'}
                 </button>
-                <Link href="/dashboard/clients" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', textDecoration: 'none', padding: '12px 16px' }}>
+                <Link href="/dashboard/clients" style={{ fontSize: '13px', color: 'var(--dash-text-muted)', textDecoration: 'none', padding: '12px 16px' }}>
                   Annuler
                 </Link>
               </div>
@@ -272,9 +268,9 @@ export default function NouveauClientPage() {
       </main>
 
       <style>{`
-        .back-arrow:hover { color: ${GOLD} !important; }
-        .dash-input:focus { border-color: ${GOLD} !important; }
-        .submit-btn:hover:not(:disabled) { background-color: #c9a84c !important; }
+        .back-arrow:hover { color: var(--dash-gold) !important; }
+        .dash-input:focus { border-color: var(--dash-gold) !important; }
+        .submit-btn:hover:not(:disabled) { background-color: #b8943d !important; }
         @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr !important; } }
       `}</style>
     </div>

@@ -1,6 +1,6 @@
 /**
  * Paramètres — Dashboard Signature 3D IA
- * Version: 2.0 — Connecté au backend (changement mot de passe réel)
+ * Version: 2.1 — Thème clair (variables --dash-*)
  */
 
 'use client'
@@ -10,16 +10,14 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import { Save, Eye, EyeOff, Check, AlertTriangle } from 'lucide-react'
 import { authApi } from '@/lib/api'
 
-const GOLD = '#d4af37'
-
 const inputStyle = {
   width: '100%',
-  backgroundColor: '#1a1a1a',
-  border: '1px solid rgba(255,255,255,0.08)',
+  backgroundColor: 'var(--dash-input)',
+  border: '1px solid var(--dash-border-input)',
   borderRadius: '10px',
   padding: '12px 16px',
   fontSize: '13px',
-  color: 'white',
+  color: 'var(--dash-text)',
   outline: 'none',
   boxSizing: 'border-box' as const,
   fontFamily: 'inherit',
@@ -31,13 +29,13 @@ const labelStyle = {
   fontSize: '11px',
   textTransform: 'uppercase' as const,
   letterSpacing: '0.25em',
-  color: 'rgba(255,255,255,0.3)',
+  color: 'var(--dash-text-muted)',
   marginBottom: '8px',
 }
 
 const sectionStyle = {
-  backgroundColor: '#111111',
-  border: '1px solid rgba(255,255,255,0.05)',
+  backgroundColor: 'var(--dash-surface)',
+  border: '1px solid var(--dash-border)',
   borderRadius: '14px',
   padding: '24px',
 }
@@ -125,12 +123,12 @@ export default function ParametresPage() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
+      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--dash-bg)' }}>
 
         {/* Header */}
-        <div style={{ padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>Paramètres</h1>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+        <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Paramètres</h1>
+          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
             Compte et préférences
           </p>
         </div>
@@ -139,7 +137,7 @@ export default function ParametresPage() {
 
           {/* ── Profil ── */}
           <div style={sectionStyle}>
-            <h2 style={{ color: 'white', fontWeight: 500, fontSize: '13px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--dash-border)' }}>
               Informations du compte
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }} className="form-grid">
@@ -166,9 +164,9 @@ export default function ParametresPage() {
                 display: 'flex', alignItems: 'center', gap: '8px',
                 fontSize: '12px', fontWeight: 600, padding: '9px 20px',
                 borderRadius: '8px', border: 'none', cursor: 'pointer',
-                backgroundColor: savedProfile ? 'rgba(74,222,128,0.1)' : GOLD,
-                color: savedProfile ? '#4ade80' : '#000',
-                outline: savedProfile ? '1px solid rgba(74,222,128,0.2)' : 'none',
+                backgroundColor: savedProfile ? 'var(--dash-success-bg)' : 'var(--dash-gold)',
+                color: savedProfile ? 'var(--dash-success)' : '#000',
+                outline: savedProfile ? '1px solid var(--dash-success-ring)' : 'none',
                 transition: 'all 0.3s ease',
               }}
               className="save-btn"
@@ -179,19 +177,19 @@ export default function ParametresPage() {
 
           {/* ── Mot de passe ── */}
           <div style={sectionStyle}>
-            <h2 style={{ color: 'white', fontWeight: 500, fontSize: '13px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--dash-border)' }}>
               Changer le mot de passe
             </h2>
             <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
               {pwdError && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '8px', color: '#f87171', fontSize: '13px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '8px', color: 'var(--dash-error)', fontSize: '13px' }}>
                   <AlertTriangle size={14} /> {pwdError}
                 </div>
               )}
 
               {pwdSuccess && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: '8px', color: '#4ade80', fontSize: '13px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: 'var(--dash-success-bg)', border: '1px solid var(--dash-success-ring)', borderRadius: '8px', color: 'var(--dash-success)', fontSize: '13px' }}>
                   <Check size={14} /> Mot de passe changé avec succès !
                 </div>
               )}
@@ -200,7 +198,7 @@ export default function ParametresPage() {
                 <label style={labelStyle}>Mot de passe actuel</label>
                 <div style={{ position: 'relative' }}>
                   <input type={showCurrent ? 'text' : 'password'} value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} placeholder="••••••••" style={{ ...inputStyle, paddingRight: '48px' }} className="dash-input" />
-                  <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
                     {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
@@ -210,7 +208,7 @@ export default function ParametresPage() {
                 <label style={labelStyle}>Nouveau mot de passe</label>
                 <div style={{ position: 'relative' }}>
                   <input type={showNew ? 'text' : 'password'} value={passwords.new} onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} placeholder="••••••••" style={{ ...inputStyle, paddingRight: '48px' }} className="dash-input" />
-                  <button type="button" onClick={() => setShowNew(!showNew)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => setShowNew(!showNew)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
                     {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
@@ -229,7 +227,7 @@ export default function ParametresPage() {
                   fontSize: '12px', fontWeight: 600, padding: '9px 20px',
                   borderRadius: '8px', border: 'none',
                   cursor: savingPwd ? 'not-allowed' : 'pointer',
-                  backgroundColor: GOLD, color: '#000',
+                  backgroundColor: 'var(--dash-gold)', color: '#000',
                   opacity: savingPwd ? 0.7 : 1,
                   width: 'fit-content',
                 }}
@@ -243,19 +241,19 @@ export default function ParametresPage() {
 
           {/* ── Notifications ── */}
           <div style={sectionStyle}>
-            <h2 style={{ color: 'white', fontWeight: 500, fontSize: '13px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--dash-border)' }}>
               Notifications
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {notifItems.map((n, i) => (
-                <div key={n.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i < notifItems.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                <div key={n.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i < notifItems.length - 1 ? '1px solid var(--dash-border)' : 'none' }}>
                   <div>
-                    <p style={{ color: 'white', fontSize: '13px', margin: 0 }}>{n.label}</p>
-                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '2px' }}>{n.desc}</p>
+                    <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>{n.label}</p>
+                    <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '2px' }}>{n.desc}</p>
                   </div>
                   <button
                     onClick={() => setNotifPrefs({ ...notifPrefs, [n.key]: !notifPrefs[n.key as keyof typeof notifPrefs] })}
-                    style={{ width: '44px', height: '24px', borderRadius: '999px', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.3s ease', backgroundColor: notifPrefs[n.key as keyof typeof notifPrefs] ? GOLD : '#2a2a2a' }}
+                    style={{ width: '44px', height: '24px', borderRadius: '999px', border: 'none', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.3s ease', backgroundColor: notifPrefs[n.key as keyof typeof notifPrefs] ? 'var(--dash-gold)' : 'var(--dash-input)' }}
                   >
                     <span style={{ position: 'absolute', top: '4px', width: '16px', height: '16px', backgroundColor: 'white', borderRadius: '50%', transition: 'left 0.3s ease', left: notifPrefs[n.key as keyof typeof notifPrefs] ? '24px' : '4px' }} />
                   </button>
@@ -265,14 +263,14 @@ export default function ParametresPage() {
           </div>
 
           {/* ── Danger zone ── */}
-          <div style={{ ...sectionStyle, border: '1px solid rgba(248,113,113,0.2)' }}>
-            <h2 style={{ color: '#f87171', fontWeight: 500, fontSize: '13px', marginBottom: '16px' }}>Zone dangereuse</h2>
+          <div style={{ ...sectionStyle, border: '1px solid var(--dash-error-ring)' }}>
+            <h2 style={{ color: 'var(--dash-error)', fontWeight: 500, fontSize: '13px', marginBottom: '16px' }}>Zone dangereuse</h2>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', margin: 0 }}>Supprimer le compte</p>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '2px' }}>Cette action est irréversible — contactez Alain pour confirmer</p>
+                <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>Supprimer le compte</p>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '2px' }}>Cette action est irréversible — contactez Alain pour confirmer</p>
               </div>
-              <button style={{ fontSize: '12px', padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', background: 'none', cursor: 'pointer' }} className="delete-btn">
+              <button style={{ fontSize: '12px', padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="delete-btn">
                 Supprimer
               </button>
             </div>
@@ -282,9 +280,9 @@ export default function ParametresPage() {
       </main>
 
       <style>{`
-        .save-btn:hover:not(:disabled) { background-color: #c9a84c !important; }
-        .delete-btn:hover { background-color: rgba(248,113,113,0.1) !important; }
-        .dash-input:focus { border-color: ${GOLD} !important; }
+        .save-btn:hover:not(:disabled) { background-color: #b8943d !important; }
+        .delete-btn:hover { background-color: var(--dash-error-bg) !important; }
+        .dash-input:focus { border-color: var(--dash-gold) !important; }
         @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr !important; } }
       `}</style>
     </div>

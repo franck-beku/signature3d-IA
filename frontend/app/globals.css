@@ -213,4 +213,11 @@ section {
   --dash-success-bg:   rgba(22,163,74,0.08);
   --dash-error:        #dc2626;
   --dash-error-bg:     rgba(220,38,38,0.08);
+  --dash-error-ring:   rgba(220,38,38,0.2);
+  --dash-hover:        rgba(0,0,0,0.03);
+  --dash-gold-icon:    rgba(200,164,93,0.5);
+  --dash-info:         #3b82f6;
+  --dash-success-ring: rgba(22,163,74,0.25);
+  --dash-gold-bar:     rgba(200,164,93,0.3);
+  --dash-success-bar:  rgba(22,163,74,0.2);
 }
