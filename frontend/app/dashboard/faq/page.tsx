@@ -1,6 +1,6 @@
 /**
  * FAQ — Dashboard Signature Immersion
- * Gestion CRUD des questions fréquentes du site.
+ * Version: 2.1 — Thème clair (variables --dash-*)
  */
 
 'use client'
@@ -10,26 +10,24 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import { Plus, Search, Trash2, Pencil, AlertTriangle, X, Check, Eye, EyeOff } from 'lucide-react'
 import { faqApi, type FaqDto } from '@/lib/api'
 
-const GOLD = '#d4af37'
-
 const thStyle = {
   textAlign: 'left' as const, padding: '14px 16px',
   fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)',
-  fontWeight: 400, borderBottom: '1px solid rgba(255,255,255,0.05)',
+  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
+  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
 const inputStyle = {
-  width: '100%', backgroundColor: '#1a1a1a',
-  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
-  padding: '10px 14px', fontSize: '13px', color: 'white' as const,
+  width: '100%', backgroundColor: 'var(--dash-input)',
+  border: '1px solid var(--dash-border-input)', borderRadius: '8px',
+  padding: '10px 14px', fontSize: '13px', color: 'var(--dash-text)' as const,
   outline: 'none', boxSizing: 'border-box' as const,
   fontFamily: 'inherit', transition: 'border-color 0.2s ease',
 }
 
 const labelStyle = {
-  display: 'block' as const, fontSize: '11px', color: 'rgba(255,255,255,0.3)',
+  display: 'block' as const, fontSize: '11px', color: 'var(--dash-text-muted)',
   textTransform: 'uppercase' as const, letterSpacing: '0.2em', marginBottom: '6px',
 }
 
@@ -120,16 +118,16 @@ export default function FaqPage() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
+      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--dash-bg)' }}>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>FAQ</h1>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>FAQ</h1>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
               {loading ? '...' : `${faqs.length} question${faqs.length > 1 ? 's' : ''}`}
             </p>
           </div>
-          <button onClick={openCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }} className="new-btn">
+          <button onClick={openCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--dash-gold)', color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }} className="new-btn">
             <Plus size={13} /> Nouvelle question
           </button>
         </div>
@@ -137,17 +135,17 @@ export default function FaqPage() {
         <div style={{ padding: '28px 40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           {error && !form && (
-            <div style={{ padding: '12px 16px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '10px', color: '#f87171', fontSize: '13px' }}>{error}</div>
+            <div style={{ padding: '12px 16px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '10px', color: 'var(--dash-error)', fontSize: '13px' }}>{error}</div>
           )}
 
           <div style={{ position: 'relative', maxWidth: '320px' }}>
-            <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+            <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
             <input type="text" placeholder="Question, réponse..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ ...inputStyle, paddingLeft: '36px' }} className="dash-input" />
           </div>
 
-          <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', overflow: 'hidden' }}>
+          <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', overflow: 'hidden' }}>
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '48px', color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Chargement...</div>
+              <div style={{ textAlign: 'center', padding: '48px', color: 'var(--dash-text-muted)', fontSize: '13px' }}>Chargement...</div>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
@@ -164,31 +162,31 @@ export default function FaqPage() {
                     const isDeletePending = deleteConfirm === f.id
                     return (
                       <React.Fragment key={f.id}>
-                        <tr style={{ borderBottom: isDeletePending ? 'none' : (i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none') }} className="client-row">
-                          <td style={{ padding: '14px 16px' }}><span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>{f.displayOrder}</span></td>
-                          <td style={{ padding: '14px 16px', maxWidth: '300px' }}><p style={{ color: 'white', fontSize: '13px', fontWeight: 500, margin: 0 }}>{f.question}</p></td>
-                          <td style={{ padding: '14px 16px', maxWidth: '360px' }}><span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.answer}</span></td>
+                        <tr style={{ borderBottom: isDeletePending ? 'none' : (i < filtered.length - 1 ? '1px solid var(--dash-border)' : 'none') }} className="client-row">
+                          <td style={{ padding: '14px 16px' }}><span style={{ color: 'var(--dash-text-subtle)', fontSize: '13px' }}>{f.displayOrder}</span></td>
+                          <td style={{ padding: '14px 16px', maxWidth: '300px' }}><p style={{ color: 'var(--dash-text)', fontSize: '13px', fontWeight: 500, margin: 0 }}>{f.question}</p></td>
+                          <td style={{ padding: '14px 16px', maxWidth: '360px' }}><span style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.answer}</span></td>
                           <td style={{ padding: '14px 16px' }}>
                             {f.isPublished
-                              ? <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>Publiée</span>
-                              : <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}>Brouillon</span>}
+                              ? <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: 'var(--dash-success-bg)', color: 'var(--dash-success)' }}>Publiée</span>
+                              : <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: 'var(--dash-border)', color: 'var(--dash-text-subtle)' }}>Brouillon</span>}
                           </td>
                           <td style={{ padding: '14px 16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                              <button onClick={() => openEdit(f)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '6px', border: `1px solid rgba(212,175,55,0.2)`, color: GOLD, background: 'none', cursor: 'pointer' }} className="edit-btn" title="Modifier"><Pencil size={12} /></button>
-                              <button onClick={() => setDeleteConfirm(isDeletePending ? null : f.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '6px', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', background: 'none', cursor: 'pointer' }} className="del-btn" title="Supprimer"><Trash2 size={12} /></button>
+                              <button onClick={() => openEdit(f)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', color: 'var(--dash-gold)', background: 'none', cursor: 'pointer' }} className="edit-btn" title="Modifier"><Pencil size={12} /></button>
+                              <button onClick={() => setDeleteConfirm(isDeletePending ? null : f.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="del-btn" title="Supprimer"><Trash2 size={12} /></button>
                             </div>
                           </td>
                         </tr>
                         {isDeletePending && (
                           <tr>
-                            <td colSpan={5} style={{ padding: '12px 16px', backgroundColor: 'rgba(248,113,113,0.05)', borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                            <td colSpan={5} style={{ padding: '12px 16px', backgroundColor: 'var(--dash-error-bg)', borderBottom: i < filtered.length - 1 ? '1px solid var(--dash-border)' : 'none' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <AlertTriangle size={14} style={{ color: '#f87171', flexShrink: 0 }} />
-                                <p style={{ color: '#f87171', fontSize: '13px', margin: 0 }}>Supprimer cette question ? Cette action est irréversible.</p>
+                                <AlertTriangle size={14} style={{ color: 'var(--dash-error)', flexShrink: 0 }} />
+                                <p style={{ color: 'var(--dash-error)', fontSize: '13px', margin: 0 }}>Supprimer cette question ? Cette action est irréversible.</p>
                                 <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
-                                  <button onClick={() => setDeleteConfirm(null)} style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', background: 'none', cursor: 'pointer' }}>Annuler</button>
-                                  <button onClick={() => handleDelete(f.id)} style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '6px', backgroundColor: '#f87171', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Confirmer</button>
+                                  <button onClick={() => setDeleteConfirm(null)} style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }}>Annuler</button>
+                                  <button onClick={() => handleDelete(f.id)} style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '6px', backgroundColor: 'var(--dash-error)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Confirmer</button>
                                 </div>
                               </div>
                             </td>
@@ -198,7 +196,7 @@ export default function FaqPage() {
                     )
                   })}
                   {filtered.length === 0 && !loading && (
-                    <tr><td colSpan={5} style={{ textAlign: 'center', padding: '48px', color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Aucune question trouvée</td></tr>
+                    <tr><td colSpan={5} style={{ textAlign: 'center', padding: '48px', color: 'var(--dash-text-muted)', fontSize: '13px' }}>Aucune question trouvée</td></tr>
                   )}
                 </tbody>
               </table>
@@ -209,12 +207,12 @@ export default function FaqPage() {
 
       {form && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-          <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border-input)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-              <h2 style={{ color: 'white', fontWeight: 500, fontSize: '16px', margin: 0 }}>{form.id ? 'Modifier la question' : 'Nouvelle question'}</h2>
-              <button onClick={() => setForm(null)} style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)' }} className="close-btn"><X size={14} /></button>
+              <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '16px', margin: 0 }}>{form.id ? 'Modifier la question' : 'Nouvelle question'}</h2>
+              <button onClick={() => setForm(null)} style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-text-subtle)' }} className="close-btn"><X size={14} /></button>
             </div>
-            {error && (<div style={{ padding: '10px 14px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '8px', color: '#f87171', fontSize: '13px', marginBottom: '16px' }}>{error}</div>)}
+            {error && (<div style={{ padding: '10px 14px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '8px', color: 'var(--dash-error)', fontSize: '13px', marginBottom: '16px' }}>{error}</div>)}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label style={labelStyle}>Question *</label>
@@ -230,14 +228,14 @@ export default function FaqPage() {
               </div>
               <div>
                 <label style={labelStyle}>Visibilité sur le site</label>
-                <button onClick={() => setForm({ ...form, isPublished: !form.isPublished })} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#1a1a1a', color: form.isPublished ? '#4ade80' : 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '13px', width: '100%' }}>
+                <button onClick={() => setForm({ ...form, isPublished: !form.isPublished })} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-input)', color: form.isPublished ? 'var(--dash-success)' : 'var(--dash-text-subtle)', cursor: 'pointer', fontSize: '13px', width: '100%' }}>
                   {form.isPublished ? <Eye size={14} /> : <EyeOff size={14} />}
                   {form.isPublished ? 'Publiée — visible sur le site' : 'Brouillon — invisible sur le site'}
                 </button>
               </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-                <button onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: GOLD, color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }} className="save-btn"><Check size={14} /> {saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
-                <button onClick={() => setForm(null)} style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer' }}>Annuler</button>
+                <button onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--dash-gold)', color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }} className="save-btn"><Check size={14} /> {saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                <button onClick={() => setForm(null)} style={{ fontSize: '13px', color: 'var(--dash-text-muted)', background: 'none', border: '1px solid var(--dash-border-input)', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer' }}>Annuler</button>
               </div>
             </div>
           </div>
@@ -245,13 +243,13 @@ export default function FaqPage() {
       )}
 
       <style>{`
-        .new-btn:hover    { background-color: #c9a84c !important; }
-        .client-row:hover { background-color: rgba(255,255,255,0.02) !important; }
-        .edit-btn:hover   { background-color: rgba(212,175,55,0.1) !important; }
-        .del-btn:hover    { background-color: rgba(248,113,113,0.1) !important; }
-        .close-btn:hover  { color: white !important; }
-        .save-btn:hover   { background-color: #c9a84c !important; }
-        .dash-input:focus { border-color: ${GOLD} !important; }
+        .new-btn:hover    { background-color: #b8943d !important; }
+        .client-row:hover { background-color: var(--dash-hover) !important; }
+        .edit-btn:hover   { background-color: var(--dash-gold-muted) !important; }
+        .del-btn:hover    { background-color: var(--dash-error-bg) !important; }
+        .close-btn:hover  { color: var(--dash-text) !important; }
+        .save-btn:hover   { background-color: #b8943d !important; }
+        .dash-input:focus { border-color: var(--dash-gold) !important; }
       `}</style>
     </div>
   )
