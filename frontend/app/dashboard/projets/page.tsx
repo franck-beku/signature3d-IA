@@ -13,9 +13,7 @@ import { projectsApi, type ProjectDto } from '@/lib/api'
 
 const thStyle = {
   textAlign: 'left' as const, padding: '14px 16px',
-  fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
-  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
+  borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
@@ -76,8 +74,8 @@ export default function ProjetsPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Projets</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Projets</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               {loading ? '...' : `${projects.length} projet${projects.length > 1 ? 's' : ''}`}
             </p>
           </div>
@@ -123,12 +121,12 @@ export default function ProjetsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
-                    <th style={thStyle}>Projet</th>
-                    <th style={thStyle}>Client</th>
-                    <th style={thStyle}>Secteur</th>
-                    <th style={thStyle}>Offre</th>
-                    <th style={thStyle}>Statut</th>
-                    <th style={{ ...thStyle, textAlign: 'center' as const }}>Actions</th>
+                    <th style={thStyle} className="dash-label">Projet</th>
+                    <th style={thStyle} className="dash-label">Client</th>
+                    <th style={thStyle} className="dash-label">Secteur</th>
+                    <th style={thStyle} className="dash-label">Offre</th>
+                    <th style={thStyle} className="dash-label">Statut</th>
+                    <th style={{ ...thStyle, textAlign: 'center' as const }} className="dash-label">Actions</th>
                   </tr>
                 </thead>
                 <tbody>

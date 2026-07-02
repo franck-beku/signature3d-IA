@@ -19,9 +19,7 @@ const statusStyle = (s: string) => {
 
 const thStyle = {
   textAlign: 'left' as const, padding: '12px 16px',
-  fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
-  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
+  borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
@@ -82,8 +80,8 @@ export default function LeadsPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Leads</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Leads</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               {loading ? '...' : `${leads.length} lead${leads.length > 1 ? 's' : ''}`}
               {nouveaux > 0 && <span style={{ color: 'var(--dash-info)', marginLeft: '8px' }}>· {nouveaux} nouveau{nouveaux > 1 ? 'x' : ''}</span>}
             </p>
@@ -121,17 +119,17 @@ export default function LeadsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
-                    <th style={thStyle}>Contact</th>
-                    <th style={thStyle}>Projet</th>
-                    <th style={thStyle}>Bouton</th>
-                    <th style={thStyle}>Message</th>
-                    <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => toggleSort('createdAt')} className="sort-th">
+                    <th style={thStyle} className="dash-label">Contact</th>
+                    <th style={thStyle} className="dash-label">Projet</th>
+                    <th style={thStyle} className="dash-label">Bouton</th>
+                    <th style={thStyle} className="dash-label">Message</th>
+                    <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => toggleSort('createdAt')} className="dash-label sort-th">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         Date
                         {sortBy === 'createdAt' && (sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)}
                       </div>
                     </th>
-                    <th style={thStyle}>Statut</th>
+                    <th style={thStyle} className="dash-label">Statut</th>
                   </tr>
                 </thead>
                 <tbody>

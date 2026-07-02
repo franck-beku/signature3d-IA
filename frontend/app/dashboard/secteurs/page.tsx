@@ -12,9 +12,7 @@ import { sectorsApi, type SectorDto } from '@/lib/api'
 
 const thStyle = {
   textAlign: 'left' as const, padding: '14px 16px',
-  fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
-  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
+  borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
@@ -24,11 +22,6 @@ const inputStyle = {
   padding: '10px 14px', fontSize: '13px', color: 'var(--dash-text)' as const,
   outline: 'none', boxSizing: 'border-box' as const,
   fontFamily: 'inherit', transition: 'border-color 0.2s ease',
-}
-
-const labelStyle = {
-  display: 'block' as const, fontSize: '11px', color: 'var(--dash-text-muted)',
-  textTransform: 'uppercase' as const, letterSpacing: '0.2em', marginBottom: '6px',
 }
 
 interface SectorForm {
@@ -136,8 +129,8 @@ export default function SecteursPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Secteurs</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Secteurs</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               {loading ? '...' : `${sectors.length} secteur${sectors.length > 1 ? 's' : ''}`}
             </p>
           </div>
@@ -166,13 +159,13 @@ export default function SecteursPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
-                    <th style={thStyle}>Ordre</th>
-                    <th style={thStyle}>Secteur</th>
-                    <th style={thStyle}>Slug</th>
-                    <th style={thStyle}>Description</th>
-                    <th style={thStyle}>Clients</th>
-                    <th style={thStyle}>Statut</th>
-                    <th style={{ ...thStyle, textAlign: 'center' as const }}>Actions</th>
+                    <th style={thStyle} className="dash-label">Ordre</th>
+                    <th style={thStyle} className="dash-label">Secteur</th>
+                    <th style={thStyle} className="dash-label">Slug</th>
+                    <th style={thStyle} className="dash-label">Description</th>
+                    <th style={thStyle} className="dash-label">Clients</th>
+                    <th style={thStyle} className="dash-label">Statut</th>
+                    <th style={{ ...thStyle, textAlign: 'center' as const }} className="dash-label">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -260,33 +253,33 @@ export default function SecteursPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={labelStyle}>Nom du secteur *</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Nom du secteur *</label>
                 <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Automobile" style={inputStyle} className="dash-input" />
               </div>
               <div>
-                <label style={labelStyle}>Description (accroche)</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description (accroche)</label>
                 <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Présentez chaque véhicule comme s'il était devant votre client." style={inputStyle} className="dash-input" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={labelStyle}>Image (vignette)</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Image (vignette)</label>
                   <input type="text" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Image plein écran</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Image plein écran</label>
                   <input type="text" value={form.coverImage} onChange={(e) => setForm({ ...form, coverImage: e.target.value })} placeholder="https://..." style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Icône</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Icône</label>
                   <input type="text" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="car" style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Ordre d'affichage</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Ordre d'affichage</label>
                   <input type="number" value={form.displayOrder} onChange={(e) => setForm({ ...form, displayOrder: Number(e.target.value) })} style={inputStyle} className="dash-input" />
                 </div>
               </div>
               <div>
-                <label style={labelStyle}>Visibilité sur le site</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Visibilité sur le site</label>
                 <button
                   onClick={() => setForm({ ...form, isActive: !form.isActive })}
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-input)', color: form.isActive ? 'var(--dash-success)' : 'var(--dash-text-subtle)', cursor: 'pointer', fontSize: '13px', width: '100%' }}

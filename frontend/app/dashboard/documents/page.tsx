@@ -16,9 +16,7 @@ interface Document {
 
 const thStyle = {
   textAlign: 'left' as const, padding: '12px 16px',
-  fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
-  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
+  borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
@@ -48,8 +46,8 @@ export default function DocumentsPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Documents</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Documents</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               {documents.length} document{documents.length > 1 ? 's' : ''} — alimentent Luxedia IA
             </p>
           </div>
@@ -110,12 +108,12 @@ export default function DocumentsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
-                    <th style={thStyle}>Document</th>
-                    <th style={thStyle}>Projet</th>
-                    <th style={thStyle}>Taille</th>
-                    <th style={thStyle}>Statut IA</th>
-                    <th style={thStyle}>Date</th>
-                    <th style={thStyle}>Action</th>
+                    <th style={thStyle} className="dash-label">Document</th>
+                    <th style={thStyle} className="dash-label">Projet</th>
+                    <th style={thStyle} className="dash-label">Taille</th>
+                    <th style={thStyle} className="dash-label">Statut IA</th>
+                    <th style={thStyle} className="dash-label">Date</th>
+                    <th style={thStyle} className="dash-label">Action</th>
                   </tr>
                 </thead>
                 <tbody>

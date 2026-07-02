@@ -55,10 +55,10 @@ export default function DashboardPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>
               Bonjour, <span style={{ color: 'var(--dash-gold)' }}>{userName}</span>
             </h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               Vue globale
             </p>
           </div>
@@ -82,7 +82,7 @@ export default function DashboardPage() {
                   <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--dash-gold-muted)', border: '1px solid var(--dash-gold-ring)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <kpi.icon size={15} style={{ color: 'var(--dash-gold)' }} />
                   </div>
-                  <span style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em' }}>{kpi.label}</span>
+                  <span className="dash-micro-label">{kpi.label}</span>
                 </div>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 300, color: kpi.value === '—' || kpi.value === '...' ? 'var(--dash-text-muted)' : 'var(--dash-text)', margin: 0, lineHeight: 1 }}>{kpi.value}</p>
                 <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '6px' }}>{kpi.sub}</p>
