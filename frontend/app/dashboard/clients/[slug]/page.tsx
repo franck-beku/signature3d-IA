@@ -421,7 +421,7 @@ export default function ClientDetailPage() {
               <ArrowLeft size={18} />
             </Link>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>{client.name}</h1>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>{client.name}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
                 <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.3em', margin: 0 }}>{client.sectorName}</p>
                 <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: priority.bgColor, color: priority.color, fontWeight: 500 }}>{priority.label}</span>

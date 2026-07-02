@@ -197,6 +197,32 @@ section {
 .gold-line { height: 2px; background: linear-gradient(to right, transparent, #C8A45D, transparent); border-radius: 2px; }
 
 /* ─── Dashboard — thème clair (scopé à .dash pour ne pas fuir sur le site public) ─── */
+
+/* Utilitaires typographiques dashboard — scopés sous .dash pour isolation structurelle */
+.dash .dash-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dash-text-subtle);
+}
+
+.dash .dash-page-eyebrow {
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--dash-text-muted);
+}
+
+.dash .dash-micro-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dash-text-subtle);
+}
+
 .dash {
   --dash-bg:           #FFFFFF;
   --dash-surface:      #FAFAFA;

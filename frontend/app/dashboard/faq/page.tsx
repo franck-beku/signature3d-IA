@@ -13,8 +13,8 @@ import { faqApi, type FaqDto } from '@/lib/api'
 const thStyle = {
   textAlign: 'left' as const, padding: '14px 16px',
   fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
-  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
+  letterSpacing: '0.06em', color: 'var(--dash-text-subtle)',
+  fontWeight: 500, borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
@@ -27,8 +27,9 @@ const inputStyle = {
 }
 
 const labelStyle = {
-  display: 'block' as const, fontSize: '11px', color: 'var(--dash-text-muted)',
-  textTransform: 'uppercase' as const, letterSpacing: '0.2em', marginBottom: '6px',
+  display: 'block' as const, fontSize: '11px', color: 'var(--dash-text-subtle)',
+  textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: '6px',
+  fontWeight: 500,
 }
 
 interface FaqForm {
@@ -122,8 +123,8 @@ export default function FaqPage() {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>FAQ</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 400, color: 'var(--dash-text)', margin: 0 }}>FAQ</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               {loading ? '...' : `${faqs.length} question${faqs.length > 1 ? 's' : ''}`}
             </p>
           </div>

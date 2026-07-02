@@ -22,8 +22,8 @@ const statusLabel = (s: string) => {
 const thStyle = {
   textAlign: 'left' as const, padding: '14px 16px',
   fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
-  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
+  letterSpacing: '0.06em', color: 'var(--dash-text-subtle)',
+  fontWeight: 500, borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
@@ -140,8 +140,8 @@ export default function ClientsPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Clients</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 400, color: 'var(--dash-text)', margin: 0 }}>Clients</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               {loading ? '...' : `${clients.length} client${clients.length > 1 ? 's' : ''}`}
             </p>
           </div>
@@ -273,30 +273,30 @@ export default function ClientsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '6px' }}>Nom</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Nom</label>
                   <input type="text" value={editClient.name} onChange={(e) => setEditClient({ ...editClient, name: e.target.value })} style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '6px' }}>Secteur</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Secteur</label>
                   <select value={editClient.sectorId} onChange={(e) => setEditClient({ ...editClient, sectorId: e.target.value })} style={inputStyle} className="dash-input">
                     <option value="">Choisir un secteur</option>
                     {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '6px' }}>Email</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Email</label>
                   <input type="email" value={editClient.email} onChange={(e) => setEditClient({ ...editClient, email: e.target.value })} style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '6px' }}>Téléphone</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Téléphone</label>
                   <input type="tel" value={editClient.phone} onChange={(e) => setEditClient({ ...editClient, phone: e.target.value })} style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '6px' }}>Date contrat</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Date contrat</label>
                   <input type="date" value={editClient.contractDate} onChange={(e) => setEditClient({ ...editClient, contractDate: e.target.value })} style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '6px' }}>Statut</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Statut</label>
                   <select value={editClient.status} onChange={(e) => setEditClient({ ...editClient, status: e.target.value })} style={inputStyle} className="dash-input">
                     <option value="Prospect">Prospect</option>
                     <option value="EnAttente">En attente</option>
@@ -305,7 +305,7 @@ export default function ClientsPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '6px' }}>Priorité</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Priorité</label>
                   <select value={editClient.priority} onChange={(e) => setEditClient({ ...editClient, priority: Number(e.target.value) })} style={inputStyle} className="dash-input">
                     <option value={1}>Haute</option>
                     <option value={2}>Moyenne</option>
