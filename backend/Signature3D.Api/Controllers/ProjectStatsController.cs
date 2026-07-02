@@ -37,4 +37,20 @@ public class ProjectStatsController : ControllerBase
 
         return Ok(result.Data);
     }
+
+    /// <summary>
+    /// Retourne le nombre de clics par bouton d'action d'un projet, trié du plus cliqué au moins cliqué.
+    /// GET /api/stats/project/{projectId}/button-clicks?from=&amp;to=
+    /// Regroupement par libellé de bouton (pas de lien ProjectButtonId aujourd'hui — voir ButtonClickStatsDto).
+    /// </summary>
+    [HttpGet("project/{projectId:guid}/button-clicks")]
+    public async Task<IActionResult> GetButtonClickStats(Guid projectId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+    {
+        var result = await _statsService.GetButtonClickStatsAsync(projectId, from, to);
+
+        if (!result.Success)
+            return NotFound(new { message = result.Error });
+
+        return Ok(result.Data);
+    }
 }

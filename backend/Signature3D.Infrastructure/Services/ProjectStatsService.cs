@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Signature3D.Application.Common;
 using Signature3D.Application.DTOs.Stats;
 using Signature3D.Application.Interfaces;
+using Signature3D.Domain.Enums;
 using Signature3D.Infrastructure.Data;
 
 namespace Signature3D.Infrastructure.Services;
@@ -46,6 +47,45 @@ public class ProjectStatsService : IProjectStatsService
             Last30Days = last30Days,
             From = from,
             To = to
+        });
+    }
+
+    /// <summary>
+    /// Nombre de clics par bouton d'action d'un projet, trié du plus cliqué au moins cliqué.
+    /// Regroupe par libellé (Metadata) — voir limite documentée sur ButtonClickStatsDto.
+    /// </summary>
+    public async Task<Result<ProjectButtonClicksDto>> GetButtonClickStatsAsync(Guid projectId, DateTime? from = null, DateTime? to = null)
+    {
+        var project = await _db.Projects.FindAsync(projectId);
+        if (project is null)
+            return Result<ProjectButtonClicksDto>.Fail("Projet introuvable.");
+
+        var query = _db.AnalyticsEvents.Where(e =>
+            e.ProjectId == projectId &&
+            e.EventType == AnalyticsEventType.ButtonClick &&
+            e.Metadata != null && e.Metadata != "");
+
+        if (from is not null) query = query.Where(e => e.CreatedAt >= from);
+        if (to is not null) query = query.Where(e => e.CreatedAt <= to);
+
+        var buttons = await query
+            .GroupBy(e => e.Metadata)
+            .Select(g => new ButtonClickStatsDto
+            {
+                ButtonLabel = g.Key!,
+                ClickCount = g.Count()
+            })
+            .OrderByDescending(b => b.ClickCount)
+            .ToListAsync();
+
+        return Result<ProjectButtonClicksDto>.Ok(new ProjectButtonClicksDto
+        {
+            ProjectId = projectId,
+            ProjectName = project.Name,
+            TotalClicks = buttons.Sum(b => b.ClickCount),
+            From = from,
+            To = to,
+            Buttons = buttons
         });
     }
 }
