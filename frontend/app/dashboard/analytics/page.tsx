@@ -85,8 +85,8 @@ export default function AnalyticsPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Analytics</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>Statistiques par projet</p>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Analytics</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">Statistiques par projet</p>
           </div>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <select value={selectedClient} onChange={(e) => setSelectedClient(e.target.value)}
@@ -131,7 +131,7 @@ export default function AnalyticsPage() {
                 ].map((kpi) => (
                   <div key={kpi.label} style={{ ...cardStyle, padding: '20px', textAlign: 'center' }}>
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 300, color: kpi.color, marginBottom: '6px', lineHeight: 1 }}>{kpi.value}</div>
-                    <div style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{kpi.label}</div>
+                    <div className="dash-micro-label">{kpi.label}</div>
                   </div>
                 ))}
               </div>

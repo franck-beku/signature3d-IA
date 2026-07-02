@@ -29,15 +29,6 @@ const inputStyle = {
   transition: 'border-color 0.2s ease',
 }
 
-const labelStyle = {
-  display: 'block',
-  fontSize: '11px', fontWeight: 600,
-  textTransform: 'uppercase' as const,
-  letterSpacing: '0.2em',
-  color: 'var(--dash-text-muted)',
-  marginBottom: '8px',
-}
-
 export default function NouveauClientPage() {
   const router = useRouter()
   const [saved, setSaved]       = useState(false)
@@ -120,8 +111,8 @@ export default function NouveauClientPage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Nouveau client</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Nouveau client</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               Remplir les informations du client
             </p>
           </div>
@@ -150,16 +141,16 @@ export default function NouveauClientPage() {
 
               {/* Infos principales */}
               <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
-                <h2 style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
+                <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Informations du client
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }} className="form-grid">
                   <div>
-                    <label style={labelStyle}>Nom du client *</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Nom du client *</label>
                     <input type="text" required value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Ex: Mercedes Québec" style={inputStyle} className="dash-input" />
                   </div>
                   <div>
-                    <label style={labelStyle}>Secteur *</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Secteur *</label>
                     <select required value={form.sectorId} onChange={(e) => set('sectorId', e.target.value)} style={inputStyle} className="dash-input">
                       <option value="">Choisir un secteur...</option>
                       {sectors.map((s) => (
@@ -168,11 +159,11 @@ export default function NouveauClientPage() {
                     </select>
                   </div>
                   <div>
-                    <label style={labelStyle}>Email *</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Email *</label>
                     <input type="email" required value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="contact@client.ca" style={inputStyle} className="dash-input" />
                   </div>
                   <div>
-                    <label style={labelStyle}>Téléphone</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Téléphone</label>
                     <input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+1 (418) 000-0000" style={inputStyle} className="dash-input" />
                   </div>
                 </div>
@@ -180,20 +171,20 @@ export default function NouveauClientPage() {
 
               {/* Dates & Statut */}
               <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
-                <h2 style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
+                <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Contrat & Priorité
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }} className="form-grid">
                   <div>
-                    <label style={labelStyle}>Date de contrat *</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Date de contrat *</label>
                     <input type="date" required value={form.contractDate} onChange={(e) => set('contractDate', e.target.value)} style={inputStyle} className="dash-input" />
                   </div>
                   <div>
-                    <label style={labelStyle}>Date de livraison *</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Date de livraison *</label>
                     <input type="date" required value={form.deliveryDate} onChange={(e) => set('deliveryDate', e.target.value)} style={inputStyle} className="dash-input" />
                   </div>
                   <div>
-                    <label style={labelStyle}>Statut</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Statut</label>
                     <select value={form.status} onChange={(e) => set('status', e.target.value)} style={inputStyle} className="dash-input">
                       <option value="Prospect">Prospect</option>
                       <option value="EnCours">En cours</option>
@@ -201,7 +192,7 @@ export default function NouveauClientPage() {
                     </select>
                   </div>
                   <div>
-                    <label style={labelStyle}>Priorité</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Priorité</label>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {PRIORITES.map((p) => (
                         <button
@@ -227,7 +218,7 @@ export default function NouveauClientPage() {
 
               {/* Notes */}
               <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
-                <h2 style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>
+                <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Notes internes
                 </h2>
                 <textarea

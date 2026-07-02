@@ -55,10 +55,10 @@ export default function MessageriePage() {
 
         {/* Header */}
         <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--dash-border)', flexShrink: 0 }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>
             Messagerie
           </h1>
-          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+          <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
             Alain Dubé · Franck Beku
           </p>
         </div>

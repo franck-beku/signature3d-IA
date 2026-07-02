@@ -24,15 +24,6 @@ const inputStyle = {
   transition: 'border-color 0.3s ease',
 }
 
-const labelStyle = {
-  display: 'block',
-  fontSize: '11px',
-  textTransform: 'uppercase' as const,
-  letterSpacing: '0.25em',
-  color: 'var(--dash-text-muted)',
-  marginBottom: '8px',
-}
-
 const sectionStyle = {
   backgroundColor: 'var(--dash-surface)',
   border: '1px solid var(--dash-border)',
@@ -127,8 +118,8 @@ export default function ParametresPage() {
 
         {/* Header */}
         <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Paramètres</h1>
-          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Paramètres</h1>
+          <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
             Compte et préférences
           </p>
         </div>
@@ -142,19 +133,19 @@ export default function ParametresPage() {
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }} className="form-grid">
               <div>
-                <label style={labelStyle}>Nom complet</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Nom complet</label>
                 <input type="text" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} style={inputStyle} className="dash-input" />
               </div>
               <div>
-                <label style={labelStyle}>Courriel</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Courriel</label>
                 <input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} style={inputStyle} className="dash-input" />
               </div>
               <div>
-                <label style={labelStyle}>Rôle</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Rôle</label>
                 <input type="text" value={profile.role} disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
               </div>
               <div>
-                <label style={labelStyle}>Entreprise</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Entreprise</label>
                 <input type="text" value="Signature 3D IA" disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
               </div>
             </div>
@@ -195,7 +186,7 @@ export default function ParametresPage() {
               )}
 
               <div>
-                <label style={labelStyle}>Mot de passe actuel</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Mot de passe actuel</label>
                 <div style={{ position: 'relative' }}>
                   <input type={showCurrent ? 'text' : 'password'} value={passwords.current} onChange={(e) => setPasswords({ ...passwords, current: e.target.value })} placeholder="••••••••" style={{ ...inputStyle, paddingRight: '48px' }} className="dash-input" />
                   <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -205,7 +196,7 @@ export default function ParametresPage() {
               </div>
 
               <div>
-                <label style={labelStyle}>Nouveau mot de passe</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Nouveau mot de passe</label>
                 <div style={{ position: 'relative' }}>
                   <input type={showNew ? 'text' : 'password'} value={passwords.new} onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} placeholder="••••••••" style={{ ...inputStyle, paddingRight: '48px' }} className="dash-input" />
                   <button type="button" onClick={() => setShowNew(!showNew)} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -215,7 +206,7 @@ export default function ParametresPage() {
               </div>
 
               <div>
-                <label style={labelStyle}>Confirmer le nouveau mot de passe</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Confirmer le nouveau mot de passe</label>
                 <input type="password" value={passwords.confirm} onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} placeholder="••••••••" style={inputStyle} className="dash-input" />
               </div>
 

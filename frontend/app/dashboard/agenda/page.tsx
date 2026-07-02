@@ -93,11 +93,6 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'var(--font-body)',
 }
 
-const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)',
-  textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px',
-}
-
 const hintStyle: React.CSSProperties = {
   fontSize: '11px', color: 'var(--dash-text-muted)', margin: '6px 0 0',
 }
@@ -213,8 +208,8 @@ export default function AgendaPage() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Agenda</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Agenda</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               Rendez-vous & événements
             </p>
           </div>
@@ -247,12 +242,12 @@ export default function AgendaPage() {
               {/* Ligne 1 : Titre + Type */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
                 <div>
-                  <label style={labelStyle}>Titre *</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Titre *</label>
                   <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Rendez-vous Mercedes" style={inputStyle} />
                   <p style={hintStyle}>Ce qui s&apos;affiche dans le calendrier</p>
                 </div>
                 <div>
-                  <label style={labelStyle}>Type</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Type</label>
                   <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as AgendaEventType })} style={inputStyle}>
                     {EVENT_TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
                   </select>
@@ -272,18 +267,18 @@ export default function AgendaPage() {
               {/* Ligne 2 : Début + Fin */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
                 <div>
-                  <label style={labelStyle}>Début *</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Début *</label>
                   <input type="datetime-local" value={form.startDateTime} onChange={e => setForm({ ...form, startDateTime: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Fin</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Fin</label>
                   <input type="datetime-local" value={form.endDateTime ?? ''} onChange={e => setForm({ ...form, endDateTime: e.target.value })} style={inputStyle} />
                 </div>
               </div>
 
               {/* Notes — pleine largeur */}
               <div style={{ marginBottom: '14px' }}>
-                <label style={labelStyle}>Notes</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Notes</label>
                 <textarea
                   value={form.notes ?? ''}
                   onChange={e => setForm({ ...form, notes: e.target.value })}
@@ -296,7 +291,7 @@ export default function AgendaPage() {
               {/* Ligne 3 : Client + Projet */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
                 <div>
-                  <label style={labelStyle}>Client</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Client</label>
                   <select
                     value={form.clientId ?? ''}
                     onChange={e => {
@@ -310,7 +305,7 @@ export default function AgendaPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={labelStyle}>Projet</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Projet</label>
                   <select
                     value={form.projectId ?? ''}
                     onChange={e => setForm({ ...form, projectId: e.target.value || undefined })}
@@ -325,7 +320,7 @@ export default function AgendaPage() {
 
               {/* Ligne 4 : Contact */}
               <div style={{ marginBottom: '20px' }}>
-                <label style={labelStyle}>Contact</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Contact</label>
                 <select
                   value={form.contactId ?? ''}
                   onChange={e => setForm({ ...form, contactId: e.target.value || undefined })}
