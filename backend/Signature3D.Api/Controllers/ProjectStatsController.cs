@@ -68,4 +68,19 @@ public class ProjectStatsController : ControllerBase
 
         return Ok(result.Data);
     }
+
+    /// <summary>
+    /// Retourne les questions visiteur posées à Luxedia, regroupées par catégorie métier (FR/EN).
+    /// GET /api/stats/project/{projectId}/questions?from=&amp;to=
+    /// </summary>
+    [HttpGet("project/{projectId:guid}/questions")]
+    public async Task<IActionResult> GetLuxediaQuestionStats(Guid projectId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+    {
+        var result = await _statsService.GetLuxediaQuestionStatsAsync(projectId, from, to);
+
+        if (!result.Success)
+            return NotFound(new { message = result.Error });
+
+        return Ok(result.Data);
+    }
 }
