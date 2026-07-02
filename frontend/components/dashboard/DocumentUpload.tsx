@@ -6,10 +6,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, Trash2, X, Check, RefreshCw } from 'lucide-react'
+import { Upload, FileText, Trash2, X, RefreshCw } from 'lucide-react'
 import { documentsApi, type DocumentDto } from '@/lib/api'
-
-const GOLD = '#d4af37'
 
 interface Props {
   projectId: string
@@ -30,14 +28,12 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
   const [error, setError]           = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  /* Charger les documents existants */
   useEffect(() => {
     documentsApi.getByProject(projectId)
       .then((docs) => setDocuments(docs as DocumentDto[]))
       .catch(console.error)
   }, [projectId])
 
-  /* Gérer l'upload */
   const handleUpload = async (file: File) => {
     if (!file.name.endsWith('.pdf')) {
       setError('Seuls les fichiers PDF sont acceptés.')
@@ -47,10 +43,8 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
       setError('Le fichier ne doit pas dépasser 50 MB.')
       return
     }
-
     setUploading(true)
     setError(null)
-
     try {
       const doc = await documentsApi.upload(projectId, file)
       setDocuments((prev) => [doc as DocumentDto, ...prev])
@@ -95,38 +89,35 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-      <div style={{ backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border-input)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
 
-        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <div>
-            <h2 style={{ color: 'white', fontWeight: 500, fontSize: '16px', margin: '0 0 4px' }}>Documents PDF</h2>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: 0 }}>{projectName}</p>
+            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '16px', margin: '0 0 4px' }}>Documents PDF</h2>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: 0 }}>{projectName}</p>
           </div>
-          <button onClick={onClose} style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)' }} className="close-btn">
+          <button onClick={onClose} style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-text-subtle)' }} className="close-btn">
             <X size={14} />
           </button>
         </div>
 
-        {/* Erreur */}
         {error && (
-          <div style={{ padding: '10px 14px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '8px', color: '#f87171', fontSize: '13px', marginBottom: '16px' }}>
+          <div style={{ padding: '10px 14px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '8px', color: 'var(--dash-error)', fontSize: '13px', marginBottom: '16px' }}>
             {error}
           </div>
         )}
 
-        {/* Zone upload */}
         <div
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
           style={{
-            border: `2px dashed ${isDragging ? GOLD : 'rgba(255,255,255,0.1)'}`,
+            border: `2px dashed ${isDragging ? 'var(--dash-gold)' : 'var(--dash-border-input)'}`,
             borderRadius: '12px', padding: '32px', textAlign: 'center',
             cursor: uploading ? 'not-allowed' : 'pointer',
             transition: 'all 0.3s ease',
-            backgroundColor: isDragging ? 'rgba(212,175,55,0.05)' : 'transparent',
+            backgroundColor: isDragging ? 'var(--dash-gold-muted)' : 'transparent',
             marginBottom: '20px',
             opacity: uploading ? 0.6 : 1,
           }}
@@ -139,43 +130,42 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
-          <Upload size={28} style={{ color: uploading ? 'rgba(212,175,55,0.3)' : 'rgba(212,175,55,0.6)', margin: '0 auto 12px' }} />
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', marginBottom: '4px' }}>
-            {uploading ? 'Upload en cours...' : <>Glissez un PDF ici ou <span style={{ color: GOLD }}>parcourez</span></>}
+          <Upload size={28} style={{ color: uploading ? 'rgba(200,164,93,0.3)' : 'rgba(200,164,93,0.6)', margin: '0 auto 12px' }} />
+          <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>
+            {uploading ? 'Upload en cours...' : <>Glissez un PDF ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></>}
           </p>
-          <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>PDF uniquement — max 50 MB</p>
+          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF uniquement — max 50 MB</p>
         </div>
 
-        {/* Liste documents */}
         {documents.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed rgba(255,255,255,0.06)', borderRadius: '10px' }}>
-            <FileText size={24} style={{ color: 'rgba(255,255,255,0.1)', margin: '0 auto 10px' }} />
-            <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Aucun document uploadé</p>
+          <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed var(--dash-border)', borderRadius: '10px' }}>
+            <FileText size={24} style={{ color: 'var(--dash-border-input)', margin: '0 auto 10px' }} />
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>Aucun document uploadé</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>
               {documents.length} document{documents.length > 1 ? 's' : ''}
             </p>
             {documents.map((doc) => (
-              <div key={doc.id} style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#222', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FileText size={14} style={{ color: GOLD }} />
+              <div key={doc.id} style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileText size={14} style={{ color: 'var(--dash-gold)' }} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: 'white', fontSize: '13px', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: 0 }}>{formatSize(doc.sizeBytes)} · {new Date(doc.createdAt).toLocaleDateString('fr-CA')}</p>
+                  <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0 }}>{formatSize(doc.sizeBytes)} · {new Date(doc.createdAt).toLocaleDateString('fr-CA')}</p>
                 </div>
-                <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'rgba(74,222,128,0.1)' : 'rgba(212,175,55,0.1)', color: doc.isIndexed ? '#4ade80' : GOLD, flexShrink: 0 }}>
+                <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', flexShrink: 0 }}>
                   {doc.isIndexed ? 'Indexé' : 'En attente'}
                 </span>
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                   {!doc.isIndexed && (
-                    <button onClick={() => handleReindex(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: `1px solid rgba(212,175,55,0.2)`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD }} className="reindex-btn" title="Indexer">
+                    <button onClick={() => handleReindex(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-gold)' }} className="reindex-btn" title="Indexer">
                       <RefreshCw size={12} />
                     </button>
                   )}
-                  <button onClick={() => handleDelete(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(248,113,113,0.2)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f87171' }} className="del-btn" title="Supprimer">
+                  <button onClick={() => handleDelete(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-error)' }} className="del-btn" title="Supprimer">
                     <Trash2 size={12} />
                   </button>
                 </div>
@@ -184,19 +174,18 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
           </div>
         )}
 
-        {/* Info */}
-        <div style={{ marginTop: '16px', padding: '12px 14px', backgroundColor: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.1)', borderRadius: '8px' }}>
-          <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px', margin: 0, lineHeight: 1.6 }}>
+        <div style={{ marginTop: '16px', padding: '12px 14px', backgroundColor: 'var(--dash-gold-muted)', border: '1px solid var(--dash-gold-ring)', borderRadius: '8px' }}>
+          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0, lineHeight: 1.6 }}>
             💡 Les documents indexés alimentent Luxedia IA. L&apos;indexation se fait automatiquement après l&apos;upload.
           </p>
         </div>
       </div>
 
       <style>{`
-        .upload-zone:hover { border-color: rgba(212,175,55,0.3) !important; }
-        .close-btn:hover { color: white !important; }
-        .del-btn:hover { background-color: rgba(248,113,113,0.1) !important; }
-        .reindex-btn:hover { background-color: rgba(212,175,55,0.1) !important; }
+        .upload-zone:hover { border-color: var(--dash-gold-ring) !important; }
+        .close-btn:hover   { color: var(--dash-text) !important; }
+        .del-btn:hover     { background-color: var(--dash-error-bg) !important; }
+        .reindex-btn:hover { background-color: var(--dash-gold-muted) !important; }
       `}</style>
     </div>
   )

@@ -1,6 +1,6 @@
 /**
  * Nouveau Projet — Dashboard
- * Version: 3.0 — Connecté au backend PostgreSQL
+ * Version: 3.1 — Thème clair (variables --dash-*)
  */
 
 'use client'
@@ -48,34 +48,32 @@ const steps = [
 ]
 
 /* ─── Styles ─── */
-const GOLD = '#d4af37'
-
 const inputStyle = {
-  width: '100%', backgroundColor: '#1a1a1a',
-  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px',
-  padding: '12px 16px', fontSize: '13px', color: 'white' as const,
+  width: '100%', backgroundColor: 'var(--dash-input)',
+  border: '1px solid var(--dash-border-input)', borderRadius: '10px',
+  padding: '12px 16px', fontSize: '13px', color: 'var(--dash-text)' as const,
   outline: 'none', boxSizing: 'border-box' as const,
   fontFamily: 'inherit', transition: 'border-color 0.3s ease',
 }
 const labelStyle = {
   display: 'block', fontSize: '11px',
   textTransform: 'uppercase' as const, letterSpacing: '0.25em',
-  color: 'rgba(255,255,255,0.4)', marginBottom: '8px',
+  color: 'var(--dash-text-subtle)' as const, marginBottom: '8px',
 }
 const cardStyle = {
-  backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)',
+  backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)',
   borderRadius: '14px', padding: '24px',
 }
 const btnGold = {
   display: 'flex', alignItems: 'center', gap: '8px',
-  backgroundColor: GOLD, color: '#000',
+  backgroundColor: 'var(--dash-gold)', color: '#000',
   fontSize: '13px', fontWeight: 600, padding: '11px 24px',
   borderRadius: '10px', border: 'none', cursor: 'pointer',
   transition: 'all 0.2s ease',
 }
 const btnOutline = {
   display: 'flex', alignItems: 'center', gap: '8px',
-  border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)',
+  border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)',
   fontSize: '13px', padding: '11px 24px', borderRadius: '10px',
   background: 'none', cursor: 'pointer', transition: 'all 0.2s ease',
 }
@@ -83,7 +81,6 @@ const btnOutline = {
 function getMatterportId(url: string): string | null {
   const m = url.match(/[?&]m=([^&]+)/)
   if (m) return m[1]
-  // Support direct ID input (ex: WJzvgHF44zq)
   if (url.length > 5 && !url.includes('/') && !url.includes(' ')) return url
   return null
 }
@@ -113,7 +110,6 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
     notes:          '',
   })
 
-  /* Charger le client pour récupérer son ID */
   useEffect(() => {
     clientsApi.getBySlug(slug)
       .then((c) => setClient(c as ClientDto))
@@ -139,7 +135,6 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
     setForm((prev) => ({ ...prev, boutons: prev.boutons.filter((b) => b.id !== id) }))
   }
 
-  /* Créer le projet via l'API */
   const handleCreate = async () => {
     if (!client) { setError('Client introuvable.'); return }
     setIsCreating(true)
@@ -181,16 +176,16 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
+      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--dash-bg)' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-          <Link href={`/dashboard/clients/${slug}`} style={{ color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', textDecoration: 'none' }} className="back-arrow">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
+          <Link href={`/dashboard/clients/${slug}`} style={{ color: 'var(--dash-text-muted)', display: 'flex', alignItems: 'center', textDecoration: 'none' }} className="back-arrow">
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'white', margin: 0 }}>Nouveau projet</h1>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Nouveau projet</h1>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
               {client ? client.name : 'Chargement...'} — Configuration en {steps.length} étapes
             </p>
           </div>
@@ -207,18 +202,18 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                     width: '32px', height: '32px', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '12px', fontWeight: 500, transition: 'all 0.3s ease',
-                    backgroundColor: currentStep > step.id ? '#4ade80' : currentStep === step.id ? GOLD : '#1a1a1a',
-                    color: currentStep >= step.id ? '#000' : 'rgba(255,255,255,0.3)',
-                    border: currentStep >= step.id ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                    backgroundColor: currentStep > step.id ? 'var(--dash-success)' : currentStep === step.id ? 'var(--dash-gold)' : 'var(--dash-input)',
+                    color: currentStep >= step.id ? '#000' : 'var(--dash-text-muted)',
+                    border: currentStep >= step.id ? 'none' : '1px solid var(--dash-border-input)',
                   }}>
                     {currentStep > step.id ? <Check size={14} /> : step.id}
                   </div>
-                  <p style={{ fontSize: '10px', marginTop: '6px', whiteSpace: 'nowrap', color: currentStep === step.id ? GOLD : 'rgba(255,255,255,0.2)' }}>
+                  <p style={{ fontSize: '10px', marginTop: '6px', whiteSpace: 'nowrap', color: currentStep === step.id ? 'var(--dash-gold)' : 'var(--dash-text-muted)' }}>
                     {step.label}
                   </p>
                 </div>
                 {index < steps.length - 1 && (
-                  <div style={{ flex: 1, height: '1px', margin: '0 8px', marginBottom: '16px', backgroundColor: currentStep > step.id ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.08)' }} />
+                  <div style={{ flex: 1, height: '1px', margin: '0 8px', marginBottom: '16px', backgroundColor: currentStep > step.id ? 'var(--dash-success-ring)' : 'var(--dash-border-input)' }} />
                 )}
               </div>
             ))}
@@ -226,7 +221,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
 
           {/* Erreur globale */}
           {error && (
-            <div style={{ padding: '12px 16px', backgroundColor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '10px', color: '#f87171', fontSize: '13px', marginBottom: '20px' }}>
+            <div style={{ padding: '12px 16px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '10px', color: 'var(--dash-error)', fontSize: '13px', marginBottom: '20px' }}>
               {error}
             </div>
           )}
@@ -235,20 +230,20 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
           {currentStep === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={cardStyle}>
-                <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Type de projet</h2>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginBottom: '24px' }}>Choisissez l&apos;expérience à livrer au client.</p>
+                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Type de projet</h2>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', marginBottom: '24px' }}>Choisissez l&apos;expérience à livrer au client.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {TYPES_PROJET.map((t) => (
                     <button key={t.value} type="button" onClick={() => set('type', t.value)}
-                      style={{ padding: '16px 20px', borderRadius: '12px', textAlign: 'left', border: `1px solid ${form.type === t.value ? GOLD : 'rgba(255,255,255,0.08)'}`, backgroundColor: form.type === t.value ? 'rgba(212,175,55,0.08)' : '#1a1a1a', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '16px' }}
+                      style={{ padding: '16px 20px', borderRadius: '12px', textAlign: 'left', border: `1px solid ${form.type === t.value ? 'var(--dash-gold)' : 'var(--dash-border-input)'}`, backgroundColor: form.type === t.value ? 'var(--dash-gold-muted)' : 'var(--dash-input)', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '16px' }}
                       className="type-btn"
                     >
-                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${form.type === t.value ? GOLD : 'rgba(255,255,255,0.2)'}`, backgroundColor: form.type === t.value ? GOLD : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${form.type === t.value ? 'var(--dash-gold)' : 'var(--dash-border-input)'}`, backgroundColor: form.type === t.value ? 'var(--dash-gold)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {form.type === t.value && <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#000' }} />}
                       </div>
                       <div>
-                        <p style={{ color: form.type === t.value ? GOLD : 'white', fontSize: '14px', fontWeight: 600, margin: '0 0 3px' }}>{t.label}</p>
-                        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: 0 }}>{t.desc}</p>
+                        <p style={{ color: form.type === t.value ? 'var(--dash-gold)' : 'var(--dash-text)', fontSize: '14px', fontWeight: 600, margin: '0 0 3px' }}>{t.label}</p>
+                        <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: 0 }}>{t.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -264,7 +259,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
           {currentStep === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={cardStyle}>
-                <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Informations du projet</h2>
+                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Informations du projet</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
                     <label style={labelStyle}>Nom du projet *</label>
@@ -273,7 +268,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                   <div>
                     <label style={labelStyle}>Email de réception des leads</label>
                     <input type="email" value={form.leadEmail} onChange={(e) => set('leadEmail', e.target.value)} placeholder="contact@client.ca" style={inputStyle} className="dash-input" />
-                    <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', marginTop: '6px' }}>Les leads seront transmis à cette adresse</p>
+                    <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '6px' }}>Les leads seront transmis à cette adresse</p>
                   </div>
                   <div>
                     <label style={labelStyle}>Notes internes</label>
@@ -294,8 +289,8 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
           {currentStep === 3 && needsMatterport && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={cardStyle}>
-                <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Lien Matterport</h2>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginBottom: '20px' }}>Collez le lien ou l&apos;ID de la visite Matterport.</p>
+                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Lien Matterport</h2>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', marginBottom: '20px' }}>Collez le lien ou l&apos;ID de la visite Matterport.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
                     <label style={labelStyle}>Lien ou ID Matterport *</label>
@@ -304,10 +299,10 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                   {matterportId && (
                     <div>
                       <label style={labelStyle}>Prévisualisation</label>
-                      <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(212,175,55,0.2)', height: '200px' }}>
+                      <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--dash-gold-ring)', height: '200px' }}>
                         <iframe src={`https://my.matterport.com/show/?m=${matterportId}&play=1&qs=1`} style={{ width: '100%', height: '100%', border: 'none' }} title="Prévisualisation Matterport" />
                       </div>
-                      <p style={{ color: '#4ade80', fontSize: '12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <p style={{ color: 'var(--dash-success)', fontSize: '12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Check size={12} /> ID Matterport valide : {matterportId}
                       </p>
                     </div>
@@ -329,7 +324,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
 
               {form.type !== 'matterport' && (
                 <div style={cardStyle}>
-                  <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Configuration Luxedia IA</h2>
+                  <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Configuration Luxedia IA</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
                       <label style={labelStyle}>Nom de l&apos;ambassadeur IA</label>
@@ -346,22 +341,22 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
               <div style={cardStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <div>
-                    <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', margin: '0 0 4px' }}>Boutons d&apos;action ({form.boutons.length}/4)</h2>
-                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: 0 }}>Ces boutons apparaîtront dans le chatbot</p>
+                    <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', margin: '0 0 4px' }}>Boutons d&apos;action ({form.boutons.length}/4)</h2>
+                    <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: 0 }}>Ces boutons apparaîtront dans le chatbot</p>
                   </div>
                   {form.boutons.length < 4 && (
-                    <button type="button" onClick={addBouton} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '7px 12px', borderRadius: '6px', border: `1px solid ${GOLD}`, color: GOLD, background: 'none', cursor: 'pointer' }} className="add-btn">
+                    <button type="button" onClick={addBouton} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '7px 12px', borderRadius: '6px', border: '1px solid var(--dash-gold)', color: 'var(--dash-gold)', background: 'none', cursor: 'pointer' }} className="add-btn">
                       <Plus size={12} /> Ajouter
                     </button>
                   )}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {form.boutons.map((bouton, i) => (
-                    <div key={bouton.id} style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', padding: '14px' }}>
+                    <div key={bouton.id} style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Bouton {i + 1}</span>
+                        <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Bouton {i + 1}</span>
                         {form.boutons.length > 1 && (
-                          <button type="button" onClick={() => removeBouton(bouton.id)} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 8px', borderRadius: '4px' }} className="del-btn">
+                          <button type="button" onClick={() => removeBouton(bouton.id)} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--dash-error)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 8px', borderRadius: '4px' }} className="del-btn">
                             <Trash2 size={11} /> Supprimer
                           </button>
                         )}
@@ -389,12 +384,12 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
 
               {/* Upload documents */}
               <div style={cardStyle}>
-                <h2 style={{ color: 'white', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Documents PDF</h2>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginBottom: '16px' }}>Uploadez les fiches techniques, menus ou catalogues. (Optionnel)</p>
-                <div style={{ border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '12px', padding: '32px', textAlign: 'center', cursor: 'pointer' }} className="upload-zone">
-                  <Upload size={24} style={{ color: 'rgba(212,175,55,0.4)', margin: '0 auto 10px' }} />
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginBottom: '4px' }}>Glissez vos PDFs ici ou <span style={{ color: GOLD }}>parcourez</span></p>
-                  <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px' }}>PDF uniquement · max 20 MB · disponible après création</p>
+                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Documents PDF</h2>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', marginBottom: '16px' }}>Uploadez les fiches techniques, menus ou catalogues. (Optionnel)</p>
+                <div style={{ border: '2px dashed var(--dash-border-input)', borderRadius: '12px', padding: '32px', textAlign: 'center', cursor: 'pointer' }} className="upload-zone">
+                  <Upload size={24} style={{ color: 'var(--dash-gold-icon)', margin: '0 auto 10px' }} />
+                  <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>Glissez vos PDFs ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></p>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF uniquement · max 20 MB · disponible après création</p>
                 </div>
               </div>
 
@@ -414,21 +409,21 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
 
           {/* ── ÉTAPE 5 — Succès ── */}
           {currentStep === 5 && created && (
-            <div style={{ ...cardStyle, border: '1px solid rgba(74,222,128,0.2)', textAlign: 'center', padding: '48px 32px' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'rgba(74,222,128,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                <Check size={24} style={{ color: '#4ade80' }} />
+            <div style={{ ...cardStyle, border: '1px solid var(--dash-success-ring)', textAlign: 'center', padding: '48px 32px' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'var(--dash-success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                <Check size={24} style={{ color: 'var(--dash-success)' }} />
               </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 300, color: 'white', marginBottom: '8px' }}>Projet créé avec succès !</h2>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', marginBottom: '32px' }}>{form.name} est maintenant disponible dans Supabase.</p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 300, color: 'var(--dash-text)', marginBottom: '8px' }}>Projet créé avec succès !</h2>
+              <p style={{ color: 'var(--dash-text-subtle)', fontSize: '14px', marginBottom: '32px' }}>{form.name} est maintenant disponible dans Supabase.</p>
 
-              <div style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', padding: '14px', marginBottom: '12px', textAlign: 'left' }}>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '6px' }}>Lien de l&apos;expérience</p>
-                <code style={{ color: GOLD, fontSize: '13px' }}>signature3dia.com/embed/{createdSlug}</code>
+              <div style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px', marginBottom: '12px', textAlign: 'left' }}>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '6px' }}>Lien de l&apos;expérience</p>
+                <code style={{ color: 'var(--dash-gold)', fontSize: '13px' }}>signature3dia.com/embed/{createdSlug}</code>
               </div>
 
-              <div style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', padding: '14px', marginBottom: '24px', textAlign: 'left' }}>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '6px' }}>Type</p>
-                <p style={{ color: 'white', fontSize: '13px', margin: 0 }}>{TYPES_PROJET.find((t) => t.value === form.type)?.label}</p>
+              <div style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px', marginBottom: '24px', textAlign: 'left' }}>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '6px' }}>Type</p>
+                <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>{TYPES_PROJET.find((t) => t.value === form.type)?.label}</p>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
@@ -441,14 +436,14 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
       </main>
 
       <style>{`
-        .back-arrow:hover { color: ${GOLD} !important; }
-        .btn-gold:hover:not(:disabled) { background-color: #c9a84c !important; }
-        .btn-outline:hover { border-color: rgba(255,255,255,0.2) !important; color: rgba(255,255,255,0.6) !important; }
-        .del-btn:hover { color: #f87171 !important; background-color: rgba(248,113,113,0.08) !important; }
-        .add-btn:hover { background-color: rgba(212,175,55,0.1) !important; }
-        .upload-zone:hover { border-color: rgba(212,175,55,0.3) !important; }
-        .dash-input:focus { border-color: ${GOLD} !important; }
-        .type-btn:hover { border-color: rgba(212,175,55,0.4) !important; }
+        .back-arrow:hover          { color: var(--dash-gold) !important; }
+        .btn-gold:hover:not(:disabled) { background-color: #b8943d !important; }
+        .btn-outline:hover         { border-color: var(--dash-gold-ring) !important; color: var(--dash-text) !important; }
+        .del-btn:hover             { color: var(--dash-error) !important; background-color: var(--dash-error-bg) !important; }
+        .add-btn:hover             { background-color: var(--dash-gold-muted) !important; }
+        .upload-zone:hover         { border-color: var(--dash-gold-ring) !important; }
+        .dash-input:focus          { border-color: var(--dash-gold) !important; }
+        .type-btn:hover            { border-color: var(--dash-gold-ring) !important; }
         @media (max-width: 640px) { .btn-row { grid-template-columns: 1fr !important; } }
       `}</style>
     </div>

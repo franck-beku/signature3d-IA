@@ -43,7 +43,7 @@ const projetsData: Record<string, {
   },
 }
 
-const cardStyle = { backgroundColor: '#111111', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '20px' }
+const cardStyle = { backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '20px' }
 
 export default function ProjetDetailPage({ params }: { params: Promise<{ slug: string; projetSlug: string }> }) {
   const { slug, projetSlug } = use(params)
@@ -58,10 +58,10 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <Sidebar />
-        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0d0d0d' }}>
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--dash-bg)' }}>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>Projet introuvable</p>
-            <Link href={`/dashboard/clients/${slug}`} style={{ color: '#d4af37', textDecoration: 'none', fontSize: '14px' }}>← Retour au client</Link>
+            <p style={{ color: 'var(--dash-text-subtle)', marginBottom: '16px' }}>Projet introuvable</p>
+            <Link href={`/dashboard/clients/${slug}`} style={{ color: 'var(--dash-gold)', textDecoration: 'none', fontSize: '14px' }}>← Retour au client</Link>
           </div>
         </main>
       </div>
@@ -73,27 +73,27 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />
-      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d0d0d' }}>
+      <main style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--dash-bg)' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 40px', borderBottom: '1px solid var(--dash-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href={`/dashboard/clients/${slug}`} style={{ color: 'rgba(255,255,255,0.3)', display: 'flex', textDecoration: 'none', transition: 'color 0.2s ease' }} className="back-arrow">
+            <Link href={`/dashboard/clients/${slug}`} style={{ color: 'var(--dash-text-muted)', display: 'flex', textDecoration: 'none', transition: 'color 0.2s ease' }} className="back-arrow">
               <ArrowLeft size={18} />
             </Link>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Link href={`/dashboard/clients/${slug}`} style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', textDecoration: 'none', transition: 'color 0.2s ease' }} className="client-link">{projet.clientName}</Link>
-                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>/</span>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 300, color: 'white', margin: 0 }}>{projet.name}</h1>
+                <Link href={`/dashboard/clients/${slug}`} style={{ color: 'var(--dash-text-muted)', fontSize: '13px', textDecoration: 'none', transition: 'color 0.2s ease' }} className="client-link">{projet.clientName}</Link>
+                <span style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>/</span>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>{projet.name}</h1>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
-                <span style={{ fontSize: '11px', padding: '2px 10px', borderRadius: '999px', backgroundColor: 'rgba(74,222,128,0.1)', color: '#4ade80' }}>{projet.status}</span>
-                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>Créé par {projet.createdBy} · {new Date(projet.createdAt).toLocaleDateString('fr-CA')}</span>
+                <span style={{ fontSize: '11px', padding: '2px 10px', borderRadius: '999px', backgroundColor: 'var(--dash-success-bg)', color: 'var(--dash-success)' }}>{projet.status}</span>
+                <span style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>Créé par {projet.createdBy} · {new Date(projet.createdAt).toLocaleDateString('fr-CA')}</span>
               </div>
             </div>
           </div>
-          <Link href={`/embed/${projetSlug}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#d4af37', color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', textDecoration: 'none', transition: 'all 0.2s ease' }} className="new-btn">
+          <Link href={`/embed/${projetSlug}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--dash-gold)', color: '#000', fontSize: '12px', fontWeight: 600, padding: '9px 16px', borderRadius: '8px', textDecoration: 'none', transition: 'all 0.2s ease' }} className="new-btn">
             Voir l&apos;expérience →
           </Link>
         </div>
@@ -113,35 +113,36 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
             {/* Lien + QR + Stats */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={cardStyle}>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '10px' }}>Lien de l&apos;expérience</p>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '10px' }}>Lien de l&apos;expérience</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <code style={{ flex: 1, fontSize: '11px', color: 'rgba(212,175,55,0.8)', backgroundColor: '#1a1a1a', padding: '8px 12px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{embedUrl}</code>
-                  <button onClick={handleCopy} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: copied ? '#4ade80' : 'rgba(255,255,255,0.4)', background: 'none', cursor: 'pointer', flexShrink: 0 }} className="copy-btn">
+                  <code style={{ flex: 1, fontSize: '11px', color: 'var(--dash-gold)', backgroundColor: 'var(--dash-input)', padding: '8px 12px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{embedUrl}</code>
+                  <button onClick={handleCopy} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: copied ? 'var(--dash-success)' : 'var(--dash-text-muted)', background: 'none', cursor: 'pointer', flexShrink: 0 }} className="copy-btn">
                     {copied ? <Check size={12} /> : <Copy size={12} />}
                   </button>
                 </div>
               </div>
 
               <div style={cardStyle}>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '10px' }}>QR Code</p>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '10px' }}>QR Code</p>
+                {/* backgroundColor: 'white' conservé — fond fonctionnel pour rendu QR */}
                 <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '12px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: '80px', height: '80px', backgroundColor: '#f0f0f0', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <p style={{ color: '#999', fontSize: '10px', textAlign: 'center' }}>QR Code bientôt</p>
                   </div>
                 </div>
-                <button style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', fontSize: '11px', padding: '8px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="dl-btn">
+                <button style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', fontSize: '11px', padding: '8px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="dl-btn">
                   <Download size={12} /> Télécharger PNG
                 </button>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div style={{ ...cardStyle, textAlign: 'center', padding: '14px' }}>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: 'white', margin: 0 }}>{projet.analytics.visitors}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Visiteurs</p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>{projet.analytics.visitors}</p>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Visiteurs</p>
                 </div>
                 <div style={{ ...cardStyle, textAlign: 'center', padding: '14px' }}>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: '#d4af37', margin: 0 }}>{projet.analytics.leads}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Leads</p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: 'var(--dash-gold)', margin: 0 }}>{projet.analytics.leads}</p>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Leads</p>
                 </div>
               </div>
             </div>
@@ -150,27 +151,27 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
           {/* Documents */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h2 style={{ color: 'white', fontWeight: 500, fontSize: '13px', margin: 0 }}>Documents — {projet.documents.length}</h2>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', padding: '6px 12px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="upload-btn">
+              <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', margin: 0 }}>Documents — {projet.documents.length}</h2>
+              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', padding: '6px 12px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="upload-btn">
                 <Upload size={11} /> Uploader un PDF
               </button>
             </div>
             {projet.documents.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '10px' }}>
-                <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Aucun document uploadé</p>
+              <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed var(--dash-border-input)', borderRadius: '10px' }}>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>Aucun document uploadé</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {projet.documents.map((doc, i) => (
-                  <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: i < projet.documents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <FileText size={13} style={{ color: '#d4af37' }} />
+                  <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: i < projet.documents.length - 1 ? '1px solid var(--dash-hover)' : 'none' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <FileText size={13} style={{ color: 'var(--dash-gold)' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: 'white', fontSize: '13px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
-                      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>{doc.size}</p>
+                      <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
+                      <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>{doc.size}</p>
                     </div>
-                    <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', flexShrink: 0, backgroundColor: doc.isIndexed ? 'rgba(74,222,128,0.1)' : 'rgba(212,175,55,0.1)', color: doc.isIndexed ? '#4ade80' : '#d4af37' }}>
+                    <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', flexShrink: 0, backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)' }}>
                       {doc.isIndexed ? 'Indexé' : 'En attente'}
                     </span>
                   </div>
@@ -181,53 +182,53 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
 
           {/* Leads */}
           <div style={cardStyle}>
-            <h2 style={{ color: 'white', fontWeight: 500, fontSize: '13px', marginBottom: '16px' }}>Leads reçus — {projet.leads.length}</h2>
+            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', marginBottom: '16px' }}>Leads reçus — {projet.leads.length}</h2>
             {projet.leads.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px' }}>
-                <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px' }}>Aucun lead pour ce projet</p>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>Aucun lead pour ce projet</p>
               </div>
             ) : (
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {projet.leads.map((lead) => (
-                    <div key={lead.id} onClick={() => setSelectedLead(lead.id === selectedLead ? null : lead.id)} style={{ padding: '12px', borderRadius: '10px', border: selectedLead === lead.id ? '1px solid rgba(212,175,55,0.4)' : '1px solid rgba(255,255,255,0.05)', backgroundColor: selectedLead === lead.id ? 'rgba(212,175,55,0.05)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s ease' }} className="lead-row">
+                    <div key={lead.id} onClick={() => setSelectedLead(lead.id === selectedLead ? null : lead.id)} style={{ padding: '12px', borderRadius: '10px', border: selectedLead === lead.id ? '1px solid var(--dash-gold)' : '1px solid var(--dash-border)', backgroundColor: selectedLead === lead.id ? 'var(--dash-gold-muted)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s ease' }} className="lead-row">
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ color: '#d4af37', fontSize: '12px', fontWeight: 500 }}>{lead.name[0]}</span>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--dash-input)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ color: 'var(--dash-gold)', fontSize: '12px', fontWeight: 500 }}>{lead.name[0]}</span>
                           </div>
                           <div>
-                            <p style={{ color: 'white', fontSize: '13px', fontWeight: 500, margin: 0 }}>{lead.name}</p>
-                            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>{lead.service}</p>
+                            <p style={{ color: 'var(--dash-text)', fontSize: '13px', fontWeight: 500, margin: 0 }}>{lead.name}</p>
+                            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>{lead.service}</p>
                           </div>
                         </div>
-                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px' }}>{new Date(lead.createdAt).toLocaleDateString('fr-CA')}</span>
+                        <span style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>{new Date(lead.createdAt).toLocaleDateString('fr-CA')}</span>
                       </div>
                     </div>
                   ))}
                 </div>
                 {selectedLeadData && (
-                  <div style={{ width: '240px', flexShrink: 0, backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <p style={{ color: '#d4af37', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em' }}>Détail</p>
+                  <div style={{ width: '240px', flexShrink: 0, backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <p style={{ color: 'var(--dash-gold)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em' }}>Détail</p>
                     <div>
-                      <p style={{ color: 'white', fontWeight: 500, fontSize: '14px', margin: 0 }}>{selectedLeadData.name}</p>
-                      <p style={{ color: '#d4af37', fontSize: '11px' }}>{selectedLeadData.service}</p>
+                      <p style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', margin: 0 }}>{selectedLeadData.name}</p>
+                      <p style={{ color: 'var(--dash-gold)', fontSize: '11px' }}>{selectedLeadData.service}</p>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Mail size={12} style={{ color: '#d4af37' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedLeadData.email}</span>
+                        <Mail size={12} style={{ color: 'var(--dash-gold)' }} />
+                        <span style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedLeadData.email}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Phone size={12} style={{ color: '#d4af37' }} />
-                        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>{selectedLeadData.phone}</span>
+                        <Phone size={12} style={{ color: 'var(--dash-gold)' }} />
+                        <span style={{ color: 'var(--dash-text-subtle)', fontSize: '11px' }}>{selectedLeadData.phone}</span>
                       </div>
                     </div>
-                    <div style={{ backgroundColor: '#111', borderRadius: '8px', padding: '10px' }}>
-                      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', marginBottom: '4px' }}>Message</p>
-                      <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', lineHeight: 1.6 }}>{selectedLeadData.message}</p>
+                    <div style={{ backgroundColor: 'var(--dash-surface)', borderRadius: '8px', padding: '10px' }}>
+                      <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', marginBottom: '4px' }}>Message</p>
+                      <p style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', lineHeight: 1.6 }}>{selectedLeadData.message}</p>
                     </div>
-                    <button onClick={() => { window.location.href = 'mailto:' + selectedLeadData.email }} style={{ backgroundColor: '#d4af37', color: '#000', fontSize: '11px', fontWeight: 600, padding: '9px', borderRadius: '8px', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="reply-btn">
+                    <button onClick={() => { window.location.href = 'mailto:' + selectedLeadData.email }} style={{ backgroundColor: 'var(--dash-gold)', color: '#000', fontSize: '11px', fontWeight: 600, padding: '9px', borderRadius: '8px', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="reply-btn">
                       Répondre par email
                     </button>
                   </div>
@@ -238,29 +239,29 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
 
           {/* Analytics */}
           <div style={cardStyle}>
-            <h2 style={{ color: 'white', fontWeight: 500, fontSize: '13px', marginBottom: '20px' }}>Analytics</h2>
+            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', marginBottom: '20px' }}>Analytics</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }} className="analytics-grid">
               {[
-                { label: 'Visiteurs', value: projet.analytics.visitors, color: 'white' },
-                { label: 'Leads', value: projet.analytics.leads, color: '#d4af37' },
-                { label: 'Interactions IA', value: projet.analytics.interactions, color: '#4ade80' },
-                { label: 'Durée moyenne', value: projet.analytics.avgDuration, color: '#60a5fa' },
+                { label: 'Visiteurs',      value: projet.analytics.visitors,     color: 'var(--dash-text)' },
+                { label: 'Leads',          value: projet.analytics.leads,        color: 'var(--dash-gold)' },
+                { label: 'Interactions IA',value: projet.analytics.interactions, color: 'var(--dash-success)' },
+                { label: 'Durée moyenne',  value: projet.analytics.avgDuration,  color: 'var(--dash-info)' },
               ].map((stat) => (
-                <div key={stat.label} style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                <div key={stat.label} style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: stat.color, margin: 0, lineHeight: 1 }}>{stat.value}</p>
-                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px' }}>{stat.label}</p>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '12px' }}>Questions fréquentes</p>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '12px' }}>Questions fréquentes</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {projet.analytics.topQuestions.map((q, i) => (
                 <div key={q} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ color: 'rgba(212,175,55,0.4)', fontSize: '11px', width: '16px' }}>{i + 1}</span>
-                  <div style={{ flex: 1, height: '6px', backgroundColor: '#1a1a1a', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', backgroundColor: 'rgba(212,175,55,0.5)', borderRadius: '999px', width: `${100 - i * 18}%`, transition: 'width 0.5s ease' }} />
+                  <span style={{ color: 'var(--dash-gold-icon)', fontSize: '11px', width: '16px' }}>{i + 1}</span>
+                  <div style={{ flex: 1, height: '6px', backgroundColor: 'var(--dash-input)', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', backgroundColor: 'var(--dash-gold-icon)', borderRadius: '999px', width: `${100 - i * 18}%`, transition: 'width 0.5s ease' }} />
                   </div>
-                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', width: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q}</span>
+                  <span style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', width: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q}</span>
                 </div>
               ))}
             </div>
@@ -269,16 +270,16 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
       </main>
 
       <style>{`
-        .back-arrow:hover { color: #d4af37 !important; }
-        .client-link:hover { color: #d4af37 !important; }
-        .new-btn:hover { background-color: #c9a84c !important; }
-        .copy-btn:hover { color: #d4af37 !important; border-color: rgba(212,175,55,0.3) !important; }
-        .dl-btn:hover { border-color: rgba(212,175,55,0.3) !important; color: #d4af37 !important; }
-        .upload-btn:hover { border-color: rgba(212,175,55,0.3) !important; color: #d4af37 !important; }
-        .lead-row:hover { border-color: rgba(255,255,255,0.15) !important; }
-        .reply-btn:hover { background-color: #c9a84c !important; }
+        .back-arrow:hover  { color: var(--dash-gold) !important; }
+        .client-link:hover { color: var(--dash-gold) !important; }
+        .new-btn:hover     { background-color: #b8943d !important; }
+        .copy-btn:hover    { color: var(--dash-gold) !important; border-color: var(--dash-gold-ring) !important; }
+        .dl-btn:hover      { border-color: var(--dash-gold-ring) !important; color: var(--dash-gold) !important; }
+        .upload-btn:hover  { border-color: var(--dash-gold-ring) !important; color: var(--dash-gold) !important; }
+        .lead-row:hover    { border-color: var(--dash-border-input) !important; background-color: var(--dash-hover) !important; }
+        .reply-btn:hover   { background-color: #b8943d !important; }
         @media (max-width: 900px) {
-          .preview-grid { grid-template-columns: 1fr !important; }
+          .preview-grid   { grid-template-columns: 1fr !important; }
           .analytics-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
