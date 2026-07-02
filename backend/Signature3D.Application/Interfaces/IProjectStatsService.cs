@@ -13,4 +13,5 @@ public interface IProjectStatsService
 {
     Task<Result<VisitStatsDto>> GetVisitStatsAsync(Guid projectId, DateTime? from = null, DateTime? to = null);
     Task<Result<ProjectButtonClicksDto>> GetButtonClickStatsAsync(Guid projectId, DateTime? from = null, DateTime? to = null);
+    Task<Result<LeadStatsDto>> GetLeadStatsAsync(Guid projectId, DateTime? from = null, DateTime? to = null);
 }

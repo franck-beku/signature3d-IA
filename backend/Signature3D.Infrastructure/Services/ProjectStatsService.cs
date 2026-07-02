@@ -88,4 +88,49 @@ public class ProjectStatsService : IProjectStatsService
             Buttons = buttons
         });
     }
+
+    /// <summary>
+    /// Statistiques de leads d'un projet — total (filtrable par date), repère fixe 30 jours,
+    /// et découpage par statut.
+    /// </summary>
+    public async Task<Result<LeadStatsDto>> GetLeadStatsAsync(Guid projectId, DateTime? from = null, DateTime? to = null)
+    {
+        var project = await _db.Projects.FindAsync(projectId);
+        if (project is null)
+            return Result<LeadStatsDto>.Fail("Projet introuvable.");
+
+        var query = _db.Leads.Where(l => l.ProjectId == projectId);
+
+        if (from is not null) query = query.Where(l => l.CreatedAt >= from);
+        if (to is not null) query = query.Where(l => l.CreatedAt <= to);
+
+        var total = await query.CountAsync();
+
+        // GroupBy matérialisé avant .ToString() sur l'enum — évite de compter sur la traduction SQL du provider.
+        var byStatusRaw = await query
+            .GroupBy(l => l.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var byStatus = byStatusRaw
+            .Select(x => new LeadStatusCountDto { Status = x.Status.ToString(), Count = x.Count })
+            .OrderByDescending(x => x.Count)
+            .ToList();
+
+        var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
+        var last30Days = await _db.Leads
+            .Where(l => l.ProjectId == projectId && l.CreatedAt >= thirtyDaysAgo)
+            .CountAsync();
+
+        return Result<LeadStatsDto>.Ok(new LeadStatsDto
+        {
+            ProjectId = projectId,
+            ProjectName = project.Name,
+            Total = total,
+            Last30Days = last30Days,
+            From = from,
+            To = to,
+            ByStatus = byStatus
+        });
+    }
 }

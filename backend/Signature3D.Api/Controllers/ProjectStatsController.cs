@@ -53,4 +53,19 @@ public class ProjectStatsController : ControllerBase
 
         return Ok(result.Data);
     }
+
+    /// <summary>
+    /// Retourne les statistiques de leads d'un projet (total, 30 derniers jours, découpage par statut).
+    /// GET /api/stats/project/{projectId}/leads?from=&amp;to=
+    /// </summary>
+    [HttpGet("project/{projectId:guid}/leads")]
+    public async Task<IActionResult> GetLeadStats(Guid projectId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+    {
+        var result = await _statsService.GetLeadStatsAsync(projectId, from, to);
+
+        if (!result.Success)
+            return NotFound(new { message = result.Error });
+
+        return Ok(result.Data);
+    }
 }
