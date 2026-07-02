@@ -14,7 +14,7 @@ export default function KPICard({ value, label, delta, deltaPositive = true }: K
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 300, color: 'var(--dash-text)', marginBottom: '6px', lineHeight: 1 }}>
         {value}
       </div>
-      <div style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+      <div className="dash-micro-label" style={{ marginBottom: '8px' }}>
         {label}
       </div>
       {delta && (

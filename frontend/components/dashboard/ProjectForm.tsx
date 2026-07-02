@@ -23,11 +23,6 @@ const inputStyle = {
   fontFamily: 'inherit', transition: 'border-color 0.2s ease',
 }
 
-const labelStyle = {
-  display: 'block' as const, fontSize: '11px', color: 'var(--dash-text-muted)',
-  textTransform: 'uppercase' as const, letterSpacing: '0.2em', marginBottom: '6px',
-}
-
 const sectionTitle = {
   fontSize: '11px', color: 'var(--dash-gold)', textTransform: 'uppercase' as const,
   letterSpacing: '0.25em', margin: '0 0 16px 0', fontWeight: 500,
@@ -263,10 +258,10 @@ export default function ProjectForm({ projectId }: Props) {
           <ArrowLeft size={15} />
         </Link>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>
             {isEdit ? 'Modifier le projet' : 'Nouveau projet'}
           </h1>
-          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>Expérience immersive</p>
+          <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">Expérience immersive</p>
         </div>
       </div>
 
@@ -280,42 +275,42 @@ export default function ProjectForm({ projectId }: Props) {
           <p style={sectionTitle}>Informations</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
-              <label style={labelStyle}>Nom du projet *</label>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Nom du projet *</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mercedes CLE 53 AMG" style={inputStyle} className="dash-input" />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
-                <label style={labelStyle}>Client *</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Client *</label>
                 <select value={clientId} onChange={(e) => setClientId(e.target.value)} style={inputStyle} className="dash-input">
                   <option value="">Choisir un client</option>
                   {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Secteur</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Secteur</label>
                 <select value={sectorId} onChange={(e) => setSectorId(e.target.value)} style={inputStyle} className="dash-input">
                   <option value="">Aucun</option>
                   {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Offre / Service</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Offre / Service</label>
                 <select value={offeringId} onChange={(e) => setOfferingId(e.target.value)} style={inputStyle} className="dash-input">
                   <option value="">Aucune</option>
                   {offerings.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Ordre d'affichage</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Ordre d'affichage</label>
                 <input type="number" value={displayOrder} onChange={(e) => setDisplayOrder(Number(e.target.value))} style={inputStyle} className="dash-input" />
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Description courte (carte vitrine)</label>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description courte (carte vitrine)</label>
               <input type="text" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} placeholder="Cabriolet sport haute performance avec expérience immersive." style={inputStyle} className="dash-input" />
             </div>
             <div>
-              <label style={labelStyle}>Image de couverture (URL)</label>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Image de couverture (URL)</label>
               <input type="text" value={coverImage} onChange={(e) => setCoverImage(e.target.value)} placeholder="https://..." style={inputStyle} className="dash-input" />
             </div>
           </div>
@@ -326,7 +321,7 @@ export default function ProjectForm({ projectId }: Props) {
           <p style={sectionTitle}>Expérience immersive</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
-              <label style={labelStyle}>Type d'expérience</label>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Type d'expérience</label>
               <select value={experienceType} onChange={(e) => setExperienceType(e.target.value)} style={inputStyle} className="dash-input">
                 <option value="Matterport">Matterport (jumeau numérique 3D)</option>
                 <option value="Tour360">360° (Glo3D, Kuula...)</option>
@@ -336,25 +331,25 @@ export default function ProjectForm({ projectId }: Props) {
 
             {experienceType === 'Matterport' && (
               <div>
-                <label style={labelStyle}>Matterport ID</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Matterport ID</label>
                 <input type="text" value={matterportId} onChange={(e) => setMatterportId(e.target.value)} placeholder="WJzvgHF44zq" style={inputStyle} className="dash-input" />
               </div>
             )}
 
             {experienceType === 'Tour360' && (
               <div>
-                <label style={labelStyle}>URL de l'expérience 360°</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>URL de l'expérience 360°</label>
                 <input type="text" value={experienceUrl} onChange={(e) => setExperienceUrl(e.target.value)} placeholder="https://glo3d.net/xxxxx" style={inputStyle} className="dash-input" />
               </div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
-                <label style={labelStyle}>Nom de l'ambassadeur IA</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Nom de l'ambassadeur IA</label>
                 <input type="text" value={ambassadorName} onChange={(e) => setAmbassadorName(e.target.value)} placeholder="Luxedia" style={inputStyle} className="dash-input" />
               </div>
               {isEdit && (
                 <div>
-                  <label style={labelStyle}>Statut</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Statut</label>
                   <select value={status} onChange={(e) => setStatus(e.target.value)} style={inputStyle} className="dash-input">
                     <option value="Active">Actif</option>
                     <option value="Draft">Brouillon</option>
@@ -364,7 +359,7 @@ export default function ProjectForm({ projectId }: Props) {
               )}
             </div>
             <div>
-              <label style={labelStyle}>Message d'accueil de Luxedia</label>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Message d'accueil de Luxedia</label>
               <textarea value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} rows={2} placeholder="Bienvenue ! Je suis Luxedia, votre assistant. Comment puis-je vous aider ?" style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
             </div>
           </div>
@@ -383,7 +378,7 @@ export default function ProjectForm({ projectId }: Props) {
                 ['Bulle utilisateur', luxediaUserMessageColor, setLuxediaUserMessageColor],
               ] as [string, string, React.Dispatch<React.SetStateAction<string>>][]).map(([label, val, set]) => (
                 <div key={label}>
-                  <label style={labelStyle}>{label}</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>{label}</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <input
                       type="color" value={val}
@@ -403,17 +398,17 @@ export default function ProjectForm({ projectId }: Props) {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
-                <label style={labelStyle}>Avatar Luxedia (URL)</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Avatar Luxedia (URL)</label>
                 <input type="text" value={luxediaAvatarUrl} onChange={(e) => setLuxediaAvatarUrl(e.target.value)} placeholder="https://... ou /luxedia-avatar.png" style={inputStyle} className="dash-input" />
               </div>
               <div>
-                <label style={labelStyle}>Logo client (URL)</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Logo client (URL)</label>
                 <input type="text" value={luxediaClientLogoUrl} onChange={(e) => setLuxediaClientLogoUrl(e.target.value)} placeholder="https://... ou /logo-dark.png" style={inputStyle} className="dash-input" />
               </div>
             </div>
 
             <div style={{ maxWidth: '200px' }}>
-              <label style={labelStyle}>Langue</label>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Langue</label>
               <select value={luxediaLanguage} onChange={(e) => setLuxediaLanguage(e.target.value)} style={inputStyle} className="dash-input">
                 <option value="fr">Français</option>
                 <option value="en">English</option>

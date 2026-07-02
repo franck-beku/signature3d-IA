@@ -74,9 +74,7 @@ function isDeliveryUrgent(date: string) {
 
 const thStyle = {
   textAlign: 'left' as const, padding: '12px 16px',
-  fontSize: '11px', textTransform: 'uppercase' as const,
-  letterSpacing: '0.15em', color: 'var(--dash-text-muted)',
-  fontWeight: 400, borderBottom: '1px solid var(--dash-border)',
+  borderBottom: '1px solid var(--dash-border)',
   whiteSpace: 'nowrap' as const,
 }
 
@@ -423,7 +421,7 @@ export default function ClientDetailPage() {
             <div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>{client.name}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.3em', margin: 0 }}>{client.sectorName}</p>
+                <p className="dash-page-eyebrow" style={{ margin: 0 }}>{client.sectorName}</p>
                 <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: priority.bgColor, color: priority.color, fontWeight: 500 }}>{priority.label}</span>
               </div>
             </div>
@@ -448,7 +446,7 @@ export default function ClientDetailPage() {
 
           {/* Infos client */}
           <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
-            <h2 style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '20px' }}>Informations du client</h2>
+            <h2 className="dash-label" style={{ marginBottom: '20px' }}>Informations du client</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '20px' }} className="info-grid">
               {[
                 { icon: Mail,     label: 'Email',        value: client.email },
@@ -458,7 +456,7 @@ export default function ClientDetailPage() {
                 <div key={info.label} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                   <info.icon size={14} style={{ color: 'var(--dash-gold)', flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>{info.label}</p>
+                    <p className="dash-micro-label" style={{ marginBottom: '4px' }}>{info.label}</p>
                     <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>{info.value}</p>
                   </div>
                 </div>
@@ -468,18 +466,18 @@ export default function ClientDetailPage() {
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                 <Calendar size={14} style={{ color: urgent ? 'var(--dash-error)' : 'var(--dash-gold)', flexShrink: 0, marginTop: '2px' }} />
                 <div>
-                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>Date livraison</p>
+                  <p className="dash-micro-label" style={{ marginBottom: '4px' }}>Date livraison</p>
                   <p style={{ color: urgent ? 'var(--dash-error)' : 'var(--dash-text)', fontSize: '13px', margin: 0 }}>
                     {new Date(client.deliveryDate).toLocaleDateString('fr-CA')}{urgent && ' ⚠️'}
                   </p>
                 </div>
               </div>
               <div>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Statut</p>
+                <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Statut</p>
                 <span style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '999px', backgroundColor: contractSt.bg, color: contractSt.color }}>{client.status}</span>
               </div>
               <div>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Entente / Contrat</p>
+                <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Entente / Contrat</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button
                     onClick={() => setShowContractModal(true)}
@@ -499,7 +497,7 @@ export default function ClientDetailPage() {
             </div>
             {client.notes && (
               <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--dash-border)' }}>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Notes internes</p>
+                <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Notes internes</p>
                 <div style={{ borderLeft: `3px solid ${priority.borderColor}`, backgroundColor: priority.bgColor, borderRadius: '0 8px 8px 0', padding: '12px 14px' }}>
                   <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{client.notes}</p>
                 </div>
@@ -624,10 +622,10 @@ export default function ClientDetailPage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-                      <th style={thStyle}>Projet</th>
-                      <th style={thStyle}>Statut</th>
-                      <th style={thStyle}>Date</th>
-                      <th style={thStyle}>Actions</th>
+                      <th style={thStyle} className="dash-label">Projet</th>
+                      <th style={thStyle} className="dash-label">Statut</th>
+                      <th style={thStyle} className="dash-label">Date</th>
+                      <th style={thStyle} className="dash-label">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -691,16 +689,16 @@ export default function ClientDetailPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Nom du projet</label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Nom du projet</label>
                 <input type="text" value={editProject.name} onChange={(e) => setEditProject({ ...editProject, name: e.target.value })} style={inputStyle} className="dash-input" />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>ID Matterport <span style={{ color: 'var(--dash-text-muted)', textTransform: 'none', letterSpacing: 0 }}>(vide = IA seule)</span></label>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>ID Matterport <span style={{ color: 'var(--dash-text-muted)', textTransform: 'none', letterSpacing: 0 }}>(vide = IA seule)</span></label>
                 <input type="text" value={editProject.matterportId} onChange={(e) => setEditProject({ ...editProject, matterportId: e.target.value })} placeholder="Ex: WJzvgHF44zq" style={inputStyle} className="dash-input" />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <label style={{ fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Boutons ({editProject.buttons.length}/4)</label>
+                  <label className="dash-label">Boutons ({editProject.buttons.length}/4)</label>
                   {editProject.buttons.length < 4 && (
                     <button onClick={addButton} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-gold)', color: 'var(--dash-gold)', background: 'none', cursor: 'pointer' }} className="add-btn">
                       <Plus size={11} /> Ajouter
@@ -711,7 +709,7 @@ export default function ClientDetailPage() {
                   {editProject.buttons.map((btn, i) => (
                     <div key={btn.id} style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '10px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Bouton {i + 1}</span>
+                        <span className="dash-micro-label">Bouton {i + 1}</span>
                         {editProject.buttons.length > 1 && (
                           <button onClick={() => removeButton(btn.id)} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: 'var(--dash-error)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', borderRadius: '4px' }} className="del-btn">
                             <Trash2 size={10} /> Supprimer
@@ -760,22 +758,22 @@ export default function ClientDetailPage() {
                   { key: 'position', label: 'Fonction', type: 'text', placeholder: 'Ex: Directeur marketing' },
                 ].map(({ key, label, type, placeholder }) => (
                   <div key={key}>
-                    <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>{label}</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>{label}</label>
                     <input type={type} value={(form as any)[key] ?? ''} onChange={(e) => setForm({ [key]: e.target.value } as any)} placeholder={placeholder} style={inputStyle} className="dash-input" />
                   </div>
                 ))}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Email</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Email</label>
                     <input type="email" value={form.email ?? ''} onChange={(e) => setForm({ email: e.target.value })} placeholder="prenom@client.ca" style={inputStyle} className="dash-input" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Téléphone</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Téléphone</label>
                     <input type="tel" value={form.phone ?? ''} onChange={(e) => setForm({ phone: e.target.value })} placeholder="+1 (418) 000-0000" style={inputStyle} className="dash-input" />
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '8px' }}>Poste / Extension</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Poste / Extension</label>
                   <input type="text" value={form.phoneExtension ?? ''} onChange={(e) => setForm({ phoneExtension: e.target.value })} placeholder="Ex: 224" style={inputStyle} className="dash-input" />
                 </div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 14px', borderRadius: '8px', border: `1px solid ${form.isPrimary ? 'var(--dash-gold-ring)' : 'var(--dash-border)'}`, backgroundColor: form.isPrimary ? 'var(--dash-gold-muted)' : 'transparent', transition: 'all 0.2s ease' }}>

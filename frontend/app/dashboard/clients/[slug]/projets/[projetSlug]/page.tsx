@@ -85,7 +85,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Link href={`/dashboard/clients/${slug}`} style={{ color: 'var(--dash-text-muted)', fontSize: '13px', textDecoration: 'none', transition: 'color 0.2s ease' }} className="client-link">{projet.clientName}</Link>
                 <span style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>/</span>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>{projet.name}</h1>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>{projet.name}</h1>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
                 <span style={{ fontSize: '11px', padding: '2px 10px', borderRadius: '999px', backgroundColor: 'var(--dash-success-bg)', color: 'var(--dash-success)' }}>{projet.status}</span>
@@ -113,7 +113,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
             {/* Lien + QR + Stats */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={cardStyle}>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '10px' }}>Lien de l&apos;expérience</p>
+                <p className="dash-micro-label" style={{ marginBottom: '10px' }}>Lien de l&apos;expérience</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <code style={{ flex: 1, fontSize: '11px', color: 'var(--dash-gold)', backgroundColor: 'var(--dash-input)', padding: '8px 12px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{embedUrl}</code>
                   <button onClick={handleCopy} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: copied ? 'var(--dash-success)' : 'var(--dash-text-muted)', background: 'none', cursor: 'pointer', flexShrink: 0 }} className="copy-btn">
@@ -123,7 +123,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
               </div>
 
               <div style={cardStyle}>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '10px' }}>QR Code</p>
+                <p className="dash-micro-label" style={{ marginBottom: '10px' }}>QR Code</p>
                 {/* backgroundColor: 'white' conservé — fond fonctionnel pour rendu QR */}
                 <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '12px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: '80px', height: '80px', backgroundColor: '#f0f0f0', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -138,11 +138,11 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div style={{ ...cardStyle, textAlign: 'center', padding: '14px' }}>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>{projet.analytics.visitors}</p>
-                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Visiteurs</p>
+                  <p className="dash-micro-label">Visiteurs</p>
                 </div>
                 <div style={{ ...cardStyle, textAlign: 'center', padding: '14px' }}>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: 'var(--dash-gold)', margin: 0 }}>{projet.analytics.leads}</p>
-                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Leads</p>
+                  <p className="dash-micro-label">Leads</p>
                 </div>
               </div>
             </div>
@@ -249,11 +249,11 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
               ].map((stat) => (
                 <div key={stat.label} style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 300, color: stat.color, margin: 0, lineHeight: 1 }}>{stat.value}</p>
-                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px' }}>{stat.label}</p>
+                  <p className="dash-micro-label" style={{ marginTop: '6px' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '12px' }}>Questions fréquentes</p>
+            <p className="dash-label" style={{ marginBottom: '12px' }}>Questions fréquentes</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {projet.analytics.topQuestions.map((q, i) => (
                 <div key={q} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

@@ -144,7 +144,7 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>
+            <p className="dash-micro-label" style={{ marginBottom: '4px' }}>
               {documents.length} document{documents.length > 1 ? 's' : ''}
             </p>
             {documents.map((doc) => (

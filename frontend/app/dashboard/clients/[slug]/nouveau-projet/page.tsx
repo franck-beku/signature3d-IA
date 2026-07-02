@@ -55,11 +55,6 @@ const inputStyle = {
   outline: 'none', boxSizing: 'border-box' as const,
   fontFamily: 'inherit', transition: 'border-color 0.3s ease',
 }
-const labelStyle = {
-  display: 'block', fontSize: '11px',
-  textTransform: 'uppercase' as const, letterSpacing: '0.25em',
-  color: 'var(--dash-text-subtle)' as const, marginBottom: '8px',
-}
 const cardStyle = {
   backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)',
   borderRadius: '14px', padding: '24px',
@@ -184,8 +179,8 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 300, color: 'var(--dash-text)', margin: 0 }}>Nouveau projet</h1>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '4px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 500, color: 'var(--dash-text)', margin: 0 }}>Nouveau projet</h1>
+            <p style={{ marginTop: '4px' }} className="dash-page-eyebrow">
               {client ? client.name : 'Chargement...'} — Configuration en {steps.length} étapes
             </p>
           </div>
@@ -262,16 +257,16 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                 <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Informations du projet</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
-                    <label style={labelStyle}>Nom du projet *</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Nom du projet *</label>
                     <input type="text" value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Ex: Mercedes CLE 53 AMG" style={inputStyle} className="dash-input" />
                   </div>
                   <div>
-                    <label style={labelStyle}>Email de réception des leads</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Email de réception des leads</label>
                     <input type="email" value={form.leadEmail} onChange={(e) => set('leadEmail', e.target.value)} placeholder="contact@client.ca" style={inputStyle} className="dash-input" />
                     <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '6px' }}>Les leads seront transmis à cette adresse</p>
                   </div>
                   <div>
-                    <label style={labelStyle}>Notes internes</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Notes internes</label>
                     <textarea rows={3} value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Spécificités, demandes du client..." style={{ ...inputStyle, resize: 'none' }} className="dash-input" />
                   </div>
                 </div>
@@ -293,12 +288,12 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                 <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', marginBottom: '20px' }}>Collez le lien ou l&apos;ID de la visite Matterport.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
-                    <label style={labelStyle}>Lien ou ID Matterport *</label>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Lien ou ID Matterport *</label>
                     <input type="text" value={form.matterportUrl} onChange={(e) => set('matterportUrl', e.target.value)} placeholder="https://my.matterport.com/show/?m=XXXXXXXX ou WJzvgHF44zq" style={inputStyle} className="dash-input" />
                   </div>
                   {matterportId && (
                     <div>
-                      <label style={labelStyle}>Prévisualisation</label>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Prévisualisation</label>
                       <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--dash-gold-ring)', height: '200px' }}>
                         <iframe src={`https://my.matterport.com/show/?m=${matterportId}&play=1&qs=1`} style={{ width: '100%', height: '100%', border: 'none' }} title="Prévisualisation Matterport" />
                       </div>
@@ -327,11 +322,11 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                   <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Configuration Luxedia IA</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
-                      <label style={labelStyle}>Nom de l&apos;ambassadeur IA</label>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Nom de l&apos;ambassadeur IA</label>
                       <input type="text" value={form.ambassadorName} onChange={(e) => set('ambassadorName', e.target.value)} placeholder="Ex: Luxedia" style={inputStyle} className="dash-input" />
                     </div>
                     <div>
-                      <label style={labelStyle}>Message d&apos;accueil</label>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Message d&apos;accueil</label>
                       <textarea rows={3} value={form.welcomeMessage} onChange={(e) => set('welcomeMessage', e.target.value)} placeholder={`Bienvenue ! Je suis ${form.ambassadorName}, votre ambassadeur IA. Comment puis-je vous aider ?`} style={{ ...inputStyle, resize: 'none' }} className="dash-input" />
                     </div>
                   </div>
@@ -354,7 +349,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                   {form.boutons.map((bouton, i) => (
                     <div key={bouton.id} style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--dash-text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Bouton {i + 1}</span>
+                        <span className="dash-micro-label">Bouton {i + 1}</span>
                         {form.boutons.length > 1 && (
                           <button type="button" onClick={() => removeBouton(bouton.id)} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--dash-error)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 8px', borderRadius: '4px' }} className="del-btn">
                             <Trash2 size={11} /> Supprimer
@@ -363,17 +358,17 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 1.4fr', gap: '8px' }} className="btn-row">
                         <div>
-                          <label style={{ ...labelStyle, fontSize: '10px', marginBottom: '5px' }}>Nom *</label>
+                          <label className="dash-micro-label" style={{ marginBottom: '5px' }}>Nom *</label>
                           <input type="text" required value={bouton.label} onChange={(e) => updateBouton(bouton.id, 'label', e.target.value)} placeholder="Ex: Réserver un essai" style={{ ...inputStyle, padding: '9px 12px', fontSize: '12px' }} className="dash-input" />
                         </div>
                         <div>
-                          <label style={{ ...labelStyle, fontSize: '10px', marginBottom: '5px' }}>Type</label>
+                          <label className="dash-micro-label" style={{ marginBottom: '5px' }}>Type</label>
                           <select value={bouton.action} onChange={(e) => updateBouton(bouton.id, 'action', e.target.value)} style={{ ...inputStyle, padding: '9px 12px', fontSize: '12px' }} className="dash-input">
                             {TYPES_ACTION.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label style={{ ...labelStyle, fontSize: '10px', marginBottom: '5px' }}>{bouton.action === 'call' ? 'Numéro' : 'URL'}</label>
+                          <label className="dash-micro-label" style={{ marginBottom: '5px' }}>{bouton.action === 'call' ? 'Numéro' : 'URL'}</label>
                           <input type="text" value={bouton.url} onChange={(e) => updateBouton(bouton.id, 'url', e.target.value)} placeholder={bouton.action === 'call' ? 'tel:+14180000000' : 'https://'} style={{ ...inputStyle, padding: '9px 12px', fontSize: '12px' }} className="dash-input" />
                         </div>
                       </div>
@@ -413,16 +408,16 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: 'var(--dash-success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
                 <Check size={24} style={{ color: 'var(--dash-success)' }} />
               </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 300, color: 'var(--dash-text)', marginBottom: '8px' }}>Projet créé avec succès !</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: 'var(--dash-text)', marginBottom: '8px' }}>Projet créé avec succès !</h2>
               <p style={{ color: 'var(--dash-text-subtle)', fontSize: '14px', marginBottom: '32px' }}>{form.name} est maintenant disponible dans Supabase.</p>
 
               <div style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px', marginBottom: '12px', textAlign: 'left' }}>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '6px' }}>Lien de l&apos;expérience</p>
+                <p className="dash-micro-label" style={{ marginBottom: '6px' }}>Lien de l&apos;expérience</p>
                 <code style={{ color: 'var(--dash-gold)', fontSize: '13px' }}>signature3dia.com/embed/{createdSlug}</code>
               </div>
 
               <div style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px', marginBottom: '24px', textAlign: 'left' }}>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '6px' }}>Type</p>
+                <p className="dash-micro-label" style={{ marginBottom: '6px' }}>Type</p>
                 <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>{TYPES_PROJET.find((t) => t.value === form.type)?.label}</p>
               </div>
 
