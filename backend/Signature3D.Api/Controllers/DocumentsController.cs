@@ -39,8 +39,12 @@ public class DocumentsController : ControllerBase
     /// Lance l'indexation RAG automatiquement après upload.
     /// </summary>
     [HttpPost("upload/{projectId:guid}")]
-    public async Task<IActionResult> Upload(Guid projectId, [FromForm] IFormFile file, [FromForm] bool isInternal = false)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Upload(Guid projectId, [FromForm] UploadDocumentRequest request)
     {
+        var file = request.File;
+        var isInternal = request.IsInternal;
+
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "Fichier manquant." });
 
@@ -106,3 +110,14 @@ public class DocumentsController : ControllerBase
 }
 
 public record SetCategoryRequest(bool IsInternal);
+
+/// <summary>
+/// Modèle groupé pour l'upload — nécessaire pour Swashbuckle : un IFormFile mêlé à d'autres
+/// paramètres [FromForm] au niveau de l'action (plutôt que dans un seul objet lié) fait
+/// planter la génération du schéma multipart.
+/// </summary>
+public class UploadDocumentRequest
+{
+    public IFormFile File { get; set; } = null!;
+    public bool IsInternal { get; set; } = false;
+}

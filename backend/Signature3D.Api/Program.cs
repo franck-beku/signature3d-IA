@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Signature3D.Application.Interfaces;
 using Signature3D.Infrastructure.AI.Providers;
 using Signature3D.Infrastructure.Configurations;
@@ -110,7 +111,8 @@ builder.Services.AddScoped<IClientService,    ClientService>();
 builder.Services.AddScoped<IProjectService,   ProjectService>();
 builder.Services.AddScoped<ILeadService,      LeadService>();
 builder.Services.AddScoped<IVisitService,     VisitService>();
-builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IAnalyticsService,    AnalyticsService>();
+builder.Services.AddScoped<IProjectStatsService, ProjectStatsService>();
 builder.Services.AddScoped<IDocumentService,  DocumentService>();
 builder.Services.AddScoped<IChatService,      ChatService>();
 builder.Services.AddScoped<IQrCodeService,    QrCodeService>();
@@ -143,7 +145,23 @@ builder.Services.AddScoped<IRealtimeService, NullRealtimeService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Entrez le token JWT (sans le préfixe \"Bearer \")."
+    });
+
+    options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+    {
+        { new OpenApiSecuritySchemeReference("Bearer", null, null), new List<string>() }
+    });
+});
 
 /* ══════════════════════════════════════════
    8. BUILD + PIPELINE HTTP
