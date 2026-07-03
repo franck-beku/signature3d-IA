@@ -402,6 +402,90 @@ export const visitsApi = {
 }
 
 /* ══════════════════════════════════════
+   STATS — rapport de preuve client (dashboard)
+   ══════════════════════════════════════ */
+
+export interface VisitStatsDto {
+  projectId: string
+  projectName: string
+  total: number
+  last30Days: number
+  from?: string | null
+  to?: string | null
+}
+
+export interface ButtonClickStatsDto {
+  buttonLabel: string
+  clickCount: number
+}
+
+export interface ProjectButtonClicksDto {
+  projectId: string
+  projectName: string
+  totalClicks: number
+  from?: string | null
+  to?: string | null
+  buttons: ButtonClickStatsDto[]
+}
+
+export interface LeadStatusCountDto {
+  status: string
+  count: number
+}
+
+export interface LeadStatsDto {
+  projectId: string
+  projectName: string
+  total: number
+  last30Days: number
+  from?: string | null
+  to?: string | null
+  byStatus: LeadStatusCountDto[]
+}
+
+export interface QuestionCategoryStatsDto {
+  category: string
+  count: number
+}
+
+export interface ProjectQuestionStatsDto {
+  projectId: string
+  projectName: string
+  totalQuestions: number
+  from?: string | null
+  to?: string | null
+  categories: QuestionCategoryStatsDto[]
+  uncategorizedQuestions: string[]
+}
+
+/** Construit ?from=&to= uniquement si fournis */
+const statsQuery = (from?: string, to?: string) => {
+  const params = new URLSearchParams()
+  if (from) params.set('from', from)
+  if (to) params.set('to', to)
+  const s = params.toString()
+  return s ? `?${s}` : ''
+}
+
+export const statsApi = {
+  /** Statistiques de visites d'un projet */
+  getVisits: (projectId: string, from?: string, to?: string) =>
+    apiFetch<VisitStatsDto>(`/api/stats/project/${projectId}/visits${statsQuery(from, to)}`),
+
+  /** Clics par bouton d'action, triés décroissant */
+  getButtonClicks: (projectId: string, from?: string, to?: string) =>
+    apiFetch<ProjectButtonClicksDto>(`/api/stats/project/${projectId}/button-clicks${statsQuery(from, to)}`),
+
+  /** Statistiques de leads, avec découpage par statut */
+  getLeads: (projectId: string, from?: string, to?: string) =>
+    apiFetch<LeadStatsDto>(`/api/stats/project/${projectId}/leads${statsQuery(from, to)}`),
+
+  /** Questions posées à Luxedia, regroupées par catégorie */
+  getQuestions: (projectId: string, from?: string, to?: string) =>
+    apiFetch<ProjectQuestionStatsDto>(`/api/stats/project/${projectId}/questions${statsQuery(from, to)}`),
+}
+
+/* ══════════════════════════════════════
    EMBED
    ══════════════════════════════════════ */
 

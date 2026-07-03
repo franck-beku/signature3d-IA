@@ -11,7 +11,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, Copy, Code, FileText, ExternalLink as OpenIcon, UserRound } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, Copy, Code, FileText, ExternalLink as OpenIcon, UserRound, BarChart3 } from 'lucide-react'
 import { clientsApi, projectsApi, contactsApi, timelineApi, type ClientDto, type ProjectDto, type ContactDto, type CreateContactDto, type TimelineItemDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
 import { format } from 'date-fns'
@@ -646,6 +646,7 @@ export default function ClientDetailPage() {
                             </td>
                             <td style={{ padding: '14px 16px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                <Link href={`/dashboard/clients/${slug}/projets/${project.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', textDecoration: 'none' }} className="action-btn"><BarChart3 size={11} /> Voir</Link>
                                 <button onClick={() => setLinkProject(project)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><ExternalLink size={11} /> Lien</button>
                                 <button onClick={() => setQrProject({ slug: project.slug, name: project.name })} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><QrCode size={11} /> QR</button>
                                 <button onClick={() => setDocProject({ id: project.id, name: project.name })} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><FileText size={11} /> PDF</button>
