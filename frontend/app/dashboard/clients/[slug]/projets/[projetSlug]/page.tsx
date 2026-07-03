@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { use } from 'react'
+import { pdf } from '@react-pdf/renderer'
 import Sidebar from '@/components/dashboard/Sidebar'
 import KPICard from '@/components/dashboard/KPICard'
+import ReportDocument from '@/components/dashboard/ProjectReportPDF'
 import Link from 'next/link'
 import { ArrowLeft, Copy, Download, Upload, FileText, Mail, Phone, Check, TrendingUp } from 'lucide-react'
 import {
@@ -44,6 +46,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
   const [questionStats, setQuestionStats] = useState<ProjectQuestionStatsDto | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [statsError, setStatsError]     = useState(false)
+  const [generatingPdf, setGeneratingPdf] = useState(false)
 
   useEffect(() => {
     projectsApi.getBySlug(projetSlug)
@@ -81,6 +84,30 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
     navigator.clipboard.writeText(embedUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleDownloadReport = async () => {
+    if (!project || !visitStats || !buttonStats || !leadStats || !questionStats) return
+    setGeneratingPdf(true)
+    try {
+      const blob = await pdf(
+        <ReportDocument
+          project={{ name: project.name, clientName: project.clientName }}
+          visitStats={visitStats}
+          buttonStats={buttonStats}
+          leadStats={leadStats}
+          questionStats={questionStats}
+        />
+      ).toBlob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `rapport-${project.slug}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setGeneratingPdf(false)
+    }
   }
 
   if (loading) {
@@ -380,10 +407,15 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
                   <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>Graphique d&apos;évolution disponible prochainement</p>
                 </div>
 
-                {/* Rapport PDF — pas encore actif */}
+                {/* Rapport PDF */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button disabled style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--dash-border)', color: 'var(--dash-text-muted)', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'not-allowed' }}>
-                    <Download size={14} /> Télécharger le rapport (PDF) — bientôt
+                  <button
+                    onClick={handleDownloadReport}
+                    disabled={generatingPdf}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--dash-gold)', color: '#000', fontSize: '13px', fontWeight: 600, padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: generatingPdf ? 'not-allowed' : 'pointer', opacity: generatingPdf ? 0.7 : 1, transition: 'all 0.2s ease' }}
+                    className="pdf-btn"
+                  >
+                    <Download size={14} /> {generatingPdf ? 'Génération...' : 'Télécharger le rapport (PDF)'}
                   </button>
                 </div>
               </div>
@@ -397,6 +429,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
         .back-arrow:hover  { color: var(--dash-gold) !important; }
         .client-link:hover { color: var(--dash-gold) !important; }
         .new-btn:hover     { background-color: #b8943d !important; }
+        .pdf-btn:hover:not(:disabled) { background-color: #b8943d !important; }
         .copy-btn:hover    { color: var(--dash-gold) !important; border-color: var(--dash-gold-ring) !important; }
         .dl-btn:hover      { border-color: var(--dash-gold-ring) !important; color: var(--dash-gold) !important; }
         .upload-btn:hover  { border-color: var(--dash-gold-ring) !important; color: var(--dash-gold) !important; }
