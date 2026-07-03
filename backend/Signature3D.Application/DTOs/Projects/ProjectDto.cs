@@ -21,6 +21,7 @@ public class ProjectDto
 
     /* Champs V2 */
     public string? ShortDescription { get; set; }
+    public string? ShortDescriptionEn { get; set; }
     public string? CoverImage { get; set; }
     public bool IsPublished { get; set; }
     public DateTime? PublishedAt { get; set; }
@@ -65,6 +66,7 @@ public class CreateProjectDto
 
     /* Champs V2 */
     public string? ShortDescription { get; set; }
+    public string? ShortDescriptionEn { get; set; }
     public string? CoverImage { get; set; }
     public bool IsPublished { get; set; }
     public bool IsFeatured { get; set; }
@@ -104,6 +106,7 @@ public class UpdateProjectDto
 
     /* Champs V2 */
     public string? ShortDescription { get; set; }
+    public string? ShortDescriptionEn { get; set; }
     public string? CoverImage { get; set; }
     public bool IsPublished { get; set; }
     public bool IsFeatured { get; set; }
@@ -167,6 +170,7 @@ public class ProjectCardDto
     public string Slug { get; set; } = string.Empty;          // sert à construire /embed/{slug}
     public string? CoverImage { get; set; }
     public string? ShortDescription { get; set; }
+    public string? ShortDescriptionEn { get; set; }
     public string? MatterportId { get; set; } 
     public bool IsFeatured { get; set; }
     public int DisplayOrder { get; set; }

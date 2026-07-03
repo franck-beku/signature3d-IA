@@ -12,6 +12,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
+import { useLanguage } from '@/context/LanguageContext'
 import { sectorsApi, type SectorDto } from '@/lib/api'
 
 /* ── Charte V2 (identique à l'accueil / Final / Contact) ── */
@@ -31,6 +32,7 @@ const SECTEUR_IMAGES: Record<string, string> = {
 const FALLBACK_IMAGE = SECTEUR_IMAGES['Automobile']
 
 export default function RealisationsPage() {
+  const { t } = useLanguage()
   const [secteurs, setSecteurs] = useState<SectorDto[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -66,7 +68,7 @@ export default function RealisationsPage() {
                 color: GOLD, marginBottom: '18px',
               }}
             >
-              Nos réalisations
+              {t('Nos réalisations', 'Our work')}
             </motion.span>
             <motion.h1
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
@@ -77,13 +79,16 @@ export default function RealisationsPage() {
                 letterSpacing: '-0.01em', lineHeight: 1.06, marginBottom: '22px',
               }}
             >
-              Expériences immersives livrées
+              {t('Expériences immersives livrées', 'Immersive experiences delivered')}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
               style={{ maxWidth: '540px', margin: '0 auto', fontSize: '16px', lineHeight: 1.75, color: '#6B6458', fontWeight: 400 }}
             >
-              Découvrez nos réalisations par secteur — chaque expérience est unique, personnalisée et accessible depuis n&apos;importe quel appareil.
+              {t(
+                "Découvrez nos réalisations par secteur — chaque expérience est unique, personnalisée et accessible depuis n'importe quel appareil.",
+                'Discover our work by sector — each experience is unique, personalized and accessible from any device.'
+              )}
             </motion.p>
           </div>
         </section>
@@ -92,9 +97,9 @@ export default function RealisationsPage() {
         <section style={{ padding: '0 0 96px', minHeight: '300px', position: 'relative', zIndex: 1 }}>
           <div className="container-main">
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>Chargement…</div>
+              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>{t('Chargement…', 'Loading…')}</div>
             ) : secteurs.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>Aucun secteur disponible pour le moment.</div>
+              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>{t('Aucun secteur disponible pour le moment.', 'No sector available at the moment.')}</div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="secteurs-grid">
                 {secteurs.map((secteur, index) => {
@@ -128,10 +133,10 @@ export default function RealisationsPage() {
                         </div>
                         <div style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <span style={{ fontSize: '13px', fontWeight: 400, color: '#6B6458' }}>
-                            {secteur.description || 'Découvrir les expériences'}
+                            {secteur.description || t('Découvrir les expériences', 'Discover experiences')}
                           </span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: GOLD, flexShrink: 0 }}>
-                            Voir tout <ArrowRight size={13} />
+                            {t('Voir tout', 'View all')} <ArrowRight size={13} />
                           </span>
                         </div>
                       </Link>

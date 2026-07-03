@@ -8,6 +8,7 @@ public class Sector : BaseEntity
 
     /* --- Champs V2 --- */
     public string? Description { get; set; }               // accroche affichée sur le site
+    public string? DescriptionEn { get; set; }              // traduction anglaise (nullable)
     public string? CoverImage { get; set; }                // image plein écran (Hero du secteur)
     public string? Icon { get; set; }                      // nom d'icône (dashboard / site)
     public int DisplayOrder { get; set; }                  // ordre d'affichage

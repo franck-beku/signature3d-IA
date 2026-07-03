@@ -68,6 +68,7 @@ export default function ProjectForm({ projectId }: Props) {
   const [ambassadorName, setAmbassadorName]   = useState('Luxedia')
   const [welcomeMessage, setWelcomeMessage]   = useState('')
   const [shortDescription, setShortDescription] = useState('')
+  const [shortDescriptionEn, setShortDescriptionEn] = useState('')
   const [coverImage, setCoverImage]           = useState('')
   const [status, setStatus]                   = useState('Active')
   const [isPublished, setIsPublished]         = useState(false)
@@ -116,6 +117,7 @@ export default function ProjectForm({ projectId }: Props) {
             setAmbassadorName(p.ambassadorName)
             setWelcomeMessage(p.welcomeMessage ?? '')
             setShortDescription(p.shortDescription ?? '')
+            setShortDescriptionEn(p.shortDescriptionEn ?? '')
             setCoverImage(p.coverImage ?? '')
             setStatus(p.status)
             setIsPublished(p.isPublished)
@@ -215,7 +217,7 @@ export default function ProjectForm({ projectId }: Props) {
           name, matterportId: matterportId || undefined, ambassadorName,
           experienceType, experienceUrl: experienceUrl || undefined,
           welcomeMessage: welcomeMessage || undefined, status,
-          shortDescription: shortDescription || undefined, coverImage: coverImage || undefined,
+          shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined, offeringId: offeringId || undefined,
           buttons: cleanButtons,
@@ -233,7 +235,7 @@ export default function ProjectForm({ projectId }: Props) {
           name, matterportId: matterportId || undefined, ambassadorName,
           experienceType, experienceUrl: experienceUrl || undefined,
           welcomeMessage: welcomeMessage || undefined, clientId,
-          shortDescription: shortDescription || undefined, coverImage: coverImage || undefined,
+          shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined, offeringId: offeringId || undefined,
           buttons: cleanButtons,
@@ -308,6 +310,10 @@ export default function ProjectForm({ projectId }: Props) {
             <div>
               <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description courte (carte vitrine)</label>
               <input type="text" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} placeholder="Cabriolet sport haute performance avec expérience immersive." style={inputStyle} className="dash-input" />
+            </div>
+            <div>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description courte (EN)</label>
+              <input type="text" value={shortDescriptionEn} onChange={(e) => setShortDescriptionEn(e.target.value)} placeholder="High-performance sport convertible with an immersive experience." style={inputStyle} className="dash-input" />
             </div>
             <div>
               <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Image de couverture (URL)</label>

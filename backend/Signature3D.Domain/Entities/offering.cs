@@ -10,10 +10,13 @@ public class Offering : BaseEntity
     public string Name { get; set; } = string.Empty;          // "Matterport + IA"
     public string Slug { get; set; } = string.Empty;          // "matterport-ia"
     public string? ShortDescription { get; set; }             // promesse courte (carte)
+    public string? ShortDescriptionEn { get; set; }            // traduction anglaise (nullable)
     public string? LongDescription { get; set; }              // description détaillée (page)
+    public string? LongDescriptionEn { get; set; }             // traduction anglaise (nullable)
     public string? Icon { get; set; }                         // nom d'icône
     public string? ImageUrl { get; set; }                     // visuel de l'offre
     public string? Level { get; set; }                        // "Découverte", "Premium", "Signature"...
+    public string? LevelEn { get; set; }                       // traduction anglaise (nullable)
     public int DisplayOrder { get; set; }                     // ordre d'affichage
     public bool IsActive { get; set; } = true;                // visible sur le site public
 

@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
+import { useLanguage } from '@/context/LanguageContext'
 import { projectsApi, sectorsApi, type ProjectCardDto, type SectorDto } from '@/lib/api'
 
 /* ── Charte V2 ── */
@@ -31,6 +32,7 @@ function getMatterportThumb(matterportId?: string): string | null {
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1200&q=85&auto=format&fit=crop'
 
 export default function SecteurPage() {
+  const { t, lang } = useLanguage()
   const params = useParams()
   const secteurSlug = params.secteur as string
 
@@ -83,7 +85,7 @@ export default function SecteurPage() {
               style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px' }}
             >
               <Link href="/realisations" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#9A8E78', textDecoration: 'none' }} className="breadcrumb-link">
-                <ArrowLeft size={14} /> Réalisations
+                <ArrowLeft size={14} /> {t('Réalisations', 'Our work')}
               </Link>
               <span style={{ color: '#D8CEBE' }}>/</span>
               <span style={{ fontSize: '13px', color: GOLD, fontWeight: 600 }}>{secteurNom}</span>
@@ -101,7 +103,7 @@ export default function SecteurPage() {
                   initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
                   style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)', fontWeight: 500, color: INK, letterSpacing: '-0.01em', lineHeight: 1.08, margin: 0 }}
                 >
-                  Expériences {secteurNom.toLowerCase()}
+                  {t('Expériences', 'Experiences')} {secteurNom.toLowerCase()}
                 </motion.h1>
               </div>
               {!loading && (
@@ -109,7 +111,10 @@ export default function SecteurPage() {
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }}
                   style={{ fontSize: '14px', color: '#9A8E78', fontWeight: 400, margin: 0 }}
                 >
-                  {totalExp} expérience{totalExp > 1 ? 's' : ''} disponible{totalExp > 1 ? 's' : ''}
+                  {t(
+                    `${totalExp} expérience${totalExp > 1 ? 's' : ''} disponible${totalExp > 1 ? 's' : ''}`,
+                    `${totalExp} experience${totalExp > 1 ? 's' : ''} available`
+                  )}
                 </motion.p>
               )}
             </div>
@@ -120,12 +125,12 @@ export default function SecteurPage() {
         <section style={{ padding: '0 0 96px', minHeight: '300px', position: 'relative', zIndex: 1 }}>
           <div className="container-main">
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>Chargement…</div>
+              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>{t('Chargement…', 'Loading…')}</div>
             ) : projects.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78' }}>
-                <p style={{ fontSize: '16px' }}>Expériences bientôt disponibles.</p>
+                <p style={{ fontSize: '16px' }}>{t('Expériences bientôt disponibles.', 'Experiences coming soon.')}</p>
                 <Link href="/realisations" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', color: GOLD, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
-                  <ArrowLeft size={14} /> Retour aux réalisations
+                  <ArrowLeft size={14} /> {t('Retour aux réalisations', 'Back to our work')}
                 </Link>
               </div>
             ) : (
@@ -167,7 +172,7 @@ export default function SecteurPage() {
                         {/* Hover overlay */}
                         <Link href={`/embed/${exp.slug}`} style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s ease', backgroundColor: 'rgba(0,0,0,0.3)', textDecoration: 'none' }} className="exp-overlay">
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '999px', backgroundColor: GOLD, padding: '11px 22px', fontSize: '12px', fontWeight: 700, color: '#FFFFFF' }}>
-                            <Play size={12} style={{ fill: '#fff' }} /> Voir l&apos;expérience
+                            <Play size={12} style={{ fill: '#fff' }} /> {t("Voir l'expérience", 'View experience')}
                           </div>
                         </Link>
                       </div>
@@ -178,7 +183,8 @@ export default function SecteurPage() {
                           {exp.name}
                         </h3>
                         <p style={{ fontSize: '12px', lineHeight: 1.5, color: 'rgba(255,255,255,0.5)', marginBottom: '14px' }}>
-                          {exp.shortDescription || 'Expérience immersive Signature.'}
+                          {(lang === 'en' ? (exp.shortDescriptionEn || exp.shortDescription) : exp.shortDescription)
+                            || t('Expérience immersive Signature.', 'Signature immersive experience.')}
                         </p>
                         {/* Caractéristiques (Prix, Kilométrage...) */}
                         {exp.details && exp.details.length > 0 && (
@@ -196,7 +202,7 @@ export default function SecteurPage() {
                           </div>
                         )}
                         <Link href={`/embed/${exp.slug}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: GOLD, textDecoration: 'none', transition: 'gap 0.2s ease' }} className="voir-link">
-                          Voir l&apos;expérience <ArrowRight size={12} />
+                          {t("Voir l'expérience", 'View experience')} <ArrowRight size={12} />
                         </Link>
                       </div>
                     </motion.div>

@@ -7,7 +7,9 @@ namespace Signature3D.Domain.Entities;
 public class Faq : BaseEntity
 {
     public string Question { get; set; } = string.Empty;
+    public string? QuestionEn { get; set; }                // traduction anglaise (nullable)
     public string Answer { get; set; } = string.Empty;
+    public string? AnswerEn { get; set; }                  // traduction anglaise (nullable)
     public int DisplayOrder { get; set; }          // ordre d'affichage
     public bool IsPublished { get; set; } = true;  // visible sur le site public
 }

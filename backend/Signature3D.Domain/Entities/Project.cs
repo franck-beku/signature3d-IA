@@ -31,6 +31,7 @@ public class Project : BaseEntity
 
     /* ── Champs V2 (vitrine) ── */
     public string? ShortDescription { get; set; }    // description courte (galerie)
+    public string? ShortDescriptionEn { get; set; }   // traduction anglaise (nullable — repli sur ShortDescription si absente)
     public string? CoverImage { get; set; }          // image de couverture (galerie)
     public bool IsPublished { get; set; }            // visible sur le site (défaut false → accord client requis)
     public DateTime? PublishedAt { get; set; }       // date de première publication (conservée si dépublié)

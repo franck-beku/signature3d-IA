@@ -85,6 +85,7 @@ public class ProjectService : IProjectService
             ClientId = dto.ClientId,
             Status = ProjectStatus.Active,
             ShortDescription = dto.ShortDescription,
+            ShortDescriptionEn = dto.ShortDescriptionEn,
             CoverImage = dto.CoverImage,
             IsPublished  = dto.IsPublished,
             PublishedAt  = dto.IsPublished ? DateTime.UtcNow : null,
@@ -154,6 +155,7 @@ public class ProjectService : IProjectService
         project.AmbassadorName = dto.AmbassadorName;
         project.WelcomeMessage = dto.WelcomeMessage;
         project.ShortDescription = dto.ShortDescription;
+        project.ShortDescriptionEn = dto.ShortDescriptionEn;
         project.CoverImage = dto.CoverImage;
         project.IsPublished = dto.IsPublished;
         if (!wasPublished && dto.IsPublished && project.PublishedAt is null)
@@ -296,6 +298,7 @@ public class ProjectService : IProjectService
         CoverImage = p.CoverImage,
         MatterportId = p.MatterportId,
         ShortDescription = p.ShortDescription,
+        ShortDescriptionEn = p.ShortDescriptionEn,
         IsFeatured = p.IsFeatured,
         DisplayOrder = p.DisplayOrder,
         SectorName = p.Sector?.Name,
@@ -332,6 +335,7 @@ public class ProjectService : IProjectService
         ClientId = p.ClientId,
         EmbedUrl = $"{_urls.EmbedBaseUrl}/{p.Slug}",
         ShortDescription = p.ShortDescription,
+        ShortDescriptionEn = p.ShortDescriptionEn,
         CoverImage = p.CoverImage,
         IsPublished  = p.IsPublished,
         PublishedAt  = p.PublishedAt,

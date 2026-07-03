@@ -194,6 +194,7 @@ export interface ProjectDto {
   clientId: string
   embedUrl: string
   shortDescription?: string
+  shortDescriptionEn?: string
   coverImage?: string
   isPublished: boolean
   isFeatured: boolean
@@ -221,6 +222,7 @@ export interface ProjectCardDto {
   coverImage?: string
   matterportId?: string
   shortDescription?: string
+  shortDescriptionEn?: string
   isFeatured: boolean
   displayOrder: number
   sectorName?: string
@@ -254,7 +256,7 @@ export const projectsApi = {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string  
     welcomeMessage?: string; leadEmail?: string; clientId: string
-    shortDescription?: string; coverImage?: string
+    shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
@@ -273,7 +275,7 @@ export const projectsApi = {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string
     welcomeMessage?: string; status: string
-    shortDescription?: string; coverImage?: string
+    shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
