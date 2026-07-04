@@ -15,6 +15,7 @@ import { chatApi } from '@/lib/api'
 
 interface Button {
   label: string
+  labelEn?: string | null
   url: string | null
   action: 'link' | 'form' | 'call'
 }
@@ -230,7 +231,7 @@ export default function AmbassadeurIA({
       </div>
 
       {/* Action Buttons */}
-      <ActionButtons buttons={buttons} projectSlug={projectSlug} primaryColor={primaryColor} label={currentT.quickActions} />
+      <ActionButtons buttons={buttons} projectSlug={projectSlug} primaryColor={primaryColor} label={currentT.quickActions} lang={lang} />
 
       {/* Input */}
       <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(26,26,26,0.3)' }}>

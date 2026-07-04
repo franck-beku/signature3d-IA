@@ -175,6 +175,7 @@ export const clientsApi = {
 export interface ProjectButtonDto {
   id: string
   label: string
+  labelEn?: string
   url?: string
   action: 'link' | 'form' | 'call'
   order: number
@@ -271,7 +272,7 @@ export const projectsApi = {
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
-    buttons: { label: string; url?: string; action: string; order: number }[]
+    buttons: { label: string; labelEn?: string; url?: string; action: string; order: number }[]
     suggestions: { label: string; labelEn?: string; answer?: string; answerEn?: string; order: number }[]
     details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
     luxediaPrimaryColor?: string
@@ -291,7 +292,7 @@ export const projectsApi = {
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
-    buttons: { label: string; url?: string; action: string; order: number }[]
+    buttons: { label: string; labelEn?: string; url?: string; action: string; order: number }[]
     suggestions: { label: string; labelEn?: string; answer?: string; answerEn?: string; order: number }[]
     details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
     luxediaPrimaryColor?: string

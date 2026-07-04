@@ -5,6 +5,7 @@ namespace Signature3D.Domain.Entities;
 public class ProjectButton : BaseEntity
 {
     public string Label { get; set; } = string.Empty;
+    public string? LabelEn { get; set; }
     public string? Url { get; set; }
     public ButtonActionType Action { get; set; } = ButtonActionType.Link;
     public int Order { get; set; } = 0;

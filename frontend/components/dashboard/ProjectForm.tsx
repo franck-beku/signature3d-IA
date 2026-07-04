@@ -30,6 +30,7 @@ const sectionTitle = {
 
 interface ButtonRow {
   label: string
+  labelEn: string
   url: string
   action: string
   order: number
@@ -134,7 +135,7 @@ export default function ProjectForm({ projectId }: Props) {
             setIsPublished(p.isPublished)
             setIsFeatured(p.isFeatured)
             setDisplayOrder(p.displayOrder)
-            setButtons(p.buttons.map((b) => ({ label: b.label, url: b.url ?? '', action: b.action, order: b.order })))
+            setButtons(p.buttons.map((b) => ({ label: b.label, labelEn: b.labelEn ?? '', url: b.url ?? '', action: b.action, order: b.order })))
             setSuggestions(p.suggestions.map((s) => ({ label: s.label, labelEn: s.labelEn ?? '', answer: s.answer ?? '', answerEn: s.answerEn ?? '', order: s.order })))
             setDetails(p.details.map((d) => ({ label: d.label, value: d.value, displayOrder: d.displayOrder, isVisible: d.isVisible })))
             setLuxediaPrimaryColor(p.luxediaPrimaryColor ?? '#d4af37')
@@ -166,7 +167,7 @@ export default function ProjectForm({ projectId }: Props) {
       .finally(() => setDocsLoading(false))
   }, [isEdit, projectId])
 
-  const addButton = () => setButtons((prev) => [...prev, { label: '', url: '', action: 'link', order: prev.length }])
+  const addButton = () => setButtons((prev) => [...prev, { label: '', labelEn: '', url: '', action: 'link', order: prev.length }])
   const removeButton = (i: number) => setButtons((prev) => prev.filter((_, idx) => idx !== i))
   const updateButton = (i: number, field: keyof ButtonRow, value: string | number) =>
     setButtons((prev) => prev.map((b, idx) => idx === i ? { ...b, [field]: value } : b))
@@ -223,7 +224,7 @@ export default function ProjectForm({ projectId }: Props) {
     try {
       const cleanButtons = buttons
         .filter((b) => b.label.trim())
-        .map((b, i) => ({ label: b.label, url: b.url || undefined, action: b.action, order: i }))
+        .map((b, i) => ({ label: b.label, labelEn: b.labelEn || undefined, url: b.url || undefined, action: b.action, order: i }))
 
       const cleanSuggestions = suggestions
         .filter((s) => s.label.trim())
@@ -468,17 +469,22 @@ export default function ProjectForm({ projectId }: Props) {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {buttons.map((b, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr 1fr auto', gap: '8px', alignItems: 'center' }}>
-                  <input type="text" value={b.label} onChange={(e) => updateButton(i, 'label', e.target.value)} placeholder="Réserver un essai" style={inputStyle} className="dash-input" />
-                  <input type="text" value={b.url} onChange={(e) => updateButton(i, 'url', e.target.value)} placeholder="https://... ou tel:+1..." style={inputStyle} className="dash-input" />
-                  <select value={b.action} onChange={(e) => updateButton(i, 'action', e.target.value)} style={inputStyle} className="dash-input">
-                    <option value="link">Lien</option>
-                    <option value="form">Formulaire</option>
-                    <option value="call">Appel</option>
-                  </select>
-                  <button onClick={() => removeButton(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="del-btn" title="Retirer">
-                    <Trash2 size={12} />
-                  </button>
+                <div key={i} style={{ border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                    <input type="text" value={b.label} onChange={(e) => updateButton(i, 'label', e.target.value)} placeholder="Libellé (FR) — Réserver un essai" style={inputStyle} className="dash-input" />
+                    <input type="text" value={b.labelEn} onChange={(e) => updateButton(i, 'labelEn', e.target.value)} placeholder="Libellé (EN) — Book a test drive" style={inputStyle} className="dash-input" />
+                    <button onClick={() => removeButton(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="del-btn" title="Retirer">
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '8px' }}>
+                    <input type="text" value={b.url} onChange={(e) => updateButton(i, 'url', e.target.value)} placeholder="https://... ou tel:+1..." style={inputStyle} className="dash-input" />
+                    <select value={b.action} onChange={(e) => updateButton(i, 'action', e.target.value)} style={inputStyle} className="dash-input">
+                      <option value="link">Lien</option>
+                      <option value="form">Formulaire</option>
+                      <option value="call">Appel</option>
+                    </select>
+                  </div>
                 </div>
               ))}
             </div>

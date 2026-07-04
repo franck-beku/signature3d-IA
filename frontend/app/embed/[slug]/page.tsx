@@ -19,6 +19,7 @@ interface EmbedData {
   buttons: {
     id:     string
     label:  string
+    labelEn?: string | null
     url?:   string
     action: 'link' | 'form' | 'call'
     order:  number
@@ -101,6 +102,7 @@ export default async function EmbedSlugPage({
         .sort((a, b) => a.order - b.order)
         .map((b) => ({
           label:  b.label,
+          labelEn: b.labelEn ?? null,
           url:    b.url ?? null,
           action: b.action,
         }))}

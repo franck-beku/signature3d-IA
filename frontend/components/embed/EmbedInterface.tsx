@@ -14,6 +14,7 @@ import { visitsApi } from '@/lib/api'
 
 interface Button {
   label: string
+  labelEn?: string | null
   url: string | null
   action: 'link' | 'form' | 'call'
 }

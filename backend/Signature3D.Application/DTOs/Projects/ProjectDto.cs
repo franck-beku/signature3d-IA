@@ -144,6 +144,7 @@ public class ProjectButtonDto
 {
     public Guid Id { get; set; }
     public string Label { get; set; } = string.Empty;
+    public string? LabelEn { get; set; }
     public string? Url { get; set; }
     public string Action { get; set; } = "link";
     public int Order { get; set; }
@@ -159,6 +160,7 @@ public class ProjectButtonDto
 public class CreateButtonDto
 {
     public string Label { get; set; } = string.Empty;
+    public string? LabelEn { get; set; }
     public string? Url { get; set; }
     public string Action { get; set; } = "link";
     public int Order { get; set; }

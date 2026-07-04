@@ -9,6 +9,7 @@ import { analyticsApi } from '@/lib/api'
 
 interface Button {
   label: string
+  labelEn?: string | null
   url: string | null
   action: 'link' | 'form' | 'call'
 }
@@ -18,9 +19,10 @@ interface Props {
   projectSlug?: string
   primaryColor?: string
   label?: string
+  lang?: 'fr' | 'en'
 }
 
-export default function ActionButtons({ buttons, projectSlug, primaryColor = '#d4af37', label = 'Actions rapides' }: Props) {
+export default function ActionButtons({ buttons, projectSlug, primaryColor = '#d4af37', label = 'Actions rapides', lang = 'fr' }: Props) {
 
   const handleClick = async (button: Button) => {
     /* ── Tracker le clic dans analytics ── */
@@ -66,7 +68,7 @@ export default function ActionButtons({ buttons, projectSlug, primaryColor = '#d
             }}
             className="action-quick-btn"
           >
-            {btn.label}
+            {lang === 'en' ? (btn.labelEn || btn.label) : btn.label}
           </button>
         ))}
       </div>

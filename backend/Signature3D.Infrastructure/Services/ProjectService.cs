@@ -110,6 +110,7 @@ public class ProjectService : IProjectService
             Buttons = dto.Buttons.Select((b, i) => new ProjectButton
             {
                 Label = b.Label,
+                LabelEn = b.LabelEn,
                 Url = b.Url,
                 Action = Enum.TryParse<ButtonActionType>(b.Action, true, out var action)
                     ? action : ButtonActionType.Link,
@@ -202,6 +203,7 @@ public class ProjectService : IProjectService
         var newButtons = dto.Buttons.Select((b, i) => new ProjectButton
         {
             Label = b.Label,
+            LabelEn = b.LabelEn,
             Url = b.Url,
             Action = Enum.TryParse<ButtonActionType>(b.Action, true, out var action)
                 ? action : ButtonActionType.Link,
@@ -389,6 +391,7 @@ public class ProjectService : IProjectService
         {
             Id = b.Id,
             Label = b.Label,
+            LabelEn = b.LabelEn,
             Url = b.Url,
             Action = b.Action.ToString().ToLower(),
             Order = b.Order
