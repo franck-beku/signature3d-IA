@@ -89,6 +89,8 @@ const inputStyle = {
 interface EditProject {
   id: string; name: string; matterportId: string; status: string
   buttons: { id: string; label: string; url: string; action: string; order: number }[]
+  details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
+  suggestions: { label: string; labelEn?: string; answer?: string; answerEn?: string; order: number }[]
 }
 
 function newButton() {
@@ -341,6 +343,8 @@ export default function ClientDetailPage() {
         name: editProject.name, matterportId: editProject.matterportId,
         ambassadorName: 'Luxedia', status: editProject.status,
         buttons: editProject.buttons.map((b, i) => ({ label: b.label, url: b.url, action: b.action, order: i })),
+        details: editProject.details,
+        suggestions: editProject.suggestions,
       })
       setProjects((prev) => prev.map((p) => p.id === editProject.id ? updated as ProjectDto : p))
       setEditProject(null)
@@ -650,7 +654,12 @@ export default function ClientDetailPage() {
                                 <button onClick={() => setLinkProject(project)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><ExternalLink size={11} /> Lien</button>
                                 <button onClick={() => setQrProject({ slug: project.slug, name: project.name })} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><QrCode size={11} /> QR</button>
                                 <button onClick={() => setDocProject({ id: project.id, name: project.name })} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><FileText size={11} /> PDF</button>
-                                <button onClick={() => setEditProject({ id: project.id, name: project.name, matterportId: project.matterportId ?? '', status: project.status, buttons: project.buttons.length > 0 ? project.buttons.map(b => ({ ...b })) : [newButton()] })} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', color: 'var(--dash-gold)', background: 'none', cursor: 'pointer' }} className="edit-btn"><Pencil size={11} /> Modifier</button>
+                                <button onClick={() => setEditProject({
+                                  id: project.id, name: project.name, matterportId: project.matterportId ?? '', status: project.status,
+                                  buttons: project.buttons.length > 0 ? project.buttons.map(b => ({ ...b })) : [newButton()],
+                                  details: project.details.map(d => ({ label: d.label, value: d.value, displayOrder: d.displayOrder, isVisible: d.isVisible })),
+                                  suggestions: project.suggestions.map(s => ({ label: s.label, labelEn: s.labelEn, answer: s.answer, answerEn: s.answerEn, order: s.order })),
+                                })} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', color: 'var(--dash-gold)', background: 'none', cursor: 'pointer' }} className="edit-btn"><Pencil size={11} /> Modifier</button>
                                 <button onClick={() => setDeleteConfirm(deleteConfirm === project.id ? null : project.id)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="delete-btn"><Trash2 size={11} /> Supprimer</button>
                               </div>
                             </td>

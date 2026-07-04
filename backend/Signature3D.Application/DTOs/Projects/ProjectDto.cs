@@ -46,6 +46,7 @@ public class ProjectDto
     public string? LuxediaPersonalityInstructions { get; set; }
 
     public List<ProjectButtonDto> Buttons { get; set; } = [];
+    public List<ProjectSuggestionDto> Suggestions { get; set; } = [];
     public List<ProjectDetailDto> Details { get; set; } = [];
     public DateTime CreatedAt { get; set; }
 }
@@ -88,6 +89,7 @@ public class CreateProjectDto
     public string? LuxediaPersonalityInstructions { get; set; }
 
     public List<CreateButtonDto> Buttons { get; set; } = [];
+    public List<CreateSuggestionDto> Suggestions { get; set; } = [];
     public List<CreateDetailDto> Details { get; set; } = [];
 }
 
@@ -128,6 +130,7 @@ public class UpdateProjectDto
     public string? LuxediaPersonalityInstructions { get; set; }
 
     public List<CreateButtonDto> Buttons { get; set; } = [];
+    public List<CreateSuggestionDto> Suggestions { get; set; } = [];
     public List<CreateDetailDto> Details { get; set; } = [];
 }
 
@@ -155,6 +158,31 @@ public class CreateButtonDto
     public string Label { get; set; } = string.Empty;
     public string? Url { get; set; }
     public string Action { get; set; } = "link";
+    public int Order { get; set; }
+}
+
+/// <summary>
+/// Suggestion rapide du widget Luxedia (remplace les 4 boutons codés en dur).
+/// </summary>
+public class ProjectSuggestionDto
+{
+    public Guid Id { get; set; }
+    public string Label { get; set; } = string.Empty;
+    public string? LabelEn { get; set; }
+    public string? Answer { get; set; }
+    public string? AnswerEn { get; set; }
+    public int Order { get; set; }
+}
+
+/// <summary>
+/// DTO pour créer une suggestion.
+/// </summary>
+public class CreateSuggestionDto
+{
+    public string Label { get; set; } = string.Empty;
+    public string? LabelEn { get; set; }
+    public string? Answer { get; set; }
+    public string? AnswerEn { get; set; }
     public int Order { get; set; }
 }
 

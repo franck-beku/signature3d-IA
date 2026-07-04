@@ -33,6 +33,7 @@ public class ProjectService : IProjectService
             .Include(p => p.Sector)
             .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
+            .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
             .Where(p => p.ClientId == clientId)
             .OrderByDescending(p => p.CreatedAt)
@@ -49,6 +50,7 @@ public class ProjectService : IProjectService
             .Include(p => p.Sector)
             .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
+            .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
             .FirstOrDefaultAsync(p => p.Slug == slug);
 
@@ -111,6 +113,15 @@ public class ProjectService : IProjectService
                 Action = Enum.TryParse<ButtonActionType>(b.Action, true, out var action)
                     ? action : ButtonActionType.Link,
                 Order = b.Order > 0 ? b.Order : i
+            }).ToList(),
+
+            Suggestions = dto.Suggestions.Select((s, i) => new ProjectSuggestion
+            {
+                Label = s.Label,
+                LabelEn = s.LabelEn,
+                Answer = s.Answer,
+                AnswerEn = s.AnswerEn,
+                Order = s.Order > 0 ? s.Order : i
             }).ToList(),
 
             Details = dto.Details.Select((d, i) => new ProjectDetail
@@ -180,8 +191,9 @@ public class ProjectService : IProjectService
         if (Enum.TryParse<ProjectStatus>(dto.Status, out var status))
             project.Status = status;
 
-        // 1) Supprimer les anciens boutons et caractéristiques directement en base (robuste, sans tracking)
+        // 1) Supprimer les anciens boutons, suggestions et caractéristiques directement en base (robuste, sans tracking)
         await _db.ProjectButtons.Where(b => b.ProjectId == project.Id).ExecuteDeleteAsync();
+        await _db.ProjectSuggestions.Where(s => s.ProjectId == project.Id).ExecuteDeleteAsync();
         await _db.ProjectDetails.Where(d => d.ProjectId == project.Id).ExecuteDeleteAsync();
 
         // 2) Ajouter les nouveaux boutons
@@ -196,7 +208,19 @@ public class ProjectService : IProjectService
         }).ToList();
         _db.ProjectButtons.AddRange(newButtons);
 
-        // 3) Ajouter les nouvelles caractéristiques
+        // 3) Ajouter les nouvelles suggestions
+        var newSuggestions = dto.Suggestions.Select((s, i) => new ProjectSuggestion
+        {
+            Label = s.Label,
+            LabelEn = s.LabelEn,
+            Answer = s.Answer,
+            AnswerEn = s.AnswerEn,
+            Order = s.Order > 0 ? s.Order : i,
+            ProjectId = project.Id
+        }).ToList();
+        _db.ProjectSuggestions.AddRange(newSuggestions);
+
+        // 4) Ajouter les nouvelles caractéristiques
         var newDetails = dto.Details.Select((d, i) => new ProjectDetail
         {
             Label = d.Label,
@@ -211,6 +235,7 @@ public class ProjectService : IProjectService
 
         // Recharger les relations pour le DTO de retour
         await _db.Entry(project).Collection(p => p.Buttons).LoadAsync();
+        await _db.Entry(project).Collection(p => p.Suggestions).LoadAsync();
         await _db.Entry(project).Collection(p => p.Details).LoadAsync();
         if (project.SectorId.HasValue)
             await _db.Entry(project).Reference(p => p.Sector).LoadAsync();
@@ -260,6 +285,7 @@ public class ProjectService : IProjectService
             .Include(p => p.Sector)
             .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
+            .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
@@ -363,6 +389,15 @@ public class ProjectService : IProjectService
             Url = b.Url,
             Action = b.Action.ToString().ToLower(),
             Order = b.Order
+        }).ToList() ?? [],
+        Suggestions = p.Suggestions?.OrderBy(s => s.Order).Select(s => new ProjectSuggestionDto
+        {
+            Id = s.Id,
+            Label = s.Label,
+            LabelEn = s.LabelEn,
+            Answer = s.Answer,
+            AnswerEn = s.AnswerEn,
+            Order = s.Order
         }).ToList() ?? [],
         Details = p.Details?
             .OrderBy(d => d.DisplayOrder)

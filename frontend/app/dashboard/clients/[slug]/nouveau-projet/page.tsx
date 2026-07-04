@@ -153,6 +153,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
               order:  i,
             }))
           : [],
+        suggestions: [],
       })
 
       setCreatedSlug((result as any).slug)

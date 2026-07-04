@@ -35,6 +35,14 @@ interface ButtonRow {
   order: number
 }
 
+interface SuggestionRow {
+  label: string
+  labelEn: string
+  answer: string
+  answerEn: string
+  order: number
+}
+
 interface DetailRow {
   label: string
   value: string
@@ -75,6 +83,7 @@ export default function ProjectForm({ projectId }: Props) {
   const [isFeatured, setIsFeatured]           = useState(false)
   const [displayOrder, setDisplayOrder]       = useState(0)
   const [buttons, setButtons]                 = useState<ButtonRow[]>([])
+  const [suggestions, setSuggestions]         = useState<SuggestionRow[]>([])
   const [details, setDetails]                 = useState<DetailRow[]>([])
 
   const [documents, setDocuments]               = useState<DocumentDto[]>([])
@@ -124,6 +133,7 @@ export default function ProjectForm({ projectId }: Props) {
             setIsFeatured(p.isFeatured)
             setDisplayOrder(p.displayOrder)
             setButtons(p.buttons.map((b) => ({ label: b.label, url: b.url ?? '', action: b.action, order: b.order })))
+            setSuggestions(p.suggestions.map((s) => ({ label: s.label, labelEn: s.labelEn ?? '', answer: s.answer ?? '', answerEn: s.answerEn ?? '', order: s.order })))
             setDetails(p.details.map((d) => ({ label: d.label, value: d.value, displayOrder: d.displayOrder, isVisible: d.isVisible })))
             setLuxediaPrimaryColor(p.luxediaPrimaryColor ?? '#d4af37')
             setLuxediaWidgetBgColor(p.luxediaWidgetBgColor ?? '#111111')
@@ -158,6 +168,11 @@ export default function ProjectForm({ projectId }: Props) {
   const removeButton = (i: number) => setButtons((prev) => prev.filter((_, idx) => idx !== i))
   const updateButton = (i: number, field: keyof ButtonRow, value: string | number) =>
     setButtons((prev) => prev.map((b, idx) => idx === i ? { ...b, [field]: value } : b))
+
+  const addSuggestion = () => setSuggestions((prev) => [...prev, { label: '', labelEn: '', answer: '', answerEn: '', order: prev.length }])
+  const removeSuggestion = (i: number) => setSuggestions((prev) => prev.filter((_, idx) => idx !== i))
+  const updateSuggestion = (i: number, field: keyof SuggestionRow, value: string | number) =>
+    setSuggestions((prev) => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s))
 
   const addDetail = () => setDetails((prev) => [...prev, { label: '', value: '', displayOrder: prev.length, isVisible: true }])
   const removeDetail = (i: number) => setDetails((prev) => prev.filter((_, idx) => idx !== i))
@@ -208,6 +223,14 @@ export default function ProjectForm({ projectId }: Props) {
         .filter((b) => b.label.trim())
         .map((b, i) => ({ label: b.label, url: b.url || undefined, action: b.action, order: i }))
 
+      const cleanSuggestions = suggestions
+        .filter((s) => s.label.trim())
+        .map((s, i) => ({
+          label: s.label, labelEn: s.labelEn || undefined,
+          answer: s.answer || undefined, answerEn: s.answerEn || undefined,
+          order: i,
+        }))
+
       const cleanDetails = details
         .filter((d) => d.label.trim() && d.value.trim())
         .map((d, i) => ({ label: d.label, value: d.value, displayOrder: i, isVisible: d.isVisible }))
@@ -221,6 +244,7 @@ export default function ProjectForm({ projectId }: Props) {
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined, offeringId: offeringId || undefined,
           buttons: cleanButtons,
+          suggestions: cleanSuggestions,
           details: cleanDetails,
           luxediaPrimaryColor: luxediaPrimaryColor || undefined,
           luxediaWidgetBgColor: luxediaWidgetBgColor || undefined,
@@ -239,6 +263,7 @@ export default function ProjectForm({ projectId }: Props) {
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined, offeringId: offeringId || undefined,
           buttons: cleanButtons,
+          suggestions: cleanSuggestions,
           details: cleanDetails,
         })
       }
@@ -448,6 +473,43 @@ export default function ProjectForm({ projectId }: Props) {
                   <button onClick={() => removeButton(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="del-btn" title="Retirer">
                     <Trash2 size={12} />
                   </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* SECTION 4bis — Suggestions rapides */}
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <p style={{ ...sectionTitle, margin: 0 }}>Suggestions rapides</p>
+            <button onClick={addSuggestion} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--dash-gold)', background: 'none', border: '1px solid var(--dash-gold-ring)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
+              <Plus size={12} /> Ajouter
+            </button>
+          </div>
+          <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: '0 0 16px 0' }}>
+            Boutons de suggestion proposés par Luxedia dans le chat (ex: Quel est le prix ?, Disponibilité ?).
+          </p>
+          {suggestions.length === 0 ? (
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', margin: 0 }}>Aucune suggestion. Les suggestions par défaut du widget seront utilisées.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {suggestions.map((s, i) => (
+                <div key={i} style={{ border: '1px solid var(--dash-border)', borderRadius: '10px', padding: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                    <input type="text" value={s.label} onChange={(e) => updateSuggestion(i, 'label', e.target.value)} placeholder="Libellé (FR)" style={inputStyle} className="dash-input" />
+                    <input type="text" value={s.labelEn} onChange={(e) => updateSuggestion(i, 'labelEn', e.target.value)} placeholder="Libellé (EN)" style={inputStyle} className="dash-input" />
+                    <button onClick={() => removeSuggestion(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="del-btn" title="Retirer">
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <textarea value={s.answer} onChange={(e) => updateSuggestion(i, 'answer', e.target.value)} rows={2} placeholder="Réponse directe (FR, optionnel)" style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
+                    <textarea value={s.answerEn} onChange={(e) => updateSuggestion(i, 'answerEn', e.target.value)} rows={2} placeholder="Réponse directe (EN, optionnel)" style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
+                  </div>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '6px 0 0 0' }}>
+                    Si rempli, Luxedia affiche cette réponse immédiatement au lieu de chercher dans les documents.
+                  </p>
                 </div>
               ))}
             </div>

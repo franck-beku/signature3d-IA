@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ProjectButton> ProjectButtons => Set<ProjectButton>();
+    public DbSet<ProjectSuggestion> ProjectSuggestions => Set<ProjectSuggestion>();
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();
     public DbSet<Lead> Leads => Set<Lead>();
@@ -106,6 +107,18 @@ public class AppDbContext : DbContext
 
             e.HasOne(x => x.Project)
              .WithMany(x => x.Buttons)
+             .HasForeignKey(x => x.ProjectId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        /* ── ProjectSuggestion ── */
+        modelBuilder.Entity<ProjectSuggestion>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Label).HasMaxLength(128);
+
+            e.HasOne(x => x.Project)
+             .WithMany(x => x.Suggestions)
              .HasForeignKey(x => x.ProjectId)
              .OnDelete(DeleteBehavior.Cascade);
         });

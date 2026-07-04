@@ -50,6 +50,7 @@ public class EmbedsController : ControllerBase
             ambassadorName = project.AmbassadorName,
             welcomeMessage = project.WelcomeMessage,
             buttons        = project.Buttons,
+            suggestions    = project.Suggestions,
             embedUrl       = project.EmbedUrl,
             luxediaAvatarUrl               = project.LuxediaAvatarUrl,
             luxediaClientLogoUrl           = project.LuxediaClientLogoUrl,

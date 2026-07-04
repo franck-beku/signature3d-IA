@@ -49,6 +49,7 @@ public class Project : BaseEntity
     public Offering? Offering { get; set; }
 
     public ICollection<ProjectButton> Buttons { get; set; } = [];
+    public ICollection<ProjectSuggestion> Suggestions { get; set; } = [];
     public ICollection<Document> Documents { get; set; } = [];
     public ICollection<Lead> Leads { get; set; } = [];
     public ICollection<Visit> Visits { get; set; } = [];

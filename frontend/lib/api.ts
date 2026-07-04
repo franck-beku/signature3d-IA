@@ -180,6 +180,15 @@ export interface ProjectButtonDto {
   order: number
 }
 
+export interface ProjectSuggestionDto {
+  id: string
+  label: string
+  labelEn?: string
+  answer?: string
+  answerEn?: string
+  order: number
+}
+
 export interface ProjectDto {
   id: string
   name: string
@@ -205,6 +214,7 @@ export interface ProjectDto {
   offeringId?: string
   offeringName?: string
   buttons: ProjectButtonDto[]
+  suggestions: ProjectSuggestionDto[]
   details: ProjectDetailDto[]
   createdAt: string
   luxediaPrimaryColor?: string
@@ -261,6 +271,7 @@ export const projectsApi = {
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
+    suggestions: { label: string; labelEn?: string; answer?: string; answerEn?: string; order: number }[]
     details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
     luxediaPrimaryColor?: string
     luxediaWidgetBgColor?: string
@@ -280,6 +291,7 @@ export const projectsApi = {
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
     buttons: { label: string; url?: string; action: string; order: number }[]
+    suggestions: { label: string; labelEn?: string; answer?: string; answerEn?: string; order: number }[]
     details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
     luxediaPrimaryColor?: string
     luxediaWidgetBgColor?: string
