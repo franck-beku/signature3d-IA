@@ -162,7 +162,7 @@ export default function FaqPage() {
                         color: INK,
                         lineHeight: 1.45,
                       }}>
-                        {faq.question}
+                        {lang === 'en' ? (faq.questionEn || faq.question) : faq.question}
                       </span>
                       <span style={{
                         flexShrink: 0,
@@ -197,7 +197,7 @@ export default function FaqPage() {
                         fontWeight: 400,
                         maxWidth: '90%',
                       }}>
-                        {faq.answer}
+                        {lang === 'en' ? (faq.answerEn || faq.answer) : faq.answer}
                       </p>
                     </div>
                   </motion.div>

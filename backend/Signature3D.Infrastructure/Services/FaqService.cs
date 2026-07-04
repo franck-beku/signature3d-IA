@@ -22,7 +22,9 @@ public class FaqService : IFaqService
     {
         Id = f.Id,
         Question = f.Question,
+        QuestionEn = f.QuestionEn,
         Answer = f.Answer,
+        AnswerEn = f.AnswerEn,
         DisplayOrder = f.DisplayOrder,
         IsPublished = f.IsPublished
     };
@@ -37,7 +39,9 @@ public class FaqService : IFaqService
             {
                 Id = f.Id,
                 Question = f.Question,
+                QuestionEn = f.QuestionEn,
                 Answer = f.Answer,
+                AnswerEn = f.AnswerEn,
                 DisplayOrder = f.DisplayOrder,
                 IsPublished = f.IsPublished
             })
@@ -55,7 +59,9 @@ public class FaqService : IFaqService
             {
                 Id = f.Id,
                 Question = f.Question,
+                QuestionEn = f.QuestionEn,
                 Answer = f.Answer,
+                AnswerEn = f.AnswerEn,
                 DisplayOrder = f.DisplayOrder,
                 IsPublished = f.IsPublished
             })
@@ -81,7 +87,9 @@ public class FaqService : IFaqService
         var faq = new Faq
         {
             Question = dto.Question,
+            QuestionEn = dto.QuestionEn,
             Answer = dto.Answer,
+            AnswerEn = dto.AnswerEn,
             DisplayOrder = dto.DisplayOrder,
             IsPublished = dto.IsPublished
         };
@@ -100,7 +108,9 @@ public class FaqService : IFaqService
             return Result<FaqDto>.Fail("FAQ introuvable.");
 
         faq.Question = dto.Question;
+        faq.QuestionEn = dto.QuestionEn;
         faq.Answer = dto.Answer;
+        faq.AnswerEn = dto.AnswerEn;
         faq.DisplayOrder = dto.DisplayOrder;
         faq.IsPublished = dto.IsPublished;
 

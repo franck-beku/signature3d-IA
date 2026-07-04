@@ -628,7 +628,9 @@ export const offeringsApi = {
 export interface FaqDto {
   id: string
   question: string
+  questionEn?: string
   answer: string
+  answerEn?: string
   displayOrder: number
   isPublished: boolean
 }
@@ -641,11 +643,11 @@ export const faqApi = {
   getAll: () => apiFetch<FaqDto[]>('/api/faq/all'),
 
   /** DASHBOARD — créer une FAQ */
-  create: (data: { question: string; answer: string; displayOrder: number; isPublished: boolean }) =>
+  create: (data: { question: string; questionEn?: string; answer: string; answerEn?: string; displayOrder: number; isPublished: boolean }) =>
     apiFetch<FaqDto>('/api/faq', { method: 'POST', body: JSON.stringify(data) }),
 
   /** DASHBOARD — modifier une FAQ */
-  update: (id: string, data: { question: string; answer: string; displayOrder: number; isPublished: boolean }) =>
+  update: (id: string, data: { question: string; questionEn?: string; answer: string; answerEn?: string; displayOrder: number; isPublished: boolean }) =>
     apiFetch<FaqDto>(`/api/faq/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   /** DASHBOARD — supprimer une FAQ */

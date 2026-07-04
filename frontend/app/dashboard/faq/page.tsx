@@ -35,13 +35,15 @@ const labelStyle = {
 interface FaqForm {
   id: string | null
   question: string
+  questionEn: string
   answer: string
+  answerEn: string
   displayOrder: number
   isPublished: boolean
 }
 
 const emptyForm: FaqForm = {
-  id: null, question: '', answer: '', displayOrder: 0, isPublished: true,
+  id: null, question: '', questionEn: '', answer: '', answerEn: '', displayOrder: 0, isPublished: true,
 }
 
 export default function FaqPage() {
@@ -70,7 +72,9 @@ export default function FaqPage() {
     setForm({
       id: f.id,
       question: f.question,
+      questionEn: f.questionEn ?? '',
       answer: f.answer,
+      answerEn: f.answerEn ?? '',
       displayOrder: f.displayOrder,
       isPublished: f.isPublished,
     })
@@ -84,7 +88,9 @@ export default function FaqPage() {
     try {
       const payload = {
         question: form.question,
+        questionEn: form.questionEn || undefined,
         answer: form.answer,
+        answerEn: form.answerEn || undefined,
         displayOrder: form.displayOrder,
         isPublished: form.isPublished,
       }
@@ -220,8 +226,16 @@ export default function FaqPage() {
                 <input type="text" value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="Quelle différence entre 360° et Matterport ?" style={inputStyle} className="dash-input" />
               </div>
               <div>
+                <label style={labelStyle}>Question (EN)</label>
+                <input type="text" value={form.questionEn} onChange={(e) => setForm({ ...form, questionEn: e.target.value })} placeholder="What's the difference between 360° and Matterport?" style={inputStyle} className="dash-input" />
+              </div>
+              <div>
                 <label style={labelStyle}>Réponse *</label>
                 <textarea value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} rows={4} placeholder="Le 360° permet de présenter un espace avec des vues panoramiques..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
+              </div>
+              <div>
+                <label style={labelStyle}>Réponse (EN)</label>
+                <textarea value={form.answerEn} onChange={(e) => setForm({ ...form, answerEn: e.target.value })} rows={4} placeholder="360° lets you present a space with panoramic views..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
               </div>
               <div>
                 <label style={labelStyle}>Ordre d'affichage</label>

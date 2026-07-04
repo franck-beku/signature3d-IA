@@ -5,7 +5,9 @@ public class FaqDto
 {
     public Guid Id { get; set; }
     public string Question { get; set; } = string.Empty;
+    public string? QuestionEn { get; set; }
     public string Answer { get; set; } = string.Empty;
+    public string? AnswerEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsPublished { get; set; }
 }
@@ -14,7 +16,9 @@ public class FaqDto
 public class CreateFaqDto
 {
     public string Question { get; set; } = string.Empty;
+    public string? QuestionEn { get; set; }
     public string Answer { get; set; } = string.Empty;
+    public string? AnswerEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsPublished { get; set; } = true;
 }
@@ -23,7 +27,9 @@ public class CreateFaqDto
 public class UpdateFaqDto
 {
     public string Question { get; set; } = string.Empty;
+    public string? QuestionEn { get; set; }
     public string Answer { get; set; } = string.Empty;
+    public string? AnswerEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsPublished { get; set; }
 }
