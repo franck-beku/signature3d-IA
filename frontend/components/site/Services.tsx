@@ -29,7 +29,9 @@ type OfferingView = {
   name: string;
   slug: string;
   level: string;
+  levelEn?: string;
   shortDescription: string;
+  shortDescriptionEn?: string;
   displayOrder: number;
 };
 
@@ -147,7 +149,9 @@ export default function Services() {
                 name: o.name,
                 slug: o.slug,
                 level: o.level ?? '',
+                levelEn: o.levelEn,
                 shortDescription: o.shortDescription ?? '',
+                shortDescriptionEn: o.shortDescriptionEn,
                 displayOrder: o.displayOrder,
               }))
           );
@@ -406,6 +410,9 @@ function SignatureCard({
 
   const icons = [Box, MessageCircle, Users, Sparkles];
 
+  const displayLevel = lang === 'en' ? (offer.levelEn || offer.level) : offer.level;
+  const displayShortDescription = lang === 'en' ? (offer.shortDescriptionEn || offer.shortDescription) : offer.shortDescription;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 26 }}
@@ -436,12 +443,12 @@ function SignatureCard({
         }}
       >
         <div>
-          <span className="signature-badge">★ {offer.level || 'Signature'}</span>
+          <span className="signature-badge">★ {displayLevel || 'Signature'}</span>
 
           <h3 className="signature-title">{offer.name}</h3>
 
           <p className="signature-text">
-            {offer.shortDescription ||
+            {displayShortDescription ||
               t(
                 "Notre expérience complète : l'espace et l'intelligence réunis.",
                 'Our complete experience: space and intelligence together.'
@@ -563,6 +570,8 @@ function OfferCard({
   const details = resolveDetail(offer);
   const Icon = details.icon;
   const features = lang === 'fr' ? details.featuresFr : details.featuresEn;
+  const displayLevel = lang === 'en' ? (offer.levelEn || offer.level) : offer.level;
+  const displayShortDescription = lang === 'en' ? (offer.shortDescriptionEn || offer.shortDescription) : offer.shortDescription;
 
   return (
     <motion.div
@@ -591,13 +600,13 @@ function OfferCard({
         <Icon size={25} strokeWidth={1.4} color={GOLD} />
       </div>
 
-      {offer.level && <p className="service-level">{offer.level}</p>}
+      {displayLevel && <p className="service-level">{displayLevel}</p>}
 
       <h3>{offer.name}</h3>
 
       <div className="service-line" />
 
-      <p className="service-description">{offer.shortDescription}</p>
+      <p className="service-description">{displayShortDescription}</p>
 
       {features.length > 0 && (
         <ul className="service-features">

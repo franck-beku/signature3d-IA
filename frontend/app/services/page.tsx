@@ -122,6 +122,9 @@ export default function ServicesPage() {
             offerings.map((offer, index) => {
               const num = String(index + 1).padStart(2, '0')
               const isLast = index === offerings.length - 1
+              const displayLevel = lang === 'en' ? (offer.levelEn || offer.level) : offer.level
+              const displayShortDescription = lang === 'en' ? (offer.shortDescriptionEn || offer.shortDescription) : offer.shortDescription
+              const displayLongDescription = lang === 'en' ? (offer.longDescriptionEn || offer.longDescription) : offer.longDescription
               return (
                 <motion.div
                   key={offer.id}
@@ -153,7 +156,7 @@ export default function ServicesPage() {
                     }}>
                       {num}
                     </span>
-                    {offer.level && (
+                    {displayLevel && (
                       <span style={{
                         display: 'inline-block',
                         marginTop: '20px',
@@ -166,7 +169,7 @@ export default function ServicesPage() {
                         borderRadius: '40px',
                         padding: '7px 16px',
                       }}>
-                        {offer.level}
+                        {displayLevel}
                       </span>
                     )}
                   </div>
@@ -184,7 +187,7 @@ export default function ServicesPage() {
                     }}>
                       {offer.name}
                     </h2>
-                    {offer.shortDescription && (
+                    {displayShortDescription && (
                       <p style={{
                         fontSize: '1.1rem',
                         color: GOLD,
@@ -193,10 +196,10 @@ export default function ServicesPage() {
                         fontStyle: 'italic',
                         fontFamily: 'var(--font-cormorant), serif',
                       }}>
-                        {offer.shortDescription}
+                        {displayShortDescription}
                       </p>
                     )}
-                    {offer.longDescription && (
+                    {displayLongDescription && (
                       <p style={{
                         fontSize: '1rem',
                         lineHeight: 1.8,
@@ -204,7 +207,7 @@ export default function ServicesPage() {
                         fontWeight: 400,
                         maxWidth: '560px',
                       }}>
-                        {offer.longDescription}
+                        {displayLongDescription}
                       </p>
                     )}
                   </div>

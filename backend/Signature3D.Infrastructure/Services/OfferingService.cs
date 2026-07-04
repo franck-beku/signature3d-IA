@@ -34,10 +34,13 @@ public class OfferingService : IOfferingService
         Name = o.Name,
         Slug = o.Slug,
         ShortDescription = o.ShortDescription,
+        ShortDescriptionEn = o.ShortDescriptionEn,
         LongDescription = o.LongDescription,
+        LongDescriptionEn = o.LongDescriptionEn,
         Icon = o.Icon,
         ImageUrl = o.ImageUrl,
         Level = o.Level,
+        LevelEn = o.LevelEn,
         DisplayOrder = o.DisplayOrder,
         IsActive = o.IsActive
     };
@@ -54,10 +57,13 @@ public class OfferingService : IOfferingService
                 Name = o.Name,
                 Slug = o.Slug,
                 ShortDescription = o.ShortDescription,
+                ShortDescriptionEn = o.ShortDescriptionEn,
                 LongDescription = o.LongDescription,
+                LongDescriptionEn = o.LongDescriptionEn,
                 Icon = o.Icon,
                 ImageUrl = o.ImageUrl,
                 Level = o.Level,
+                LevelEn = o.LevelEn,
                 DisplayOrder = o.DisplayOrder,
                 IsActive = o.IsActive
             })
@@ -77,10 +83,13 @@ public class OfferingService : IOfferingService
                 Name = o.Name,
                 Slug = o.Slug,
                 ShortDescription = o.ShortDescription,
+                ShortDescriptionEn = o.ShortDescriptionEn,
                 LongDescription = o.LongDescription,
+                LongDescriptionEn = o.LongDescriptionEn,
                 Icon = o.Icon,
                 ImageUrl = o.ImageUrl,
                 Level = o.Level,
+                LevelEn = o.LevelEn,
                 DisplayOrder = o.DisplayOrder,
                 IsActive = o.IsActive
             })
@@ -124,10 +133,13 @@ public class OfferingService : IOfferingService
             Name = dto.Name,
             Slug = slug,
             ShortDescription = dto.ShortDescription,
+            ShortDescriptionEn = dto.ShortDescriptionEn,
             LongDescription = dto.LongDescription,
+            LongDescriptionEn = dto.LongDescriptionEn,
             Icon = dto.Icon,
             ImageUrl = dto.ImageUrl,
             Level = dto.Level,
+            LevelEn = dto.LevelEn,
             DisplayOrder = dto.DisplayOrder,
             IsActive = dto.IsActive
         };
@@ -152,10 +164,13 @@ public class OfferingService : IOfferingService
         offering.Name = dto.Name;
         offering.Slug = newSlug;
         offering.ShortDescription = dto.ShortDescription;
+        offering.ShortDescriptionEn = dto.ShortDescriptionEn;
         offering.LongDescription = dto.LongDescription;
+        offering.LongDescriptionEn = dto.LongDescriptionEn;
         offering.Icon = dto.Icon;
         offering.ImageUrl = dto.ImageUrl;
         offering.Level = dto.Level;
+        offering.LevelEn = dto.LevelEn;
         offering.DisplayOrder = dto.DisplayOrder;
         offering.IsActive = dto.IsActive;
 

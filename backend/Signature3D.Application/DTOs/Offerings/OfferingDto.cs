@@ -7,10 +7,13 @@ public class OfferingDto
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public string? ShortDescription { get; set; }
+    public string? ShortDescriptionEn { get; set; }
     public string? LongDescription { get; set; }
+    public string? LongDescriptionEn { get; set; }
     public string? Icon { get; set; }
     public string? ImageUrl { get; set; }
     public string? Level { get; set; }
+    public string? LevelEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
 }
@@ -20,10 +23,13 @@ public class CreateOfferingDto
 {
     public string Name { get; set; } = string.Empty;
     public string? ShortDescription { get; set; }
+    public string? ShortDescriptionEn { get; set; }
     public string? LongDescription { get; set; }
+    public string? LongDescriptionEn { get; set; }
     public string? Icon { get; set; }
     public string? ImageUrl { get; set; }
     public string? Level { get; set; }
+    public string? LevelEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; } = true;
 }
@@ -33,10 +39,13 @@ public class UpdateOfferingDto
 {
     public string Name { get; set; } = string.Empty;
     public string? ShortDescription { get; set; }
+    public string? ShortDescriptionEn { get; set; }
     public string? LongDescription { get; set; }
+    public string? LongDescriptionEn { get; set; }
     public string? Icon { get; set; }
     public string? ImageUrl { get; set; }
     public string? Level { get; set; }
+    public string? LevelEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
 }

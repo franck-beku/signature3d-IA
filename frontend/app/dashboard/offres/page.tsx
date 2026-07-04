@@ -28,8 +28,11 @@ interface OfferingForm {
   id: string | null
   name: string
   shortDescription: string
+  shortDescriptionEn: string
   longDescription: string
+  longDescriptionEn: string
   level: string
+  levelEn: string
   icon: string
   imageUrl: string
   displayOrder: number
@@ -37,8 +40,8 @@ interface OfferingForm {
 }
 
 const emptyForm: OfferingForm = {
-  id: null, name: '', shortDescription: '', longDescription: '',
-  level: '', icon: '', imageUrl: '', displayOrder: 0, isActive: true,
+  id: null, name: '', shortDescription: '', shortDescriptionEn: '', longDescription: '', longDescriptionEn: '',
+  level: '', levelEn: '', icon: '', imageUrl: '', displayOrder: 0, isActive: true,
 }
 
 export default function OffresPage() {
@@ -68,8 +71,11 @@ export default function OffresPage() {
       id: o.id,
       name: o.name,
       shortDescription: o.shortDescription ?? '',
+      shortDescriptionEn: o.shortDescriptionEn ?? '',
       longDescription: o.longDescription ?? '',
+      longDescriptionEn: o.longDescriptionEn ?? '',
       level: o.level ?? '',
+      levelEn: o.levelEn ?? '',
       icon: o.icon ?? '',
       imageUrl: o.imageUrl ?? '',
       displayOrder: o.displayOrder,
@@ -86,8 +92,11 @@ export default function OffresPage() {
       const payload = {
         name: form.name,
         shortDescription: form.shortDescription || undefined,
+        shortDescriptionEn: form.shortDescriptionEn || undefined,
         longDescription: form.longDescription || undefined,
+        longDescriptionEn: form.longDescriptionEn || undefined,
         level: form.level || undefined,
+        levelEn: form.levelEn || undefined,
         icon: form.icon || undefined,
         imageUrl: form.imageUrl || undefined,
         displayOrder: form.displayOrder,
@@ -240,8 +249,16 @@ export default function OffresPage() {
                 <input type="text" value={form.shortDescription} onChange={(e) => setForm({ ...form, shortDescription: e.target.value })} placeholder="Solution Signature." style={inputStyle} className="dash-input" />
               </div>
               <div>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description courte (EN)</label>
+                <input type="text" value={form.shortDescriptionEn} onChange={(e) => setForm({ ...form, shortDescriptionEn: e.target.value })} placeholder="Signature solution." style={inputStyle} className="dash-input" />
+              </div>
+              <div>
                 <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description longue</label>
                 <textarea value={form.longDescription} onChange={(e) => setForm({ ...form, longDescription: e.target.value })} rows={3} placeholder="L'immersion 3D complète accompagnée de Luxedia..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
+              </div>
+              <div>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description longue (EN)</label>
+                <textarea value={form.longDescriptionEn} onChange={(e) => setForm({ ...form, longDescriptionEn: e.target.value })} rows={3} placeholder="The complete 3D immersion powered by Luxedia..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
@@ -260,6 +277,10 @@ export default function OffresPage() {
                   <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Ordre d'affichage</label>
                   <input type="number" value={form.displayOrder} onChange={(e) => setForm({ ...form, displayOrder: Number(e.target.value) })} style={inputStyle} className="dash-input" />
                 </div>
+              </div>
+              <div>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Niveau (EN)</label>
+                <input type="text" value={form.levelEn} onChange={(e) => setForm({ ...form, levelEn: e.target.value })} placeholder="Signature" style={inputStyle} className="dash-input" />
               </div>
               <div>
                 <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Visibilité sur le site</label>
