@@ -15,6 +15,7 @@ interface EmbedData {
   experienceUrl:  string | null    // URL iframe pour Tour360 (Glo3D, etc.)
   ambassadorName: string
   welcomeMessage: string
+  welcomeMessageEn?: string | null
   buttons: {
     id:     string
     label:  string
@@ -93,7 +94,8 @@ export default async function EmbedSlugPage({
       experienceUrl={project.experienceUrl}
       projectName={project.projectName}
       ambassadorName={project.ambassadorName}
-      welcomeMessage={project.welcomeMessage ?? `Bienvenue ! Je suis ${project.ambassadorName}, votre assistant intelligent.`}
+      welcomeMessage={project.welcomeMessage || `Bienvenue ! Je suis ${project.ambassadorName}, votre assistant intelligent.`}
+      welcomeMessageEn={project.welcomeMessageEn ?? undefined}
       projectSlug={slug}
       buttons={project.buttons
         .sort((a, b) => a.order - b.order)

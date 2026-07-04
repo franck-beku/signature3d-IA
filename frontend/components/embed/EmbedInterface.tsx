@@ -32,6 +32,7 @@ interface EmbedInterfaceProps {
   projectName:    string
   ambassadorName: string
   welcomeMessage: string
+  welcomeMessageEn?: string
   buttons:        Button[]
   suggestions?:   Suggestion[]
   projectSlug?:   string  // slug du projet pour l'API chat Groq + tracking visites
@@ -64,7 +65,7 @@ function resolveSource(): string {
 
 export default function EmbedInterface({
   matterportId, projectName, ambassadorName,
-  welcomeMessage, buttons, suggestions, projectSlug,
+  welcomeMessage, welcomeMessageEn, buttons, suggestions, projectSlug,
   experienceType, experienceUrl,
   luxediaAvatarUrl, luxediaClientLogoUrl,
   luxediaPrimaryColor, luxediaWidgetBgColor,
@@ -132,6 +133,7 @@ export default function EmbedInterface({
   const hasTour360    = experienceType === 'Tour360' && !!experienceUrl && experienceUrl.trim() !== ''
   const hasMatterport = !!matterportId && matterportId.trim() !== ''
   const isIAOnly      = !hasTour360 && !hasMatterport
+  const onlineLabel   = luxediaLanguage === 'en' ? 'Online' : 'En ligne'
 
   /* ── IA seule — pas de visite immersive → chatbot plein écran ── */
   if (isIAOnly) {
@@ -153,7 +155,7 @@ export default function EmbedInterface({
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-            <span style={{ color: '#4ade80', fontSize: '11px', fontWeight: 500 }}>En ligne</span>
+            <span style={{ color: '#4ade80', fontSize: '11px', fontWeight: 500 }}>{onlineLabel}</span>
           </div>
         </div>
 
@@ -162,6 +164,7 @@ export default function EmbedInterface({
           <AmbassadeurIA
             ambassadorName={ambassadorName}
             welcomeMessage={welcomeMessage}
+            welcomeMessageEn={welcomeMessageEn}
             buttons={buttons}
             suggestions={suggestions}
             projectSlug={projectSlug}
@@ -200,6 +203,7 @@ export default function EmbedInterface({
         <AmbassadeurIA
           ambassadorName={ambassadorName}
           welcomeMessage={welcomeMessage}
+          welcomeMessageEn={welcomeMessageEn}
           buttons={buttons}
           suggestions={suggestions}
           projectSlug={projectSlug}
@@ -239,6 +243,7 @@ export default function EmbedInterface({
             <AmbassadeurIA
               ambassadorName={ambassadorName}
               welcomeMessage={welcomeMessage}
+              welcomeMessageEn={welcomeMessageEn}
               buttons={buttons}
               suggestions={suggestions}
               projectSlug={projectSlug}

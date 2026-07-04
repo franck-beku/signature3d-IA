@@ -49,6 +49,7 @@ public class EmbedsController : ControllerBase
             experienceUrl  = project.ExperienceUrl,
             ambassadorName = project.AmbassadorName,
             welcomeMessage = project.WelcomeMessage,
+            welcomeMessageEn = project.WelcomeMessageEn,
             buttons        = project.Buttons,
             suggestions    = project.Suggestions,
             embedUrl       = project.EmbedUrl,

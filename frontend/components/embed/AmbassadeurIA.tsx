@@ -36,6 +36,7 @@ interface Message {
 interface AmbassadeurIAProps {
   ambassadorName: string
   welcomeMessage: string
+  welcomeMessageEn?: string
   buttons: Button[]
   suggestions?: Suggestion[]
   projectSlug?: string
@@ -53,6 +54,7 @@ const i18n = {
     online:      'En ligne',
     placeholder: 'Votre question...',
     suggestions: ['Caractéristiques', 'Prix', 'Garantie', 'Disponibilité'],
+    quickActions: 'Actions rapides',
     errorMsg:    'Je suis désolé, je rencontre une difficulté technique. Veuillez contacter directement notre équipe.',
     fallbackMsg: (text: string) => `Merci pour votre question sur "${text}". Souhaitez-vous être contacté par un conseiller ?`,
   },
@@ -60,6 +62,7 @@ const i18n = {
     online:      'Online',
     placeholder: 'Your question...',
     suggestions: ['Features', 'Price', 'Warranty', 'Availability'],
+    quickActions: 'Quick actions',
     errorMsg:    "I'm sorry, I'm experiencing a technical issue. Please contact our team directly.",
     fallbackMsg: (text: string) => `Thank you for your question about "${text}". Would you like to be contacted by an advisor?`,
   },
@@ -68,6 +71,7 @@ const i18n = {
 export default function AmbassadeurIA({
   ambassadorName,
   welcomeMessage,
+  welcomeMessageEn,
   buttons,
   suggestions,
   projectSlug,
@@ -103,6 +107,7 @@ export default function AmbassadeurIA({
   }, [messages, isTyping])
 
   const currentT = i18n[lang]
+  const displayWelcomeMessage = lang === 'en' ? (welcomeMessageEn || welcomeMessage) : welcomeMessage
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return
@@ -207,7 +212,7 @@ export default function AmbassadeurIA({
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {messages.map((msg, i) => (
-          <ChatBubble key={i} role={msg.role} content={msg.content} botMsgColor={botMsgColor} userMsgColor={userMsgColor} />
+          <ChatBubble key={i} role={msg.role} content={i === 0 ? displayWelcomeMessage : msg.content} botMsgColor={botMsgColor} userMsgColor={userMsgColor} />
         ))}
 
         {messages.length === 1 && (
@@ -225,7 +230,7 @@ export default function AmbassadeurIA({
       </div>
 
       {/* Action Buttons */}
-      <ActionButtons buttons={buttons} projectSlug={projectSlug} primaryColor={primaryColor} />
+      <ActionButtons buttons={buttons} projectSlug={projectSlug} primaryColor={primaryColor} label={currentT.quickActions} />
 
       {/* Input */}
       <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(26,26,26,0.3)' }}>

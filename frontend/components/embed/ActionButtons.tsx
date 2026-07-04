@@ -17,9 +17,10 @@ interface Props {
   buttons: Button[]
   projectSlug?: string
   primaryColor?: string
+  label?: string
 }
 
-export default function ActionButtons({ buttons, projectSlug, primaryColor = '#d4af37' }: Props) {
+export default function ActionButtons({ buttons, projectSlug, primaryColor = '#d4af37', label = 'Actions rapides' }: Props) {
 
   const handleClick = async (button: Button) => {
     /* ── Tracker le clic dans analytics ── */
@@ -46,7 +47,7 @@ export default function ActionButtons({ buttons, projectSlug, primaryColor = '#d
   return (
     <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
       <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', marginBottom: '8px', textAlign: 'center' }}>
-        Actions rapides
+        {label}
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: buttons.length === 1 ? '1fr' : '1fr 1fr', gap: '6px' }}>
         {buttons.map((btn) => (

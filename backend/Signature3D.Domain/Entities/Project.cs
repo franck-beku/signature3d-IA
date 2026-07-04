@@ -12,6 +12,7 @@ public class Project : BaseEntity
     public string? ThumbnailUrl { get; set; }
     public string AmbassadorName { get; set; } = "Luxedia";
     public string? WelcomeMessage { get; set; }
+    public string? WelcomeMessageEn { get; set; }
     public string? LeadEmail { get; set; }
     public ProjectStatus Status { get; set; } = ProjectStatus.Draft;
     public string? Notes { get; set; }

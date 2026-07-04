@@ -11,4 +11,5 @@ public static class AppConstants
     public const int EmbeddingDimension = 1536;
     public const string DefaultAmbassadorName = "Luxedia";
     public const string DefaultWelcomeMessage = "Bonjour ! Je suis Luxedia, votre assistant intelligent. Comment puis-je vous aider ?";
+    public const string DefaultWelcomeMessageEn = "Hello! I'm Luxedia, your intelligent assistant. How can I help you?";
 }

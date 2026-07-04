@@ -75,6 +75,7 @@ export default function ProjectForm({ projectId }: Props) {
   const [experienceUrl, setExperienceUrl]     = useState('')
   const [ambassadorName, setAmbassadorName]   = useState('Luxedia')
   const [welcomeMessage, setWelcomeMessage]   = useState('')
+  const [welcomeMessageEn, setWelcomeMessageEn] = useState('')
   const [shortDescription, setShortDescription] = useState('')
   const [shortDescriptionEn, setShortDescriptionEn] = useState('')
   const [coverImage, setCoverImage]           = useState('')
@@ -125,6 +126,7 @@ export default function ProjectForm({ projectId }: Props) {
             setExperienceUrl(p.experienceUrl ?? '')
             setAmbassadorName(p.ambassadorName)
             setWelcomeMessage(p.welcomeMessage ?? '')
+            setWelcomeMessageEn(p.welcomeMessageEn ?? '')
             setShortDescription(p.shortDescription ?? '')
             setShortDescriptionEn(p.shortDescriptionEn ?? '')
             setCoverImage(p.coverImage ?? '')
@@ -239,7 +241,7 @@ export default function ProjectForm({ projectId }: Props) {
         await projectsApi.update(projectId, {
           name, matterportId: matterportId || undefined, ambassadorName,
           experienceType, experienceUrl: experienceUrl || undefined,
-          welcomeMessage: welcomeMessage || undefined, status,
+          welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, status,
           shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined, offeringId: offeringId || undefined,
@@ -258,7 +260,7 @@ export default function ProjectForm({ projectId }: Props) {
         await projectsApi.create({
           name, matterportId: matterportId || undefined, ambassadorName,
           experienceType, experienceUrl: experienceUrl || undefined,
-          welcomeMessage: welcomeMessage || undefined, clientId,
+          welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, clientId,
           shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined, offeringId: offeringId || undefined,
@@ -392,6 +394,10 @@ export default function ProjectForm({ projectId }: Props) {
             <div>
               <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Message d'accueil de Luxedia</label>
               <textarea value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} rows={2} placeholder="Bienvenue ! Je suis Luxedia, votre assistant. Comment puis-je vous aider ?" style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
+            </div>
+            <div>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Message d'accueil de Luxedia (EN)</label>
+              <textarea value={welcomeMessageEn} onChange={(e) => setWelcomeMessageEn(e.target.value)} rows={2} placeholder="Welcome! I'm Luxedia, your assistant. How can I help you?" style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
             </div>
           </div>
         </div>

@@ -199,6 +199,7 @@ export interface ProjectDto {
   thumbnailUrl?: string
   ambassadorName: string
   welcomeMessage?: string
+  welcomeMessageEn?: string
   status: string
   clientName: string
   clientId: string
@@ -266,7 +267,7 @@ export const projectsApi = {
   create: (data: {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string  
-    welcomeMessage?: string; leadEmail?: string; clientId: string
+    welcomeMessage?: string; welcomeMessageEn?: string; leadEmail?: string; clientId: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
@@ -286,7 +287,7 @@ export const projectsApi = {
   update: (id: string, data: {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string
-    welcomeMessage?: string; status: string
+    welcomeMessage?: string; welcomeMessageEn?: string; status: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string

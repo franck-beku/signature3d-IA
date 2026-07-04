@@ -14,6 +14,7 @@ public class ProjectDto
     public string? ThumbnailUrl { get; set; }
     public string AmbassadorName { get; set; } = string.Empty;
     public string? WelcomeMessage { get; set; }
+    public string? WelcomeMessageEn { get; set; }
     public string Status { get; set; } = string.Empty;
     public string ClientName { get; set; } = string.Empty;
     public Guid ClientId { get; set; }
@@ -62,6 +63,7 @@ public class CreateProjectDto
     public string? ExperienceUrl { get; set; }
     public string AmbassadorName { get; set; } = "Luxedia";
     public string? WelcomeMessage { get; set; }
+    public string? WelcomeMessageEn { get; set; }
     public string? LeadEmail { get; set; }
     public Guid ClientId { get; set; }
 
@@ -104,6 +106,7 @@ public class UpdateProjectDto
     public string? ExperienceUrl { get; set; } 
     public string AmbassadorName { get; set; } = string.Empty;
     public string? WelcomeMessage { get; set; }
+    public string? WelcomeMessageEn { get; set; }
     public string Status { get; set; } = string.Empty;
 
     /* Champs V2 */
