@@ -79,6 +79,7 @@ export interface SectorDto {
   slug: string
   imageUrl?: string
   description?: string
+  descriptionEn?: string
   coverImage?: string
   icon?: string
   displayOrder: number
@@ -98,13 +99,13 @@ export const sectorsApi = {
 
   /** DASHBOARD — créer un secteur */
   create: (data: {
-    name: string; imageUrl?: string; description?: string
+    name: string; imageUrl?: string; description?: string; descriptionEn?: string
     coverImage?: string; icon?: string; displayOrder: number; isActive: boolean
   }) => apiFetch<SectorDto>('/api/sectors', { method: 'POST', body: JSON.stringify(data) }),
 
   /** DASHBOARD — modifier un secteur */
   update: (id: string, data: {
-    name: string; imageUrl?: string; description?: string
+    name: string; imageUrl?: string; description?: string; descriptionEn?: string
     coverImage?: string; icon?: string; displayOrder: number; isActive: boolean
   }) => apiFetch<SectorDto>(`/api/sectors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 

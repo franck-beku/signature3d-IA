@@ -32,7 +32,7 @@ const SECTEUR_IMAGES: Record<string, string> = {
 const FALLBACK_IMAGE = SECTEUR_IMAGES['Automobile']
 
 export default function RealisationsPage() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [secteurs, setSecteurs] = useState<SectorDto[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -133,7 +133,9 @@ export default function RealisationsPage() {
                         </div>
                         <div style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <span style={{ fontSize: '13px', fontWeight: 400, color: '#6B6458' }}>
-                            {secteur.description || t('Découvrir les expériences', 'Discover experiences')}
+                            {lang === 'en'
+                              ? (secteur.descriptionEn || secteur.description || t('Découvrir les expériences', 'Discover experiences'))
+                              : (secteur.description || t('Découvrir les expériences', 'Discover experiences'))}
                           </span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: GOLD, flexShrink: 0 }}>
                             {t('Voir tout', 'View all')} <ArrowRight size={13} />

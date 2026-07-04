@@ -34,6 +34,7 @@ public class SectorService : ISectorService
         Slug = s.Slug,
         ImageUrl = s.ImageUrl,
         Description = s.Description,
+        DescriptionEn = s.DescriptionEn,
         CoverImage = s.CoverImage,
         Icon = s.Icon,
         DisplayOrder = s.DisplayOrder,
@@ -55,6 +56,7 @@ public class SectorService : ISectorService
                 Slug = s.Slug,
                 ImageUrl = s.ImageUrl,
                 Description = s.Description,
+                DescriptionEn = s.DescriptionEn,
                 CoverImage = s.CoverImage,
                 Icon = s.Icon,
                 DisplayOrder = s.DisplayOrder,
@@ -79,6 +81,7 @@ public class SectorService : ISectorService
                 Slug = s.Slug,
                 ImageUrl = s.ImageUrl,
                 Description = s.Description,
+                DescriptionEn = s.DescriptionEn,
                 CoverImage = s.CoverImage,
                 Icon = s.Icon,
                 DisplayOrder = s.DisplayOrder,
@@ -130,6 +133,7 @@ public class SectorService : ISectorService
             Slug = slug,
             ImageUrl = dto.ImageUrl,
             Description = dto.Description,
+            DescriptionEn = dto.DescriptionEn,
             CoverImage = dto.CoverImage,
             Icon = dto.Icon,
             DisplayOrder = dto.DisplayOrder,
@@ -158,6 +162,7 @@ public class SectorService : ISectorService
         sector.Slug = newSlug;
         sector.ImageUrl = dto.ImageUrl;
         sector.Description = dto.Description;
+        sector.DescriptionEn = dto.DescriptionEn;
         sector.CoverImage = dto.CoverImage;
         sector.Icon = dto.Icon;
         sector.DisplayOrder = dto.DisplayOrder;

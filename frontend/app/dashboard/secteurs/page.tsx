@@ -28,6 +28,7 @@ interface SectorForm {
   id: string | null
   name: string
   description: string
+  descriptionEn: string
   imageUrl: string
   coverImage: string
   icon: string
@@ -36,7 +37,7 @@ interface SectorForm {
 }
 
 const emptyForm: SectorForm = {
-  id: null, name: '', description: '', imageUrl: '', coverImage: '',
+  id: null, name: '', description: '', descriptionEn: '', imageUrl: '', coverImage: '',
   icon: '', displayOrder: 0, isActive: true,
 }
 
@@ -67,6 +68,7 @@ export default function SecteursPage() {
       id: s.id,
       name: s.name,
       description: s.description ?? '',
+      descriptionEn: s.descriptionEn ?? '',
       imageUrl: s.imageUrl ?? '',
       coverImage: s.coverImage ?? '',
       icon: s.icon ?? '',
@@ -84,6 +86,7 @@ export default function SecteursPage() {
       const payload = {
         name: form.name,
         description: form.description || undefined,
+        descriptionEn: form.descriptionEn || undefined,
         imageUrl: form.imageUrl || undefined,
         coverImage: form.coverImage || undefined,
         icon: form.icon || undefined,
@@ -259,6 +262,10 @@ export default function SecteursPage() {
               <div>
                 <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description (accroche)</label>
                 <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Présentez chaque véhicule comme s'il était devant votre client." style={inputStyle} className="dash-input" />
+              </div>
+              <div>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Description (EN)</label>
+                <input type="text" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder="Showcase every vehicle as if it were right in front of your client." style={inputStyle} className="dash-input" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
