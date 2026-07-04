@@ -18,12 +18,22 @@ interface Button {
   action: 'link' | 'form' | 'call'
 }
 
+interface Suggestion {
+  id: string
+  label: string
+  labelEn?: string | null
+  answer?: string | null
+  answerEn?: string | null
+  order: number
+}
+
 interface EmbedInterfaceProps {
   matterportId:   string
   projectName:    string
   ambassadorName: string
   welcomeMessage: string
   buttons:        Button[]
+  suggestions?:   Suggestion[]
   projectSlug?:   string  // slug du projet pour l'API chat Groq + tracking visites
   experienceType?: string // 'Matterport' | 'Tour360' | 'IAOnly'
   experienceUrl?:  string | null // URL iframe pour Tour360 (Glo3D, etc.)
@@ -54,7 +64,7 @@ function resolveSource(): string {
 
 export default function EmbedInterface({
   matterportId, projectName, ambassadorName,
-  welcomeMessage, buttons, projectSlug,
+  welcomeMessage, buttons, suggestions, projectSlug,
   experienceType, experienceUrl,
   luxediaAvatarUrl, luxediaClientLogoUrl,
   luxediaPrimaryColor, luxediaWidgetBgColor,
@@ -153,6 +163,7 @@ export default function EmbedInterface({
             ambassadorName={ambassadorName}
             welcomeMessage={welcomeMessage}
             buttons={buttons}
+            suggestions={suggestions}
             projectSlug={projectSlug}
             luxediaAvatarUrl={luxediaAvatarUrl}
             luxediaClientLogoUrl={luxediaClientLogoUrl}
@@ -190,6 +201,7 @@ export default function EmbedInterface({
           ambassadorName={ambassadorName}
           welcomeMessage={welcomeMessage}
           buttons={buttons}
+          suggestions={suggestions}
           projectSlug={projectSlug}
           luxediaAvatarUrl={luxediaAvatarUrl}
           luxediaClientLogoUrl={luxediaClientLogoUrl}
@@ -228,6 +240,7 @@ export default function EmbedInterface({
               ambassadorName={ambassadorName}
               welcomeMessage={welcomeMessage}
               buttons={buttons}
+              suggestions={suggestions}
               projectSlug={projectSlug}
               luxediaAvatarUrl={luxediaAvatarUrl}
               luxediaClientLogoUrl={luxediaClientLogoUrl}

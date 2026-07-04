@@ -19,6 +19,15 @@ interface Button {
   action: 'link' | 'form' | 'call'
 }
 
+interface Suggestion {
+  id: string
+  label: string
+  labelEn?: string | null
+  answer?: string | null
+  answerEn?: string | null
+  order: number
+}
+
 interface Message {
   role: 'user' | 'assistant'
   content: string
@@ -28,6 +37,7 @@ interface AmbassadeurIAProps {
   ambassadorName: string
   welcomeMessage: string
   buttons: Button[]
+  suggestions?: Suggestion[]
   projectSlug?: string
   language?: 'fr' | 'en'
   luxediaAvatarUrl?:       string
@@ -59,6 +69,7 @@ export default function AmbassadeurIA({
   ambassadorName,
   welcomeMessage,
   buttons,
+  suggestions,
   projectSlug,
   language = 'fr',
   luxediaAvatarUrl,
@@ -113,6 +124,36 @@ export default function AmbassadeurIA({
     } finally {
       setIsTyping(false)
     }
+  }
+
+  const hasCustomSuggestions = !!suggestions && suggestions.length > 0
+
+  const suggestionItems = hasCustomSuggestions
+    ? [...suggestions!]
+        .sort((a, b) => a.order - b.order)
+        .map((s, i) => ({
+          key: s.id || `custom-${i}`,
+          label: lang === 'en' ? (s.labelEn || s.label) : s.label,
+          answer: lang === 'en' ? (s.answerEn || s.answer || null) : (s.answer || null),
+        }))
+    : currentT.suggestions.map((label, i) => ({ key: `default-${i}`, label, answer: null as string | null }))
+
+  const handleSuggestionSelect = (key: string) => {
+    const item = suggestionItems.find((s) => s.key === key)
+    if (!item) return
+
+    if (item.answer) {
+      setMessages((prev) => [...prev, { role: 'user', content: item.label }])
+      setIsTyping(true)
+      const delay = 600 + Math.random() * 300
+      setTimeout(() => {
+        setMessages((prev) => [...prev, { role: 'assistant', content: item.answer! }])
+        setIsTyping(false)
+      }, delay)
+      return
+    }
+
+    sendMessage(item.label)
   }
 
   return (
@@ -170,7 +211,7 @@ export default function AmbassadeurIA({
         ))}
 
         {messages.length === 1 && (
-          <SuggestionsRapides suggestions={currentT.suggestions} onSelect={sendMessage} primaryColor={primaryColor} />
+          <SuggestionsRapides items={suggestionItems} onSelect={handleSuggestionSelect} primaryColor={primaryColor} />
         )}
 
         {isTyping && (

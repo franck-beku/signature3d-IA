@@ -22,6 +22,14 @@ interface EmbedData {
     action: 'link' | 'form' | 'call'
     order:  number
   }[]
+  suggestions: {
+    id:       string
+    label:    string
+    labelEn?: string | null
+    answer?:  string | null
+    answerEn?: string | null
+    order:    number
+  }[]
   luxediaAvatarUrl?:       string | null
   luxediaClientLogoUrl?:   string | null
   luxediaPrimaryColor?:    string | null
@@ -94,6 +102,7 @@ export default async function EmbedSlugPage({
           url:    b.url ?? null,
           action: b.action,
         }))}
+      suggestions={project.suggestions}
       luxediaAvatarUrl={project.luxediaAvatarUrl ?? undefined}
       luxediaClientLogoUrl={project.luxediaClientLogoUrl ?? undefined}
       luxediaPrimaryColor={project.luxediaPrimaryColor ?? undefined}
