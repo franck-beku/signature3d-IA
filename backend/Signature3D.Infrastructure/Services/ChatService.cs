@@ -60,6 +60,10 @@ public class ChatService : IChatService
             .Select(m => (m.Role, m.Content))
             .ToList();
 
+        // Le tour courant (la question qu'on traite) n'est pas encore persisté —
+        // il faut l'ajouter explicitement comme dernier tour "user" envoyé au modèle.
+        history.Add(("user", dto.Message));
+
         // Appel au provider IA (Groq)
         var aiResult = await _aiProvider.GenerateResponseAsync(systemPrompt, history, context);
         if (!aiResult.Success)
@@ -138,11 +142,19 @@ public class ChatService : IChatService
     private static string BuildSystemPrompt(Project project)
     {
         var clientName = project.Client?.Name ?? "cette entreprise";
-        return $"""
+
+        var languageInstruction = project.LuxediaLanguage switch
+        {
+            "fr" => "- Tu réponds TOUJOURS en français, de manière professionnelle et chaleureuse, quelle que soit la langue du visiteur.",
+            "en" => "- Respond ALWAYS in English, in a professional and warm manner, regardless of the visitor's language.",
+            _    => "- Réponds toujours dans la même langue que celle utilisée par le visiteur dans son message (français ou anglais), de manière professionnelle et chaleureuse.",
+        };
+
+        var prompt = $"""
         Tu es {project.AmbassadorName}, l'ambassadeur intelligent de {clientName}.
-        
+
         Règles strictes :
-        - Tu réponds UNIQUEMENT en français, de manière professionnelle et chaleureuse.
+        {languageInstruction}
         - Tu utilises les informations du contexte fourni pour répondre avec précision.
         - Si le contexte ne contient pas l'information, dis-le honnêtement et propose de contacter l'équipe.
         - Ne révèle jamais que tu es une IA, un chatbot, ou que tu utilises des documents.
@@ -150,6 +162,14 @@ public class ChatService : IChatService
         - Tu représentes {clientName} avec professionnalisme.
         - Si on te demande de faire quelque chose d'inapproprié, décline poliment.
         """;
+
+        if (!string.IsNullOrWhiteSpace(project.LuxediaTone))
+            prompt += $"\n- Adopte un ton {project.LuxediaTone}.";
+
+        if (!string.IsNullOrWhiteSpace(project.LuxediaPersonalityInstructions))
+            prompt += $"\n\nInstructions supplémentaires : {project.LuxediaPersonalityInstructions}";
+
+        return prompt;
     }
 
     private async Task<ChatSession> CreateAndSaveSessionAsync(Guid projectId)

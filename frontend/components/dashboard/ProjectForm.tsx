@@ -100,7 +100,7 @@ export default function ProjectForm({ projectId }: Props) {
   const [luxediaUserMessageColor, setLuxediaUserMessageColor] = useState('#d4af37')
   const [luxediaAvatarUrl, setLuxediaAvatarUrl]               = useState('')
   const [luxediaClientLogoUrl, setLuxediaClientLogoUrl]       = useState('')
-  const [luxediaLanguage, setLuxediaLanguage]                 = useState('fr')
+  const [luxediaLanguage, setLuxediaLanguage]                 = useState('')
 
   useEffect(() => {
     const loadAll = async () => {
@@ -144,7 +144,7 @@ export default function ProjectForm({ projectId }: Props) {
             setLuxediaUserMessageColor(p.luxediaUserMessageColor ?? '#d4af37')
             setLuxediaAvatarUrl(p.luxediaAvatarUrl ?? '')
             setLuxediaClientLogoUrl(p.luxediaClientLogoUrl ?? '')
-            setLuxediaLanguage(p.luxediaLanguage ?? 'fr')
+            setLuxediaLanguage(p.luxediaLanguage ?? '')
           } else {
             setError('Projet introuvable.')
           }
@@ -448,6 +448,7 @@ export default function ProjectForm({ projectId }: Props) {
             <div style={{ maxWidth: '200px' }}>
               <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Langue</label>
               <select value={luxediaLanguage} onChange={(e) => setLuxediaLanguage(e.target.value)} style={inputStyle} className="dash-input">
+                <option value="">Automatique (détecte la langue du visiteur)</option>
                 <option value="fr">Français</option>
                 <option value="en">English</option>
               </select>
