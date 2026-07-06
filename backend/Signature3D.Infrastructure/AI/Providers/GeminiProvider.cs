@@ -23,7 +23,8 @@ public class GeminiProvider : IAIProvider
         _settings = settings;
         _http = new HttpClient
         {
-            BaseAddress = new Uri("https://generativelanguage.googleapis.com/v1beta/")
+            BaseAddress = new Uri("https://generativelanguage.googleapis.com/v1beta/"),
+            Timeout = TimeSpan.FromSeconds(AppConstants.AIProviderTimeoutSeconds)
         };
     }
 

@@ -7,6 +7,17 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
 
+/** Erreur API — conserve le code HTTP pour permettre de distinguer les erreurs
+ *  sûres à afficher (400 validation, 429 rate limit) des pannes techniques opaques. */
+export class ApiError extends Error {
+  status: number
+  constructor(message: string, status: number) {
+    super(message)
+    this.status = status
+    this.name = 'ApiError'
+  }
+}
+
 /* ── Helper fetch avec gestion d'erreurs ── */
 async function apiFetch<T>(
   endpoint: string,
@@ -29,7 +40,7 @@ async function apiFetch<T>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Erreur inconnue' }))
-    throw new Error(error.message ?? `Erreur ${response.status}`)
+    throw new ApiError(error.message ?? `Erreur ${response.status}`, response.status)
   }
 
   // 204 No Content — pas de body

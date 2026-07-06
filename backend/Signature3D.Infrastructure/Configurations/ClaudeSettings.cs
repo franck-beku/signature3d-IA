@@ -7,6 +7,6 @@ public class ClaudeSettings
 {
     public string ApiKey { get; set; } = string.Empty;
     public string Model { get; set; } = "claude-3-haiku-20240307";
-    public int MaxTokens { get; set; } = 1024;
+    public int MaxTokens { get; set; } = 700;
     public double Temperature { get; set; } = 0.7;
 }

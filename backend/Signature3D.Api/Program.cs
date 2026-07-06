@@ -1,5 +1,7 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -88,6 +90,35 @@ builder.Services.AddCors(options =>
 });
 
 /* ══════════════════════════════════════════
+   4bis. RATE LIMITING — endpoint chat public
+   ══════════════════════════════════════════ */
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, token) =>
+    {
+        var ip = context.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "inconnue";
+        Console.WriteLine($"[RateLimiter] ⚠️ Limite atteinte pour IP {ip}");
+
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            "{\"message\":\"Trop de requêtes. Veuillez réessayer dans un instant.\"}", token);
+    };
+
+    options.AddPolicy("chat", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            }));
+});
+
+/* ══════════════════════════════════════════
    5. INJECTION DE DÉPENDANCES — Settings
    ══════════════════════════════════════════ */
 
@@ -173,6 +204,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowFrontend");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

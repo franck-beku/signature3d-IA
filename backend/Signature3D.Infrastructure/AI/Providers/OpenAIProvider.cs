@@ -24,7 +24,8 @@ public class OpenAIProvider : IAIProvider
         _settings = settings;
         _http = new HttpClient
         {
-            BaseAddress = new Uri("https://api.openai.com/v1/")
+            BaseAddress = new Uri("https://api.openai.com/v1/"),
+            Timeout = TimeSpan.FromSeconds(AppConstants.AIProviderTimeoutSeconds)
         };
         _http.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", settings.ApiKey);

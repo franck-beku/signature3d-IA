@@ -23,7 +23,8 @@ public class ClaudeProvider : IAIProvider
         _settings = settings;
         _http = new HttpClient
         {
-            BaseAddress = new Uri("https://api.anthropic.com/v1/")
+            BaseAddress = new Uri("https://api.anthropic.com/v1/"),
+            Timeout = TimeSpan.FromSeconds(AppConstants.AIProviderTimeoutSeconds)
         };
         _http.DefaultRequestHeaders.Add("x-api-key", settings.ApiKey);
         _http.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");

@@ -11,7 +11,7 @@ import ChatBubble from './ChatBubble'
 import SuggestionsRapides from './SuggestionsRapides'
 import ActionButtons from './ActionButtons'
 import Image from 'next/image'
-import { chatApi } from '@/lib/api'
+import { chatApi, ApiError } from '@/lib/api'
 
 interface Button {
   label: string
@@ -125,8 +125,10 @@ export default function AmbassadeurIA({
         await new Promise((r) => setTimeout(r, 1200))
         setMessages((prev) => [...prev, { role: 'assistant', content: currentT.fallbackMsg(text) }])
       }
-    } catch {
-      setMessages((prev) => [...prev, { role: 'assistant', content: currentT.errorMsg }])
+    } catch (err) {
+      const isSafeToShow = err instanceof ApiError && (err.status === 400 || err.status === 429)
+      const content = isSafeToShow ? err.message : currentT.errorMsg
+      setMessages((prev) => [...prev, { role: 'assistant', content }])
     } finally {
       setIsTyping(false)
     }

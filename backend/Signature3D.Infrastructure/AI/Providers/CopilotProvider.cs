@@ -24,7 +24,8 @@ public class CopilotProvider : IAIProvider
         _settings = settings;
         _http = new HttpClient
         {
-            BaseAddress = new Uri(settings.Endpoint)
+            BaseAddress = new Uri(settings.Endpoint),
+            Timeout = TimeSpan.FromSeconds(AppConstants.AIProviderTimeoutSeconds)
         };
         _http.DefaultRequestHeaders.Add("api-key", settings.ApiKey);
     }

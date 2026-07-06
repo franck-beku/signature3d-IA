@@ -25,7 +25,8 @@ public class GroqProvider : IAIProvider
         _settings = settings;
         _http = new HttpClient
         {
-            BaseAddress = new Uri("https://api.groq.com/openai/v1/")
+            BaseAddress = new Uri("https://api.groq.com/openai/v1/"),
+            Timeout = TimeSpan.FromSeconds(AppConstants.AIProviderTimeoutSeconds)
         };
         _http.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", settings.ApiKey);
