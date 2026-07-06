@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -199,6 +200,20 @@ builder.Services.AddSwaggerGen(options =>
    ══════════════════════════════════════════ */
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var feature = context.Features.Get<IExceptionHandlerFeature>();
+        Console.WriteLine($"[GlobalExceptionHandler] ❌ Exception non gérée : {feature?.Error.Message}");
+
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await context.Response.WriteAsync(
+            "{\"message\":\"Une erreur est survenue. Veuillez réessayer ou contacter le support.\"}");
+    });
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();
