@@ -104,6 +104,17 @@ public class ChatService : IChatService
 
         if (!chunks.Any()) return null;
 
+        return ScoreAndSelectChunks(chunks, query);
+    }
+
+    /// <summary>
+    /// Scoring RAG pur — sans accès DB, testable isolément avec une liste de chunks en mémoire.
+    /// Stratégie : score basé sur le nombre de mots du query trouvés dans le chunk.
+    /// Fallback vers les 3 premiers chunks (ordre d'entrée, ex. ChunkIndex) si aucun match
+    /// ou si le query ne contient aucun mot de plus de 3 caractères.
+    /// </summary>
+    internal static string? ScoreAndSelectChunks(List<DocumentChunk> chunks, string query)
+    {
         // Extraire les mots significatifs du query (>3 caractères)
         var queryWords = query
             .ToLowerInvariant()

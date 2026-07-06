@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
@@ -21,6 +22,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Signature3D.Application\Signature3D.Application.csproj" />
     <ProjectReference Include="..\Signature3D.Domain\Signature3D.Domain.csproj" />
+    <ProjectReference Include="..\Signature3D.Infrastructure\Signature3D.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- appsettings.Test.json contient la chaîne de connexion réelle — gitignoré, jamais committé. -->
+    <None Include="appsettings.Test.json" CopyToOutputDirectory="PreserveNewest" Condition="Exists('appsettings.Test.json')" />
   </ItemGroup>
 
 </Project>
