@@ -194,50 +194,60 @@ public class ProjectService : IProjectService
         if (Enum.TryParse<ProjectStatus>(dto.Status, out var status))
             project.Status = status;
 
-        // 1) Supprimer les anciens boutons, suggestions et caractéristiques directement en base (robuste, sans tracking)
-        await _db.ProjectButtons.Where(b => b.ProjectId == project.Id).ExecuteDeleteAsync();
-        await _db.ProjectSuggestions.Where(s => s.ProjectId == project.Id).ExecuteDeleteAsync();
-        await _db.ProjectDetails.Where(d => d.ProjectId == project.Id).ExecuteDeleteAsync();
-
-        // 2) Ajouter les nouveaux boutons
-        var newButtons = dto.Buttons.Select((b, i) => new ProjectButton
+        await using var tx = await _db.Database.BeginTransactionAsync();
+        try
         {
-            Label = b.Label,
-            LabelEn = b.LabelEn,
-            Url = b.Url,
-            Action = Enum.TryParse<ButtonActionType>(b.Action, true, out var action)
-                ? action : ButtonActionType.Link,
-            Order = b.Order > 0 ? b.Order : i,
-            ProjectId = project.Id
-        }).ToList();
-        _db.ProjectButtons.AddRange(newButtons);
+            // 1) Supprimer les anciens boutons, suggestions et caractéristiques directement en base (robuste, sans tracking)
+            await _db.ProjectButtons.Where(b => b.ProjectId == project.Id).ExecuteDeleteAsync();
+            await _db.ProjectSuggestions.Where(s => s.ProjectId == project.Id).ExecuteDeleteAsync();
+            await _db.ProjectDetails.Where(d => d.ProjectId == project.Id).ExecuteDeleteAsync();
 
-        // 3) Ajouter les nouvelles suggestions
-        var newSuggestions = dto.Suggestions.Select((s, i) => new ProjectSuggestion
+            // 2) Ajouter les nouveaux boutons
+            var newButtons = dto.Buttons.Select((b, i) => new ProjectButton
+            {
+                Label = b.Label,
+                LabelEn = b.LabelEn,
+                Url = b.Url,
+                Action = Enum.TryParse<ButtonActionType>(b.Action, true, out var action)
+                    ? action : ButtonActionType.Link,
+                Order = b.Order > 0 ? b.Order : i,
+                ProjectId = project.Id
+            }).ToList();
+            _db.ProjectButtons.AddRange(newButtons);
+
+            // 3) Ajouter les nouvelles suggestions
+            var newSuggestions = dto.Suggestions.Select((s, i) => new ProjectSuggestion
+            {
+                Label = s.Label,
+                LabelEn = s.LabelEn,
+                Answer = s.Answer,
+                AnswerEn = s.AnswerEn,
+                Order = s.Order > 0 ? s.Order : i,
+                ProjectId = project.Id
+            }).ToList();
+            _db.ProjectSuggestions.AddRange(newSuggestions);
+
+            // 4) Ajouter les nouvelles caractéristiques
+            var newDetails = dto.Details.Select((d, i) => new ProjectDetail
+            {
+                Label = d.Label,
+                Value = d.Value,
+                DisplayOrder = d.DisplayOrder > 0 ? d.DisplayOrder : i,
+                IsVisible = d.IsVisible,
+                ProjectId = project.Id
+            }).ToList();
+            _db.ProjectDetails.AddRange(newDetails);
+
+            await _db.SaveChangesAsync();
+            await tx.CommitAsync();
+        }
+        catch (Exception ex)
         {
-            Label = s.Label,
-            LabelEn = s.LabelEn,
-            Answer = s.Answer,
-            AnswerEn = s.AnswerEn,
-            Order = s.Order > 0 ? s.Order : i,
-            ProjectId = project.Id
-        }).ToList();
-        _db.ProjectSuggestions.AddRange(newSuggestions);
+            await tx.RollbackAsync();
+            return Result<ProjectDto>.Fail($"Erreur lors de la mise à jour du projet : {ex.Message}");
+        }
 
-        // 4) Ajouter les nouvelles caractéristiques
-        var newDetails = dto.Details.Select((d, i) => new ProjectDetail
-        {
-            Label = d.Label,
-            Value = d.Value,
-            DisplayOrder = d.DisplayOrder > 0 ? d.DisplayOrder : i,
-            IsVisible = d.IsVisible,
-            ProjectId = project.Id
-        }).ToList();
-        _db.ProjectDetails.AddRange(newDetails);
-
-        await _db.SaveChangesAsync();
-
-        // Recharger les relations pour le DTO de retour
+        // Recharger les relations pour le DTO de retour (hors transaction — lecture seule)
         await _db.Entry(project).Collection(p => p.Buttons).LoadAsync();
         await _db.Entry(project).Collection(p => p.Suggestions).LoadAsync();
         await _db.Entry(project).Collection(p => p.Details).LoadAsync();
