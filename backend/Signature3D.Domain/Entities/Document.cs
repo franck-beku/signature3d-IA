@@ -4,6 +4,7 @@ public class Document : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
     public string StorageUrl { get; set; } = string.Empty;
+    public string? PrivateStorageReference { get; set; }
     public long SizeBytes { get; set; }
     public bool IsIndexed { get; set; } = false;
     public bool IsInternal { get; set; } = false;

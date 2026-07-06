@@ -68,21 +68,23 @@ public class DocumentService : IDocumentService
         var fileBytes = ms.ToArray();
 
         // Upload dans Supabase Storage — nom unique pour éviter les collisions
+        // Un document interne est stocké dans le bucket privé (référence, pas d'URL publique).
         var storageFileName = $"{Guid.NewGuid()}-{fileName}";
         using var uploadStream = new MemoryStream(fileBytes);
-        var uploadResult = await _storage.UploadAsync(uploadStream, storageFileName, $"documents/{projectId}");
+        var uploadResult = await _storage.UploadAsync(uploadStream, storageFileName, $"documents/{projectId}", isPrivate: isInternal);
         if (!uploadResult.Success)
             return Result<DocumentDto>.Fail(uploadResult.Error!);
 
         // Sauvegarder en base
         var document = new Document
         {
-            Name       = fileName,
-            StorageUrl = uploadResult.Data!,
-            SizeBytes  = fileBytes.Length,
-            IsIndexed  = false,
-            IsInternal = isInternal,
-            ProjectId  = projectId
+            Name                    = fileName,
+            StorageUrl              = isInternal ? string.Empty : uploadResult.Data!,
+            PrivateStorageReference = isInternal ? uploadResult.Data! : null,
+            SizeBytes               = fileBytes.Length,
+            IsIndexed               = false,
+            IsInternal              = isInternal,
+            ProjectId               = projectId
         };
 
         _db.Documents.Add(document);
@@ -115,7 +117,8 @@ public class DocumentService : IDocumentService
         if (document is null)
             return Result.Fail("Document introuvable.");
 
-        await _storage.DeleteAsync(document.StorageUrl);
+        var storageRef = document.IsInternal ? (document.PrivateStorageReference ?? string.Empty) : document.StorageUrl;
+        await _storage.DeleteAsync(storageRef);
         _db.Documents.Remove(document);
         await _db.SaveChangesAsync();
 
@@ -125,13 +128,30 @@ public class DocumentService : IDocumentService
     /// <summary>Re-indexe un document existant depuis Supabase Storage.</summary>
     public async Task<Result> IndexAsync(Guid documentId)
     {
-        // Récupérer le StorageUrl dans le contexte de la requête (scope actif)
+        // Récupérer le document dans le contexte de la requête (scope actif)
         var document = await _db.Documents.FindAsync(documentId);
         if (document is null)
             return Result.Fail("Document introuvable.");
 
+        string downloadUrl;
+        if (document.IsInternal)
+        {
+            if (string.IsNullOrEmpty(document.PrivateStorageReference))
+                return Result.Fail("Référence de stockage privée manquante.");
+
+            var signedUrlResult = await _storage.GetSignedUrlAsync(document.PrivateStorageReference);
+            if (!signedUrlResult.Success)
+                return Result.Fail(signedUrlResult.Error!);
+
+            downloadUrl = signedUrlResult.Data!;
+        }
+        else
+        {
+            downloadUrl = document.StorageUrl;
+        }
+
         using var httpClient = new HttpClient();
-        var pdfBytes = await httpClient.GetByteArrayAsync(document.StorageUrl);
+        var pdfBytes = await httpClient.GetByteArrayAsync(downloadUrl);
 
         // Indexation dans un scope dédié — même chemin que l'upload
         return await IndexWithBytesInScopeAsync(documentId, pdfBytes);
@@ -150,11 +170,20 @@ public class DocumentService : IDocumentService
         if (document.IsInternal == isInternal)
             return Result.Ok(); // déjà dans le bon état
 
-        document.IsInternal = isInternal;
-
         if (isInternal)
         {
-            // IA → interne : supprimer les chunks, marquer non indexé
+            // IA → interne : déplacer le fichier vers le bucket privé AVANT de changer l'état —
+            // si le déplacement échoue, le document reste "IA" plutôt que de se prétendre
+            // interne alors que son fichier est toujours public.
+            var moveResult = await _storage.MoveToPrivateAsync(document.StorageUrl);
+            if (!moveResult.Success)
+                return Result.Fail(moveResult.Error!);
+
+            document.PrivateStorageReference = moveResult.Data!;
+            document.StorageUrl = string.Empty;
+            document.IsInternal = true;
+
+            // Supprimer les chunks, marquer non indexé
             if (document.Chunks.Any())
                 _db.DocumentChunks.RemoveRange(document.Chunks);
             document.IsIndexed = false;
@@ -163,19 +192,48 @@ public class DocumentService : IDocumentService
         }
         else
         {
-            // interne → IA : sauvegarder d'abord, puis ré-indexer dans un scope dédié
-            var storageUrl = document.StorageUrl;
+            // interne → IA : déplacer le fichier vers le bucket public AVANT de changer l'état,
+            // puis sauvegarder et ré-indexer dans un scope dédié.
+            var moveResult = await _storage.MoveToPublicAsync(document.PrivateStorageReference!);
+            if (!moveResult.Success)
+                return Result.Fail(moveResult.Error!);
+
+            document.StorageUrl = moveResult.Data!;
+            document.PrivateStorageReference = null;
+            document.IsInternal = false;
             document.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
+
+            var publicUrl = document.StorageUrl;
             _ = Task.Run(async () =>
             {
-                using var httpClient = new HttpClient();
-                var pdfBytes = await httpClient.GetByteArrayAsync(storageUrl);
-                await IndexWithBytesInScopeAsync(documentId, pdfBytes);
+                try
+                {
+                    using var httpClient = new HttpClient();
+                    var pdfBytes = await httpClient.GetByteArrayAsync(publicUrl);
+                    await IndexWithBytesInScopeAsync(documentId, pdfBytes);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DocumentService] ❌ Erreur téléchargement post-bascule interne→IA : {ex.Message}");
+                }
             });
         }
 
         return Result.Ok();
+    }
+
+    /// <summary>Génère une URL signée à durée limitée pour consulter un document interne.</summary>
+    public async Task<Result<string>> GetSignedUrlAsync(Guid documentId)
+    {
+        var document = await _db.Documents.FindAsync(documentId);
+        if (document is null)
+            return Result<string>.Fail("Document introuvable.");
+
+        if (!document.IsInternal || string.IsNullOrEmpty(document.PrivateStorageReference))
+            return Result<string>.Fail("Ce document n'est pas stocké de façon privée.");
+
+        return await _storage.GetSignedUrlAsync(document.PrivateStorageReference);
     }
 
     /* ── Extraction + indexation — toujours dans un scope dédié ── */

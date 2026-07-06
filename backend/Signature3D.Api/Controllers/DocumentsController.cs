@@ -107,6 +107,19 @@ public class DocumentsController : ControllerBase
             return BadRequest(new { message = result.Error });
         return NoContent();
     }
+
+    /// <summary>
+    /// Génère une URL signée à durée limitée pour consulter un document interne.
+    /// GET /api/documents/{id}/signed-url
+    /// </summary>
+    [HttpGet("{id:guid}/signed-url")]
+    public async Task<IActionResult> GetSignedUrl(Guid id)
+    {
+        var result = await _documentService.GetSignedUrlAsync(id);
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+        return Ok(new { url = result.Data });
+    }
 }
 
 public record SetCategoryRequest(bool IsInternal);

@@ -13,4 +13,7 @@ public interface IDocumentService
     Task<Result> DeleteAsync(Guid documentId);
     Task<Result> IndexAsync(Guid documentId);
     Task<Result> SetCategoryAsync(Guid documentId, bool isInternal);
+
+    /// <summary>Génère une URL signée à durée limitée pour consulter un document interne.</summary>
+    Task<Result<string>> GetSignedUrlAsync(Guid documentId);
 }
