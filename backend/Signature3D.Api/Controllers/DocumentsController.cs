@@ -51,6 +51,16 @@ public class DocumentsController : ControllerBase
         if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
             return BadRequest(new { message = "Seuls les fichiers PDF sont acceptés." });
 
+        // Vérifie la signature réelle du fichier (%PDF-) — pas seulement l'extension du nom.
+        // Flux dédié, distinct de celui utilisé plus bas pour l'upload — aucune interférence.
+        using (var headerStream = file.OpenReadStream())
+        {
+            var header = new byte[5];
+            var bytesRead = await headerStream.ReadAsync(header.AsMemory(0, 5));
+            if (bytesRead < 5 || System.Text.Encoding.ASCII.GetString(header) != "%PDF-")
+                return BadRequest(new { message = "Le fichier n'est pas un PDF valide." });
+        }
+
         if (file.Length > 20 * 1024 * 1024) // 20 MB max
             return BadRequest(new { message = "Le fichier ne doit pas dépasser 20 MB." });
 
