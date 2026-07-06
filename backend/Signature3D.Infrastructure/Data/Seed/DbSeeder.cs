@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 using Signature3D.Domain.Entities;
 using Signature3D.Domain.Enums;
 
@@ -23,11 +24,14 @@ public static class DbSeeder
         Console.WriteLine("[Seed] Initialisation de la base de données...");
 
         /* ── Utilisateurs ── */
+        var alainPassword  = GenerateSecurePassword();
+        var franckPassword = GenerateSecurePassword();
+
         var alain = new User
         {
             Name          = "Alain Dubé",
             Email         = "alain@signature3d.ai",
-            PasswordHash  = BCrypt.Net.BCrypt.HashPassword("alain123"),
+            PasswordHash  = BCrypt.Net.BCrypt.HashPassword(alainPassword),
             Role          = "admin",
             IsActive      = true
         };
@@ -36,7 +40,7 @@ public static class DbSeeder
         {
             Name          = "Franck Beku",
             Email         = "franck@signature3d.ai",
-            PasswordHash  = BCrypt.Net.BCrypt.HashPassword("franck123"),
+            PasswordHash  = BCrypt.Net.BCrypt.HashPassword(franckPassword),
             Role          = "admin",
             IsActive      = true
         };
@@ -134,12 +138,16 @@ public static class DbSeeder
         await db.SaveChangesAsync();
 
         Console.WriteLine("[Seed] ✅ Base initialisée avec succès !");
-        Console.WriteLine("[Seed] Utilisateurs créés :");
-        Console.WriteLine("[Seed]   → alain@signature3d.ai / alain123");
-        Console.WriteLine("[Seed]   → franck@signature3d.ai / franck123");
+        Console.WriteLine("[Seed] Comptes admin créés — ⚠️ Notez ces mots de passe, ils ne seront plus jamais affichés :");
+        Console.WriteLine($"[Seed]   → alain@signature3d.ai / {alainPassword}");
+        Console.WriteLine($"[Seed]   → franck@signature3d.ai / {franckPassword}");
         Console.WriteLine("[Seed] Secteurs créés : Automobile, Immobilier, Restaurant, Hôtellerie, Commerce, Événementiel");
         Console.WriteLine("[Seed] Client démo : Mercedes Québec avec 3 projets");
     }
+
+    /// <summary>Génère un mot de passe aléatoire sécurisé pour un compte admin créé au seed initial.</summary>
+    private static string GenerateSecurePassword() =>
+        RandomNumberGenerator.GetString("ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*", 20);
 
     /// <summary>
     /// Seed des 5 offres commerciales (Offerings).
