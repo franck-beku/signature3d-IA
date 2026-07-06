@@ -36,10 +36,9 @@ public class ProjectsController : ControllerBase
     /// <summary>
     /// Retourne un projet par son slug — utilisé par l'embed.
     /// GET /api/projects/slug/{slug}
-    /// Endpoint public — pas besoin d'authentification.
+    /// Utilisé par le dashboard authentifié (fiche projet).
     /// </summary>
     [HttpGet("slug/{slug}")]
-    [AllowAnonymous]
     public async Task<IActionResult> GetBySlug(string slug)
     {
         var result = await _projectService.GetBySlugAsync(slug);
