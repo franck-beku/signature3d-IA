@@ -253,7 +253,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
                       <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
                       <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>{formatSize(doc.sizeBytes)}</p>
                     </div>
-                    <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', flexShrink: 0, backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)' }}>
+                    <span title={doc.indexingError} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', flexShrink: 0, backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', cursor: doc.indexingError ? 'help' : 'default' }}>
                       {doc.isIndexed ? 'Indexé' : 'En attente'}
                     </span>
                   </div>

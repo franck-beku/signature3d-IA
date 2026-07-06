@@ -7,6 +7,7 @@ public class Document : BaseEntity
     public string? PrivateStorageReference { get; set; }
     public long SizeBytes { get; set; }
     public bool IsIndexed { get; set; } = false;
+    public string? IndexingError { get; set; }
     public bool IsInternal { get; set; } = false;
 
     /* Relations */

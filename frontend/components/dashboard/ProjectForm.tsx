@@ -596,11 +596,14 @@ export default function ProjectForm({ projectId }: Props) {
                     <FileText size={13} style={{ color: 'var(--dash-gold)', flexShrink: 0 }} />
                     <span style={{ flex: 1, fontSize: '12px', color: 'var(--dash-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</span>
                     <span style={{ fontSize: '11px', color: 'var(--dash-text-muted)', flexShrink: 0 }}>{(doc.sizeBytes / 1024).toFixed(0)} KB</span>
-                    <span style={{
-                      fontSize: '10px', padding: '2px 8px', borderRadius: '999px', flexShrink: 0,
-                      backgroundColor: doc.isInternal ? 'var(--dash-border)' : doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)',
-                      color: doc.isInternal ? 'var(--dash-text-muted)' : doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)',
-                    }}>
+                    <span
+                      title={!doc.isInternal ? doc.indexingError : undefined}
+                      style={{
+                        fontSize: '10px', padding: '2px 8px', borderRadius: '999px', flexShrink: 0,
+                        backgroundColor: doc.isInternal ? 'var(--dash-border)' : doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)',
+                        color: doc.isInternal ? 'var(--dash-text-muted)' : doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)',
+                        cursor: !doc.isInternal && doc.indexingError ? 'help' : 'default',
+                      }}>
                       {doc.isInternal ? 'Interne' : doc.isIndexed ? 'Indexé' : 'En attente'}
                     </span>
                     <button

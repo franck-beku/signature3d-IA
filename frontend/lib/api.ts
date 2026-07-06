@@ -532,6 +532,7 @@ export interface DocumentDto {
   storageUrl: string
   sizeBytes: number
   isIndexed: boolean
+  indexingError?: string
   isInternal: boolean
   chunkCount: number
   createdAt: string

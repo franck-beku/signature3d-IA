@@ -156,7 +156,7 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
                   <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
                   <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0 }}>{formatSize(doc.sizeBytes)} · {new Date(doc.createdAt).toLocaleDateString('fr-CA')}</p>
                 </div>
-                <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', flexShrink: 0 }}>
+                <span title={doc.indexingError} style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', flexShrink: 0, cursor: doc.indexingError ? 'help' : 'default' }}>
                   {doc.isIndexed ? 'Indexé' : 'En attente'}
                 </span>
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>

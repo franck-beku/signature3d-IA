@@ -11,7 +11,7 @@ import { Upload, FileText, Trash2, Search } from 'lucide-react'
 
 interface Document {
   id: string; name: string; project: string
-  size: string; isIndexed: boolean; uploadedAt: string
+  size: string; isIndexed: boolean; indexingError?: string; uploadedAt: string
 }
 
 const thStyle = {
@@ -130,7 +130,7 @@ export default function DocumentsPage() {
                       <td style={{ padding: '14px 16px' }}><span style={{ color: 'var(--dash-text-subtle)', fontSize: '13px' }}>{doc.project}</span></td>
                       <td style={{ padding: '14px 16px' }}><span style={{ color: 'var(--dash-text-subtle)', fontSize: '13px' }}>{doc.size}</span></td>
                       <td style={{ padding: '14px 16px' }}>
-                        <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)' }}>
+                        <span title={doc.indexingError} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', cursor: doc.indexingError ? 'help' : 'default' }}>
                           {doc.isIndexed ? 'Indexé' : 'En attente'}
                         </span>
                       </td>

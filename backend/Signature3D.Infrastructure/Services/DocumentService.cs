@@ -49,6 +49,7 @@ public class DocumentService : IDocumentService
             StorageUrl = d.StorageUrl,
             SizeBytes  = d.SizeBytes,
             IsIndexed  = d.IsIndexed,
+            IndexingError = d.IndexingError,
             IsInternal = d.IsInternal,
             ChunkCount = d.Chunks?.Count ?? 0,
             CreatedAt  = d.CreatedAt
@@ -101,6 +102,7 @@ public class DocumentService : IDocumentService
             StorageUrl = document.StorageUrl,
             SizeBytes  = document.SizeBytes,
             IsIndexed  = document.IsIndexed,
+            IndexingError = document.IndexingError,
             IsInternal = document.IsInternal,
             ChunkCount = 0,
             CreatedAt  = document.CreatedAt
@@ -261,7 +263,8 @@ public class DocumentService : IDocumentService
             if (string.IsNullOrWhiteSpace(extractedText))
             {
                 Console.WriteLine($"[DocumentService] Aucun texte extrait de {document.Name}");
-                document.IsIndexed = true;
+                document.IsIndexed = false;
+                document.IndexingError = "Aucun texte n'a pu être extrait de ce document (probablement un PDF scanné/image sans OCR).";
                 await db.SaveChangesAsync();
                 return Result.Ok();
             }
@@ -283,6 +286,7 @@ public class DocumentService : IDocumentService
 
             db.DocumentChunks.AddRange(chunkEntities);
             document.IsIndexed  = true;
+            document.IndexingError = null;
             document.UpdatedAt  = DateTime.UtcNow;
             await db.SaveChangesAsync();
 
