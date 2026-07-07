@@ -11,10 +11,9 @@ import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star } from 'lucide-react'
 import Link from 'next/link'
 import {
   projectsApi, clientsApi, sectorsApi, offeringsApi,
-  documentsApi,
-  type ProjectDto, type ClientDto, type SectorDto, type OfferingDto, type DocumentDto,
+  type ProjectDto, type ClientDto, type SectorDto, type OfferingDto,
 } from '@/lib/api'
-import ProjectDocumentsSection from './ProjectDocumentsSection'
+import ProjectDocumentsManager from '@/components/dashboard/ProjectDocumentsManager'
 
 const inputStyle = {
   width: '100%', backgroundColor: 'var(--dash-input)',
@@ -89,11 +88,6 @@ export default function ProjectForm({ projectId }: Props) {
   const [suggestions, setSuggestions]         = useState<SuggestionRow[]>([])
   const [details, setDetails]                 = useState<DetailRow[]>([])
 
-  const [documents, setDocuments]               = useState<DocumentDto[]>([])
-  const [docsLoading, setDocsLoading]           = useState(false)
-  const [uploadingDoc, setUploadingDoc]         = useState(false)
-  const [uploadIsInternal, setUploadIsInternal] = useState(false)
-
   // Valeurs de données Luxedia — ne pas modifier (couleurs choisies par le client)
   const [luxediaPrimaryColor, setLuxediaPrimaryColor]         = useState('#d4af37')
   const [luxediaWidgetBgColor, setLuxediaWidgetBgColor]       = useState('#111111')
@@ -159,15 +153,6 @@ export default function ProjectForm({ projectId }: Props) {
     loadAll()
   }, [isEdit, projectId])
 
-  useEffect(() => {
-    if (!isEdit || !projectId) return
-    setDocsLoading(true)
-    documentsApi.getByProject(projectId)
-      .then((docs) => setDocuments(docs as DocumentDto[]))
-      .catch(() => {})
-      .finally(() => setDocsLoading(false))
-  }, [isEdit, projectId])
-
   const addButton = () => setButtons((prev) => [...prev, { label: '', labelEn: '', url: '', action: 'link', order: prev.length }])
   const removeButton = (i: number) => setButtons((prev) => prev.filter((_, idx) => idx !== i))
   const updateButton = (i: number, field: keyof ButtonRow, value: string | number) =>
@@ -182,40 +167,6 @@ export default function ProjectForm({ projectId }: Props) {
   const removeDetail = (i: number) => setDetails((prev) => prev.filter((_, idx) => idx !== i))
   const updateDetail = (i: number, field: keyof DetailRow, value: string | number | boolean) =>
     setDetails((prev) => prev.map((d, idx) => idx === i ? { ...d, [field]: value } : d))
-
-  const handleUploadDocument = async (file: File) => {
-    if (!projectId) return
-    setUploadingDoc(true)
-    try {
-      const doc = await documentsApi.upload(projectId, file, uploadIsInternal)
-      setDocuments((prev) => [doc as DocumentDto, ...prev])
-      setUploadIsInternal(false)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
-    } finally {
-      setUploadingDoc(false)
-    }
-  }
-
-  const handleToggleCategory = async (doc: DocumentDto) => {
-    try {
-      await documentsApi.setCategory(doc.id, !doc.isInternal)
-      setDocuments((prev) => prev.map((d) =>
-        d.id === doc.id ? { ...d, isInternal: !d.isInternal, isIndexed: false } : d
-      ))
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
-    }
-  }
-
-  const handleDeleteDocument = async (id: string) => {
-    try {
-      await documentsApi.delete(id)
-      setDocuments((prev) => prev.filter((d) => d.id !== id))
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
-    }
-  }
 
   const handleSave = async () => {
     if (!name.trim()) { setError('Le nom du projet est obligatoire.'); return }
@@ -563,17 +514,8 @@ export default function ProjectForm({ projectId }: Props) {
         </div>
 
         {/* SECTION — Documents (édition uniquement) */}
-        {isEdit && (
-          <ProjectDocumentsSection
-            documents={documents}
-            docsLoading={docsLoading}
-            uploadingDoc={uploadingDoc}
-            uploadIsInternal={uploadIsInternal}
-            onUploadIsInternalChange={setUploadIsInternal}
-            onUpload={handleUploadDocument}
-            onToggleCategory={handleToggleCategory}
-            onDelete={handleDeleteDocument}
-          />
+        {isEdit && projectId && (
+          <ProjectDocumentsManager projectId={projectId} variant="section" />
         )}
 
         {/* SECTION — Publication */}

@@ -5,7 +5,7 @@
 
 'use client'
 import QRCodeLogo from '@/components/dashboard/QRCodeLogo'
-import DocumentUpload from '@/components/dashboard/DocumentUpload'
+import ProjectDocumentsManager from '@/components/dashboard/ProjectDocumentsManager'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
@@ -303,7 +303,7 @@ export default function ClientDetailPage() {
         />
       )}
 
-      {docProject && <DocumentUpload projectId={docProject.id} projectName={docProject.name} onClose={() => setDocProject(null)} />}
+      {docProject && <ProjectDocumentsManager projectId={docProject.id} projectName={docProject.name} variant="modal" onClose={() => setDocProject(null)} />}
       {showContractModal && client && (
         <ContractModal clientId={client.id} clientName={client.name} existingUrl={client.contractFileUrl}
           onClose={() => setShowContractModal(false)}
