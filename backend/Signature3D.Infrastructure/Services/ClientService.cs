@@ -144,6 +144,18 @@ public class ClientService : IClientService
         if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
             return Result<ClientDto>.Fail("Seuls les fichiers PDF sont acceptés.");
 
+        // Vérifie la signature réelle du fichier (%PDF-) — pas seulement l'extension du nom.
+        using (var headerStream = file.OpenReadStream())
+        {
+            var header = new byte[5];
+            var bytesRead = await headerStream.ReadAsync(header.AsMemory(0, 5));
+            if (bytesRead < 5 || System.Text.Encoding.ASCII.GetString(header) != "%PDF-")
+                return Result<ClientDto>.Fail("Le fichier n'est pas un PDF valide.");
+        }
+
+        if (file.Length > 50 * 1024 * 1024) // 50 MB max
+            return Result<ClientDto>.Fail("Le fichier ne doit pas dépasser 50 MB.");
+
         using var stream = file.OpenReadStream();
         var uploadResult = await _storageService.UploadAsync(stream, $"{Guid.NewGuid()}.pdf", $"contracts/{id}");
 

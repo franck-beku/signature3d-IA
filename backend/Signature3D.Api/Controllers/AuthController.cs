@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Signature3D.Application.DTOs.Auth;
 using Signature3D.Application.Interfaces;
 
@@ -25,9 +26,11 @@ public class AuthController : ControllerBase
     /// Connecte un utilisateur et retourne un token JWT.
     /// POST /api/auth/login
     /// Body : { "email": "alain@signature3d.ai", "password": "..." }
+    /// Limité à 5 tentatives/minute par IP (policy "auth") — protection contre le brute-force.
     /// </summary>
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var result = await _authService.LoginAsync(dto);
