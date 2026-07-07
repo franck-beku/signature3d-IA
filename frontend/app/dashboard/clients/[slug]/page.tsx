@@ -7,11 +7,13 @@
 import QRCodeLogo from '@/components/dashboard/QRCodeLogo'
 import DocumentUpload from '@/components/dashboard/DocumentUpload'
 import React from 'react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Sidebar from '@/components/dashboard/Sidebar'
+import ContractModal from '@/components/dashboard/ContractModal'
+import ProjectLinkModal from '@/components/dashboard/ProjectLinkModal'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, Copy, Code, FileText, ExternalLink as OpenIcon, UserRound, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, FileText, ExternalLink as OpenIcon, UserRound, BarChart3 } from 'lucide-react'
 import { clientsApi, projectsApi, contactsApi, timelineApi, type ClientDto, type ProjectDto, type ContactDto, type CreateContactDto, type TimelineItemDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
 import { format } from 'date-fns'
@@ -47,7 +49,6 @@ function formatTimelineDate(item: TimelineItemDto) {
   return format(d, 'd MMM yyyy', { locale: fr })
 }
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'https://signature3dia.com'
-const API_URL  = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5125'
 
 const TYPES_ACTION = [
   { value: 'link',  label: 'Lien URL'   },
@@ -95,165 +96,6 @@ interface EditProject {
 
 function newButton() {
   return { id: Date.now().toString(), label: '', url: '', action: 'link', order: 0 }
-}
-
-/* ── Modal Contrat PDF ── */
-function ContractModal({
-  clientId, clientName, existingUrl, onClose, onUploaded
-}: {
-  clientId: string
-  clientName: string
-  existingUrl?: string | null
-  onClose: () => void
-  onUploaded: (url: string) => void
-}) {
-  const [uploading, setUploading] = useState(false)
-  const [error, setError]         = useState<string | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleUpload = async (file: File) => {
-    if (!file.name.endsWith('.pdf')) { setError('Seuls les fichiers PDF sont acceptés.'); return }
-    if (file.size > 50 * 1024 * 1024) { setError('Le fichier ne doit pas dépasser 50 MB.'); return }
-    setUploading(true)
-    setError(null)
-    try {
-      const token = localStorage.getItem('token')
-      const formData = new FormData()
-      formData.append('file', file)
-      const res = await fetch(`${API_URL}/api/clients/${clientId}/contract`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      })
-      if (!res.ok) { const data = await res.json(); throw new Error(data.message ?? 'Erreur lors de l\'upload.') }
-      const data = await res.json()
-      onUploaded(data.contractFileUrl)
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-      <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border-input)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '480px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <div>
-            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '16px', margin: '0 0 4px' }}>Entente / Contrat</h2>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: 0 }}>{clientName}</p>
-          </div>
-          <button onClick={onClose} style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-text-subtle)' }} className="close-btn">
-            <X size={14} />
-          </button>
-        </div>
-
-        {existingUrl && (
-          <div style={{ marginBottom: '20px', padding: '14px', backgroundColor: 'var(--dash-success-bg)', border: '1px solid var(--dash-success-ring)', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <FileText size={16} style={{ color: 'var(--dash-success)', flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ color: 'var(--dash-success)', fontSize: '13px', margin: '0 0 2px', fontWeight: 500 }}>Contrat existant</p>
-              <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0 }}>Un contrat PDF est déjà uploadé</p>
-            </div>
-            <a href={existingUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-success-ring)', color: 'var(--dash-success)', textDecoration: 'none' }}>
-              <OpenIcon size={11} /> Ouvrir
-            </a>
-          </div>
-        )}
-
-        {error && (
-          <div style={{ marginBottom: '16px', padding: '10px 14px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '8px', color: 'var(--dash-error)', fontSize: '13px' }}>{error}</div>
-        )}
-
-        <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleUpload(f) }}
-          onClick={() => !uploading && fileInputRef.current?.click()}
-          style={{
-            border: `2px dashed ${isDragging ? 'var(--dash-gold)' : 'var(--dash-border-input)'}`,
-            borderRadius: '12px', padding: '32px', textAlign: 'center',
-            cursor: uploading ? 'not-allowed' : 'pointer',
-            backgroundColor: isDragging ? 'var(--dash-gold-muted)' : 'transparent',
-            transition: 'all 0.3s ease',
-            opacity: uploading ? 0.6 : 1,
-          }}
-        >
-          <input ref={fileInputRef} type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f) }} style={{ display: 'none' }} />
-          <Upload size={28} style={{ color: uploading ? 'rgba(200,164,93,0.3)' : 'rgba(200,164,93,0.6)', margin: '0 auto 12px' }} />
-          <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>
-            {uploading ? 'Upload en cours...' : <>{existingUrl ? 'Remplacer le contrat' : 'Glissez le PDF ici ou'} <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></>}
-          </p>
-          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF uniquement — max 50 MB</p>
-        </div>
-
-        <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '12px', textAlign: 'center', lineHeight: 1.5 }}>
-          💡 Ce contrat est confidentiel — visible uniquement dans le dashboard.
-        </p>
-      </div>
-    </div>
-  )
-}
-
-/* ── Modal Lien + iframe ── */
-function LinkModal({ project, onClose }: { project: ProjectDto; onClose: () => void }) {
-  const [copied, setCopied] = useState<string | null>(null)
-  const directUrl  = `${BASE_URL}/embed/${project.slug}`
-  const iframeCode = `<iframe\n  src="${directUrl}"\n  width="420"\n  height="620"\n  style="border: none; border-radius: 12px;"\n  title="${project.name}"\n></iframe>`
-
-  const copy = (text: string, key: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(key)
-    setTimeout(() => setCopied(null), 2000)
-  }
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-      <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border-input)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <div>
-            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '16px', margin: '0 0 4px' }}>Partager l&apos;expérience</h2>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: 0 }}>{project.name}</p>
-          </div>
-          <button onClick={onClose} style={{ width: '30px', height: '30px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-text-subtle)' }} className="close-btn">
-            <X size={14} />
-          </button>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <ExternalLink size={14} style={{ color: 'var(--dash-gold)' }} />
-              <p style={{ color: 'var(--dash-text)', fontSize: '13px', fontWeight: 600, margin: 0 }}>Lien direct</p>
-            </div>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginBottom: '12px', lineHeight: 1.5 }}>Pour QR code, email, réseaux sociaux.</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ flex: 1, backgroundColor: 'var(--dash-bg)', border: '1px solid var(--dash-border)', borderRadius: '6px', padding: '8px 12px', overflow: 'hidden' }}>
-                <code style={{ color: 'var(--dash-gold)', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>{directUrl}</code>
-              </div>
-              <button onClick={() => copy(directUrl, 'link')} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', padding: '8px 12px', borderRadius: '6px', border: `1px solid ${copied === 'link' ? 'var(--dash-success-ring)' : 'var(--dash-border-input)'}`, color: copied === 'link' ? 'var(--dash-success)' : 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer', flexShrink: 0 }} className="copy-btn">
-                {copied === 'link' ? <Check size={12} /> : <Copy size={12} />}
-                {copied === 'link' ? 'Copié !' : 'Copier'}
-              </button>
-            </div>
-          </div>
-          <div style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <Code size={14} style={{ color: 'var(--dash-gold)' }} />
-              <p style={{ color: 'var(--dash-text)', fontSize: '13px', fontWeight: 600, margin: 0 }}>Intégrer sur un site web</p>
-            </div>
-            <div style={{ backgroundColor: 'var(--dash-bg)', border: '1px solid var(--dash-border)', borderRadius: '6px', padding: '12px', marginBottom: '10px' }}>
-              <pre style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'monospace', lineHeight: 1.6 }}>{iframeCode}</pre>
-            </div>
-            <button onClick={() => copy(iframeCode, 'iframe')} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', padding: '8px 14px', borderRadius: '6px', border: `1px solid ${copied === 'iframe' ? 'var(--dash-success-ring)' : 'var(--dash-border-input)'}`, color: copied === 'iframe' ? 'var(--dash-success)' : 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="copy-btn">
-              {copied === 'iframe' ? <Check size={12} /> : <Copy size={12} />}
-              {copied === 'iframe' ? 'Copié !' : 'Copier le code iframe'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 export default function ClientDetailPage() {
@@ -814,7 +656,7 @@ export default function ClientDetailPage() {
           onUploaded={(url) => { setClient({ ...client, contractFileUrl: url }); setShowContractModal(false) }}
         />
       )}
-      {linkProject && <LinkModal project={linkProject} onClose={() => setLinkProject(null)} />}
+      {linkProject && <ProjectLinkModal project={linkProject} onClose={() => setLinkProject(null)} />}
       {qrProject && <QRCodeLogo url={`${BASE_URL}/embed/${qrProject.slug}`} projectName={qrProject.name} onClose={() => setQrProject(null)} />}
 
       <style>{`
