@@ -44,6 +44,17 @@ public class DocumentService : IDocumentService
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
 
+        var documentIds = documents.Select(d => d.Id).ToList();
+
+        // Job d'indexation le plus récent par document — sert de repli quand le document
+        // n'a pas d'IndexingError propre (le job a échoué avant même l'extraction de texte,
+        // ex. erreur de stockage) mais que rien n'est autrement visible dans le dashboard.
+        var latestJobByDocument = await _db.IndexingJobs
+            .Where(j => documentIds.Contains(j.DocumentId))
+            .GroupBy(j => j.DocumentId)
+            .Select(g => g.OrderByDescending(j => j.CreatedAt).First())
+            .ToDictionaryAsync(j => j.DocumentId);
+
         return Result<List<DocumentDto>>.Ok(documents.Select(d => new DocumentDto
         {
             Id         = d.Id,
@@ -51,7 +62,10 @@ public class DocumentService : IDocumentService
             StorageUrl = d.StorageUrl,
             SizeBytes  = d.SizeBytes,
             IsIndexed  = d.IsIndexed,
-            IndexingError = d.IndexingError,
+            IndexingError = d.IndexingError ?? (
+                !d.IsIndexed && latestJobByDocument.TryGetValue(d.Id, out var job) && job.Status == IndexingJobStatus.Failed
+                    ? job.ErrorMessage
+                    : null),
             IsInternal = d.IsInternal,
             ChunkCount = d.Chunks?.Count ?? 0,
             CreatedAt  = d.CreatedAt
