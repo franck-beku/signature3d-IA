@@ -35,6 +35,7 @@ public class ProjectService : IProjectService
             .Include(p => p.Buttons.OrderBy(b => b.Order))
             .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
+            .AsSplitQuery()
             .Where(p => p.ClientId == clientId)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
@@ -52,6 +53,7 @@ public class ProjectService : IProjectService
             .Include(p => p.Buttons.OrderBy(b => b.Order))
             .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Slug == slug);
 
         if (project is null)
@@ -316,6 +318,7 @@ public class ProjectService : IProjectService
             .Include(p => p.Buttons.OrderBy(b => b.Order))
             .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
+            .AsSplitQuery()
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
