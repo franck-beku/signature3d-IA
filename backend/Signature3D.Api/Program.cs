@@ -95,6 +95,23 @@ builder.Services.AddCors(options =>
 
 /* ══════════════════════════════════════════
    4bis. RATE LIMITING — endpoint chat public
+
+   ⚠️ LIMITATION CONNUE — compteur EN MÉMOIRE, PAR INSTANCE.
+   Le FixedWindowLimiter ci-dessous garde son état dans le process ASP.NET Core.
+   Avec UNE SEULE instance (déploiement Railway actuel), la limite de 10 req/min
+   par IP est correcte. Si ce service est un jour scalé horizontalement
+   (N instances derrière un load balancer sans affinité de session), la limite
+   réelle devient N×10/min par IP — chaque instance compte séparément.
+   Ce n'est pas un crash ni une corruption de données, juste un affaiblissement
+   silencieux de la protection anti-abus du endpoint chat public.
+
+   Avant de scaler à plusieurs instances : soit accepter consciemment cette
+   limite affaiblie, soit remplacer ce bloc par un compteur partagé —
+   PostgreSQL (déjà disponible) avec une fenêtre fixe mono-ligne-par-IP
+   (UPSERT atomique, pas de nouvelle dépendance) est l'option recommandée
+   à l'échelle de ce projet ; Redis reste une option si un vrai besoin
+   multi-instance se confirme. Détails : backend/README.md, section
+   "Limitations connues".
    ══════════════════════════════════════════ */
 
 builder.Services.AddRateLimiter(options =>
