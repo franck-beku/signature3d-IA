@@ -416,7 +416,7 @@ export const analyticsApi = {
 export const visitsApi = {
   /** Enregistre une visite */
   create: (projectSlug: string, source = 'DirectLink') =>
-    apiFetch('/api/visits', {
+    apiFetch<{ id: string }>('/api/visits', {
       method: 'POST',
       body: JSON.stringify({ projectSlug, source }),
     }),

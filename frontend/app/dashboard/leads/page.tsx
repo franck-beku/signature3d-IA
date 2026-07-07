@@ -47,8 +47,8 @@ export default function LeadsPage() {
     try {
       await leadsApi.updateStatus(id, status)
       setLeads((prev) => prev.map((l) => l.id === id ? { ...l, status } : l))
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 

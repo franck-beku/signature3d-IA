@@ -116,7 +116,7 @@ export default function ClientDetailPage() {
       await projectsApi.delete(projectId)
       setProjects((prev) => prev.filter((p) => p.id !== projectId))
       setDeleteConfirm(null)
-    } catch (err: any) { setError(err.message) }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Une erreur est survenue.') }
   }
 
   const handleSaveProject = async () => {
@@ -132,7 +132,7 @@ export default function ClientDetailPage() {
       })
       setProjects((prev) => prev.map((p) => p.id === editProject.id ? updated as ProjectDto : p))
       setEditProject(null)
-    } catch (err: any) { setError(err.message) }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Une erreur est survenue.') }
     finally { setSaving(false) }
   }
 
@@ -151,7 +151,7 @@ export default function ClientDetailPage() {
       setContacts((prev) => [...prev, created as ContactDto])
       setShowContactForm(false)
       resetContactForm()
-    } catch (err: any) { setError(err.message) }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Une erreur est survenue.') }
     finally { setContactSaving(false) }
   }
 
@@ -171,7 +171,7 @@ export default function ClientDetailPage() {
       })
       setContacts((prev) => prev.map((c) => c.id === editContact.id ? updated as ContactDto : c))
       setEditContact(null)
-    } catch (err: any) { setError(err.message) }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Une erreur est survenue.') }
     finally { setContactSaving(false) }
   }
 
@@ -180,7 +180,7 @@ export default function ClientDetailPage() {
       await contactsApi.delete(id)
       setContacts((prev) => prev.filter((c) => c.id !== id))
       setDeleteContactConfirm(null)
-    } catch (err: any) { setError(err.message) }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Une erreur est survenue.') }
   }
 
   const updateButton = (id: string, key: string, value: string) => {

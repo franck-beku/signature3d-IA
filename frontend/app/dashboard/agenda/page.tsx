@@ -115,8 +115,8 @@ export default function AgendaPage() {
       setLoading(true)
       const data = await agendaApi.getAll()
       setEvents(data.map(toCalEvent))
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Une erreur est survenue.')
     } finally {
       setLoading(false)
     }
@@ -178,8 +178,8 @@ export default function AgendaPage() {
       }
       resetForm()
       await load()
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Une erreur est survenue.')
     } finally {
       setSubmitting(false)
     }
@@ -193,8 +193,8 @@ export default function AgendaPage() {
       await agendaApi.delete(editingId)
       resetForm()
       await load()
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Une erreur est survenue.')
     } finally {
       setSubmitting(false)
     }

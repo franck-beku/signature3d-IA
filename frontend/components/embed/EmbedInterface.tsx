@@ -96,7 +96,7 @@ export default function EmbedInterface({
     // 1) Enregistrer la visite
     visitsApi
       .create(projectSlug, resolveSource())
-      .then((visit: any) => {
+      .then((visit) => {
         if (visit && visit.id) visitIdRef.current = visit.id
       })
       .catch(() => { /* silencieux — ne pas perturber le visiteur */ })

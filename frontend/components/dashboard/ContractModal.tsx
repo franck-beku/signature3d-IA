@@ -37,8 +37,8 @@ export default function ContractModal({
       if (!res.ok) { const data = await res.json(); throw new Error(data.message ?? 'Erreur lors de l\'upload.') }
       const data = await res.json()
       onUploaded(data.contractFileUrl)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setUploading(false)
     }

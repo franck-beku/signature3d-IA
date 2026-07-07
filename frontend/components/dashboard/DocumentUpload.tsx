@@ -48,8 +48,8 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
     try {
       const doc = await documentsApi.upload(projectId, file)
       setDocuments((prev) => [doc as DocumentDto, ...prev])
-    } catch (err: any) {
-      setError(err.message ?? 'Erreur lors de l\'upload.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload.')
     } finally {
       setUploading(false)
     }
@@ -71,8 +71,8 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
     try {
       await documentsApi.delete(docId)
       setDocuments((prev) => prev.filter((d) => d.id !== docId))
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 
@@ -82,8 +82,8 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
       setDocuments((prev) => prev.map((d) =>
         d.id === docId ? { ...d, isIndexed: true } : d
       ))
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 

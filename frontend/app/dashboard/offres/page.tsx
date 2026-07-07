@@ -106,8 +106,8 @@ export default function OffresPage() {
       else await offeringsApi.create(payload)
       setForm(null)
       load()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
     }
@@ -118,8 +118,8 @@ export default function OffresPage() {
       await offeringsApi.delete(id)
       setOfferings((prev) => prev.filter((o) => o.id !== id))
       setDeleteConfirm(null)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 

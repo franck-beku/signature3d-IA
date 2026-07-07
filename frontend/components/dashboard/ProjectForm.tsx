@@ -150,8 +150,8 @@ export default function ProjectForm({ projectId }: Props) {
             setError('Projet introuvable.')
           }
         }
-      } catch (err: any) {
-        setError(err.message)
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
       } finally {
         setLoading(false)
       }
@@ -190,8 +190,8 @@ export default function ProjectForm({ projectId }: Props) {
       const doc = await documentsApi.upload(projectId, file, uploadIsInternal)
       setDocuments((prev) => [doc as DocumentDto, ...prev])
       setUploadIsInternal(false)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setUploadingDoc(false)
     }
@@ -203,8 +203,8 @@ export default function ProjectForm({ projectId }: Props) {
       setDocuments((prev) => prev.map((d) =>
         d.id === doc.id ? { ...d, isInternal: !d.isInternal, isIndexed: false } : d
       ))
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 
@@ -212,8 +212,8 @@ export default function ProjectForm({ projectId }: Props) {
     try {
       await documentsApi.delete(id)
       setDocuments((prev) => prev.filter((d) => d.id !== id))
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 
@@ -272,8 +272,8 @@ export default function ProjectForm({ projectId }: Props) {
         })
       }
       router.push('/dashboard/projets')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
       setSaving(false)
     }
   }

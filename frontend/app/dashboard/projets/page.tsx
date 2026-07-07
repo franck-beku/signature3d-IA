@@ -48,8 +48,8 @@ export default function ProjetsPage() {
       await projectsApi.delete(id)
       setProjects((prev) => prev.filter((p) => p.id !== id))
       setDeleteConfirm(null)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 

@@ -97,8 +97,8 @@ export default function ParametresPage() {
       await authApi.changePassword(passwords.current, passwords.new)
       setPwdSuccess(true)
       setPasswords({ current: '', new: '', confirm: '' })
-    } catch (err: any) {
-      setPwdError(err.message ?? 'Erreur lors du changement de mot de passe.')
+    } catch (err: unknown) {
+      setPwdError(err instanceof Error ? err.message : 'Erreur lors du changement de mot de passe.')
     } finally {
       setSavingPwd(false)
     }

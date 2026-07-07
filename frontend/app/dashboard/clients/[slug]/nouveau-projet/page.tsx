@@ -156,11 +156,11 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
         suggestions: [],
       })
 
-      setCreatedSlug((result as any).slug)
+      setCreatedSlug(result.slug)
       setCreated(true)
       setCurrentStep(5)
-    } catch (err: any) {
-      setError(err.message ?? 'Une erreur est survenue.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setIsCreating(false)
     }

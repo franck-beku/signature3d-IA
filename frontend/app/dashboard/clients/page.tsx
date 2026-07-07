@@ -75,8 +75,8 @@ export default function ClientsPage() {
       await clientsApi.delete(id)
       setClients((prev) => prev.filter((c) => c.id !== id))
       setDeleteConfirm(null)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 
@@ -110,8 +110,8 @@ export default function ClientsPage() {
       })
       setClients((prev) => prev.map((c) => c.id === editClient.id ? updated as ClientDto : c))
       setEditClient(null)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
     }

@@ -98,8 +98,8 @@ export default function FaqPage() {
       else await faqApi.create(payload)
       setForm(null)
       load()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
     }
@@ -110,8 +110,8 @@ export default function FaqPage() {
       await faqApi.delete(id)
       setFaqs((prev) => prev.filter((f) => f.id !== id))
       setDeleteConfirm(null)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 

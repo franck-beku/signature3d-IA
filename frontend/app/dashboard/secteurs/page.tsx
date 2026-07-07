@@ -100,8 +100,8 @@ export default function SecteursPage() {
       }
       setForm(null)
       load()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
     }
@@ -112,8 +112,8 @@ export default function SecteursPage() {
       await sectorsApi.delete(id)
       setSectors((prev) => prev.filter((s) => s.id !== id))
       setDeleteConfirm(null)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 

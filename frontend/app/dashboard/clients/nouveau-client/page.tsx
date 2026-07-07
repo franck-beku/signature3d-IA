@@ -86,8 +86,8 @@ export default function NouveauClientPage() {
 
       setSaved(true)
       setTimeout(() => router.push('/dashboard/clients'), 2000)
-    } catch (err: any) {
-      setError(err.message ?? 'Une erreur est survenue.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
     }
