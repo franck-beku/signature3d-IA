@@ -7,13 +7,14 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star, FileText, Upload } from 'lucide-react'
+import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star } from 'lucide-react'
 import Link from 'next/link'
 import {
   projectsApi, clientsApi, sectorsApi, offeringsApi,
   documentsApi,
   type ProjectDto, type ClientDto, type SectorDto, type OfferingDto, type DocumentDto,
 } from '@/lib/api'
+import ProjectDocumentsSection from './ProjectDocumentsSection'
 
 const inputStyle = {
   width: '100%', backgroundColor: 'var(--dash-input)',
@@ -563,69 +564,16 @@ export default function ProjectForm({ projectId }: Props) {
 
         {/* SECTION — Documents (édition uniquement) */}
         {isEdit && (
-          <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
-            <p style={sectionTitle}>Documents</p>
-
-            <div style={{ marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--dash-gold)', background: 'none', border: '1px solid var(--dash-gold-ring)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
-                  <Upload size={12} />
-                  {uploadingDoc ? 'Upload...' : 'Ajouter un PDF'}
-                  <input
-                    type="file" accept=".pdf" style={{ display: 'none' }}
-                    disabled={uploadingDoc}
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadDocument(f); e.target.value = '' }}
-                  />
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--dash-text-subtle)', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={uploadIsInternal} onChange={(e) => setUploadIsInternal(e.target.checked)} style={{ accentColor: 'var(--dash-gold)' }} />
-                  Document interne (non transmis à Luxedia)
-                </label>
-              </div>
-              <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '8px', marginBottom: 0 }}>PDF uniquement — max 20 MB</p>
-            </div>
-
-            {docsLoading ? (
-              <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', margin: 0 }}>Chargement...</p>
-            ) : documents.length === 0 ? (
-              <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', margin: 0 }}>Aucun document. Uploadez des PDFs pour alimenter Luxedia IA.</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {documents.map((doc) => (
-                  <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: 'var(--dash-input)', borderRadius: '8px', border: '1px solid var(--dash-border)' }}>
-                    <FileText size={13} style={{ color: 'var(--dash-gold)', flexShrink: 0 }} />
-                    <span style={{ flex: 1, fontSize: '12px', color: 'var(--dash-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</span>
-                    <span style={{ fontSize: '11px', color: 'var(--dash-text-muted)', flexShrink: 0 }}>{(doc.sizeBytes / 1024).toFixed(0)} KB</span>
-                    <span
-                      title={!doc.isInternal ? doc.indexingError : undefined}
-                      style={{
-                        fontSize: '10px', padding: '2px 8px', borderRadius: '999px', flexShrink: 0,
-                        backgroundColor: doc.isInternal ? 'var(--dash-border)' : doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)',
-                        color: doc.isInternal ? 'var(--dash-text-muted)' : doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)',
-                        cursor: !doc.isInternal && doc.indexingError ? 'help' : 'default',
-                      }}>
-                      {doc.isInternal ? 'Interne' : doc.isIndexed ? 'Indexé' : 'En attente'}
-                    </span>
-                    <button
-                      onClick={() => handleToggleCategory(doc)}
-                      title={doc.isInternal ? 'Rendre disponible pour Luxedia' : 'Marquer interne'}
-                      style={{ fontSize: '10px', padding: '3px 8px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-surface)', color: 'var(--dash-text-subtle)', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
-                      className="add-btn"
-                    >
-                      {doc.isInternal ? '→ IA' : '→ Interne'}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDocument(doc.id)}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer', flexShrink: 0 }}
-                      className="del-btn" title="Supprimer"
-                    >
-                      <Trash2 size={11} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ProjectDocumentsSection
+            documents={documents}
+            docsLoading={docsLoading}
+            uploadingDoc={uploadingDoc}
+            uploadIsInternal={uploadIsInternal}
+            onUploadIsInternalChange={setUploadIsInternal}
+            onUpload={handleUploadDocument}
+            onToggleCategory={handleToggleCategory}
+            onDelete={handleDeleteDocument}
+          />
         )}
 
         {/* SECTION — Publication */}
