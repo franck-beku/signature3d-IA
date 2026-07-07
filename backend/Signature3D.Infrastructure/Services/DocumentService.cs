@@ -2,6 +2,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Signature3D.Application.Common;
 using Signature3D.Application.DTOs.Documents;
@@ -21,16 +22,18 @@ public class DocumentService : IDocumentService
     private readonly IStorageService _storage;
     private readonly IAIProvider _aiProvider;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IMemoryCache _cache;
 
     private const int MaxChunkSize = 800;   // ~600 tokens
     private const int ChunkOverlap = 100;   // chevauchement pour contexte
 
-    public DocumentService(AppDbContext db, IStorageService storage, IAIProvider aiProvider, IServiceScopeFactory scopeFactory)
+    public DocumentService(AppDbContext db, IStorageService storage, IAIProvider aiProvider, IServiceScopeFactory scopeFactory, IMemoryCache cache)
     {
         _db = db;
         _storage = storage;
         _aiProvider = aiProvider;
         _scopeFactory = scopeFactory;
+        _cache = cache;
     }
 
     /// <summary>Retourne tous les documents d'un projet.</summary>
@@ -123,6 +126,7 @@ public class DocumentService : IDocumentService
         await _storage.DeleteAsync(storageRef);
         _db.Documents.Remove(document);
         await _db.SaveChangesAsync();
+        _cache.Remove(RagCacheKeys.ForProject(document.ProjectId));
 
         return Result.Ok();
     }
@@ -191,6 +195,7 @@ public class DocumentService : IDocumentService
             document.IsIndexed = false;
             document.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
+            _cache.Remove(RagCacheKeys.ForProject(document.ProjectId));
         }
         else
         {
@@ -266,6 +271,7 @@ public class DocumentService : IDocumentService
                 document.IsIndexed = false;
                 document.IndexingError = "Aucun texte n'a pu être extrait de ce document (probablement un PDF scanné/image sans OCR).";
                 await db.SaveChangesAsync();
+                _cache.Remove(RagCacheKeys.ForProject(document.ProjectId));
                 return Result.Ok();
             }
 
@@ -289,6 +295,7 @@ public class DocumentService : IDocumentService
             document.IndexingError = null;
             document.UpdatedAt  = DateTime.UtcNow;
             await db.SaveChangesAsync();
+            _cache.Remove(RagCacheKeys.ForProject(document.ProjectId));
 
             Console.WriteLine($"[DocumentService] ✅ {document.Name} indexé avec {chunks.Count} chunks");
             return Result.Ok();

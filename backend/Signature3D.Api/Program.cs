@@ -47,6 +47,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
+// Cache mémoire in-process — utilisé pour le cache court des chunks RAG (ChatService/DocumentService)
+builder.Services.AddMemoryCache();
+
 /* ══════════════════════════════════════════
    3. AUTHENTIFICATION JWT
    ══════════════════════════════════════════ */

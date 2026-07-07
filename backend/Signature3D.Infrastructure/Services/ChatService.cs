@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Signature3D.Application.Common;
 using Signature3D.Application.DTOs.Chat;
 using Signature3D.Application.Interfaces;
@@ -15,11 +16,15 @@ public class ChatService : IChatService
 {
     private readonly AppDbContext _db;
     private readonly IAIProvider _aiProvider;
+    private readonly IMemoryCache _cache;
 
-    public ChatService(AppDbContext db, IAIProvider aiProvider)
+    private static readonly TimeSpan ChunkCacheDuration = TimeSpan.FromMinutes(3);
+
+    public ChatService(AppDbContext db, IAIProvider aiProvider, IMemoryCache cache)
     {
         _db = db;
         _aiProvider = aiProvider;
+        _cache = cache;
     }
 
     /// <summary>Traite un message visiteur et retourne la réponse de Luxedia.</summary>
@@ -96,13 +101,17 @@ public class ChatService : IChatService
     /// </summary>
     private async Task<string?> SearchRelevantContextAsync(Guid projectId, string query)
     {
-        var chunks = await _db.DocumentChunks
-            .Include(c => c.Document)
-            .Where(c => c.Document.ProjectId == projectId && c.Document.IsIndexed && !c.Document.IsInternal)
-            .OrderBy(c => c.ChunkIndex)
-            .ToListAsync();
+        var chunks = await _cache.GetOrCreateAsync(RagCacheKeys.ForProject(projectId), async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = ChunkCacheDuration;
+            return await _db.DocumentChunks
+                .Include(c => c.Document)
+                .Where(c => c.Document.ProjectId == projectId && c.Document.IsIndexed && !c.Document.IsInternal)
+                .OrderBy(c => c.ChunkIndex)
+                .ToListAsync();
+        });
 
-        if (!chunks.Any()) return null;
+        if (chunks is null || !chunks.Any()) return null;
 
         return ScoreAndSelectChunks(chunks, query);
     }
