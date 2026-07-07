@@ -12,42 +12,13 @@ import { useParams } from 'next/navigation'
 import Sidebar from '@/components/dashboard/Sidebar'
 import ContractModal from '@/components/dashboard/ContractModal'
 import ProjectLinkModal from '@/components/dashboard/ProjectLinkModal'
+import ClientTimelineSection from '@/components/dashboard/ClientTimelineSection'
+import ClientInfoCard from '@/components/dashboard/ClientInfoCard'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Phone, Calendar, ExternalLink, QrCode, Upload, Plus, Trash2, AlertTriangle, Pencil, X, Check, FileText, ExternalLink as OpenIcon, UserRound, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, ExternalLink, QrCode, Plus, Trash2, AlertTriangle, Pencil, X, Check, FileText, UserRound, BarChart3 } from 'lucide-react'
 import { clientsApi, projectsApi, contactsApi, timelineApi, type ClientDto, type ProjectDto, type ContactDto, type CreateContactDto, type TimelineItemDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
 
-const AGENDA_TYPE_LABELS: Record<string, string> = {
-  RendezVousCommercial: 'Rendez-vous commercial',
-  CaptationMatterport:  'Captation 3D Matterport',
-  Captation360:         'Captation 360°',
-  Livraison:            'Livraison du projet',
-  Urgent:               'Urgent',
-  ReunionInterne:       'Réunion interne',
-  AppelClient:          'Appel client',
-  SuiviClient:          'Suivi client',
-  Presentation:         'Présentation du projet',
-  Validation:           'Validation client',
-  Autre:                'Autre',
-}
-
-// Couleurs fonctionnelles de catégorie timeline — inchangées
-function getCategoryColor(type: string) {
-  if (type === 'EvenementAgenda') return '#22c55e'
-  if (['LuxediaConfigure','BaseConnaissancesAlimentee','PremierePublicationBaseIA',
-       'PremiereConversationLuxedia','IAPrete'].includes(type)) return '#a855f7'
-  return '#3b82f6'
-}
-
-function formatTimelineDate(item: TimelineItemDto) {
-  const d = new Date(item.date)
-  if (item.type === 'EvenementAgenda') {
-    return format(d, "d MMM yyyy', 'HH'h'mm", { locale: fr })
-  }
-  return format(d, 'd MMM yyyy', { locale: fr })
-}
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'https://signature3dia.com'
 
 const TYPES_ACTION = [
@@ -60,12 +31,6 @@ const statusStyle = (s: string) => {
   if (s === 'Active' || s === 'actif')  return { bg: 'var(--dash-success-bg)',  color: 'var(--dash-success)' }
   if (s === 'Draft')                    return { bg: 'var(--dash-gold-muted)',   color: 'var(--dash-gold)' }
   return                                       { bg: 'var(--dash-border)',       color: 'var(--dash-text-subtle)' }
-}
-
-const clientStatusStyle = (s: string) => {
-  if (s === 'Actif')   return { bg: 'var(--dash-success-bg)',  color: 'var(--dash-success)' }
-  if (s === 'EnCours') return { bg: 'var(--dash-gold-muted)',  color: 'var(--dash-gold)' }
-  return                      { bg: 'var(--dash-border)',      color: 'var(--dash-text-subtle)' }
 }
 
 function isDeliveryUrgent(date: string) {
@@ -166,8 +131,7 @@ export default function ClientDetailPage() {
   }
 
   const priority = getPriority(client.priority)
-  const contractSt = clientStatusStyle(client.status)
-  const urgent     = isDeliveryUrgent(client.deliveryDate)
+  const urgent   = isDeliveryUrgent(client.deliveryDate)
 
   const handleDeleteProject = async (projectId: string) => {
     try {
@@ -291,96 +255,15 @@ export default function ClientDetailPage() {
           )}
 
           {/* Infos client */}
-          <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
-            <h2 className="dash-label" style={{ marginBottom: '20px' }}>Informations du client</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '20px' }} className="info-grid">
-              {[
-                { icon: Mail,     label: 'Email',        value: client.email },
-                { icon: Phone,    label: 'Téléphone',    value: client.phone ?? '—' },
-                { icon: Calendar, label: 'Date contrat', value: new Date(client.contractDate).toLocaleDateString('fr-CA') },
-              ].map((info) => (
-                <div key={info.label} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <info.icon size={14} style={{ color: 'var(--dash-gold)', flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <p className="dash-micro-label" style={{ marginBottom: '4px' }}>{info.label}</p>
-                    <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>{info.value}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }} className="info-grid">
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                <Calendar size={14} style={{ color: urgent ? 'var(--dash-error)' : 'var(--dash-gold)', flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <p className="dash-micro-label" style={{ marginBottom: '4px' }}>Date livraison</p>
-                  <p style={{ color: urgent ? 'var(--dash-error)' : 'var(--dash-text)', fontSize: '13px', margin: 0 }}>
-                    {new Date(client.deliveryDate).toLocaleDateString('fr-CA')}{urgent && ' ⚠️'}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Statut</p>
-                <span style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '999px', backgroundColor: contractSt.bg, color: contractSt.color }}>{client.status}</span>
-              </div>
-              <div>
-                <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Entente / Contrat</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button
-                    onClick={() => setShowContractModal(true)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', borderRadius: '6px', border: `1px solid ${client.contractFileUrl ? 'var(--dash-success-ring)' : 'var(--dash-border-input)'}`, color: client.contractFileUrl ? 'var(--dash-success)' : 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }}
-                    className="upload-btn"
-                  >
-                    {client.contractFileUrl ? <Check size={11} /> : <Upload size={11} />}
-                    {client.contractFileUrl ? 'Contrat uploadé' : 'Uploader PDF'}
-                  </button>
-                  {client.contractFileUrl && (
-                    <a href={client.contractFileUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', textDecoration: 'none' }} className="action-btn" title="Ouvrir le contrat">
-                      <OpenIcon size={11} />
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-            {client.notes && (
-              <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--dash-border)' }}>
-                <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Notes internes</p>
-                <div style={{ borderLeft: `3px solid ${priority.borderColor}`, backgroundColor: priority.bgColor, borderRadius: '0 8px 8px 0', padding: '12px 14px' }}>
-                  <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>{client.notes}</p>
-                </div>
-              </div>
-            )}
-          </div>
+          <ClientInfoCard
+            client={client}
+            priority={priority}
+            urgent={urgent}
+            onOpenContractModal={() => setShowContractModal(true)}
+          />
 
           {/* Parcours du client */}
-          <div>
-            <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Parcours du client</h2>
-            {timeline.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed var(--dash-border-input)', borderRadius: '14px' }}>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', margin: 0 }}>Aucun événement dans l&apos;historique</p>
-              </div>
-            ) : (
-              <div style={{ position: 'relative', paddingLeft: '28px' }}>
-                <div style={{ position: 'absolute', left: '7px', top: '6px', bottom: '6px', width: '1px', backgroundColor: 'var(--dash-border)' }} />
-                {timeline.map((item, i) => {
-                  const color = getCategoryColor(item.type)
-                  const shadowRgb = color === '#22c55e' ? '34,197,94' : color === '#a855f7' ? '168,85,247' : '59,130,246'
-                  const desc = item.type === 'EvenementAgenda' && item.description
-                    ? (AGENDA_TYPE_LABELS[item.description] ?? item.description)
-                    : item.description
-                  return (
-                    <div key={i} style={{ position: 'relative', marginBottom: i < timeline.length - 1 ? '20px' : 0 }}>
-                      <div style={{ position: 'absolute', left: '-24px', top: '4px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: color, boxShadow: `0 0 0 3px rgba(${shadowRgb},0.15)` }} />
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
-                        <span style={{ color: 'var(--dash-text-muted)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatTimelineDate(item)}</span>
-                        <span style={{ color: 'var(--dash-text)', fontSize: '13px', fontWeight: 500 }}>{item.title}</span>
-                      </div>
-                      {desc && <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '3px 0 0' }}>{desc}</p>}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
+          <ClientTimelineSection timeline={timeline} />
 
           {/* Contacts */}
           <div>
