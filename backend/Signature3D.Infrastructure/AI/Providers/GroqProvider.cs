@@ -94,18 +94,4 @@ public class GroqProvider : IAIProvider
             return Result<string>.Fail($"Erreur Groq : {ex.Message}");
         }
     }
-
-    /// <summary>
-    /// Génère un vecteur d'embedding pour la recherche sémantique RAG.
-    /// Note : Groq ne supporte pas encore les embeddings nativement.
-    /// Cette méthode retourne un vecteur vide — utiliser OpenAI pour les embeddings.
-    /// </summary>
-    public Task<Result<float[]>> GenerateEmbeddingAsync(string text)
-    {
-        // Groq ne supporte pas les embeddings — retourner vecteur vide
-        // En production, utiliser OpenAIProvider pour les embeddings
-        return Task.FromResult(Result<float[]>.Fail(
-            "Groq ne supporte pas les embeddings. Utilisez OpenAI pour la vectorisation."
-        ));
-    }
 }

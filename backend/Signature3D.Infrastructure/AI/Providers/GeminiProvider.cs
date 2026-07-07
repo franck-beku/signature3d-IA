@@ -11,7 +11,7 @@ namespace Signature3D.Infrastructure.AI.Providers;
 /// Provider IA Google Gemini — gemini-1.5-flash.
 /// Implémente IAIProvider pour être interchangeable avec Groq, OpenAI, Claude.
 /// </summary>
-public class GeminiProvider : IAIProvider
+public class GeminiProvider : IAIProvider, IEmbeddingProvider
 {
     private readonly GeminiSettings _settings;
     private readonly HttpClient _http;

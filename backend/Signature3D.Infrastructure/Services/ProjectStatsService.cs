@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Signature3D.Application.Common;
@@ -55,22 +53,9 @@ public class ProjectStatsService : IProjectStatsService
     private static readonly (string Category, Regex[] Patterns)[] QuestionCategories =
         RawQuestionCategories
             .Select(c => (c.Category, c.Keywords
-                .Select(k => new Regex(@"\b" + Regex.Escape(NormalizeText(k)) + @"\b", RegexOptions.Compiled))
+                .Select(k => new Regex(@"\b" + Regex.Escape(TextNormalizer.Normalize(k)) + @"\b", RegexOptions.Compiled))
                 .ToArray()))
             .ToArray();
-
-    /// <summary>Minuscules + suppression des accents (é→e, à→a...) — no-op sur du texte déjà ASCII.</summary>
-    private static string NormalizeText(string text)
-    {
-        var decomposed = text.ToLowerInvariant().Normalize(NormalizationForm.FormD);
-        var sb = new StringBuilder(decomposed.Length);
-        foreach (var c in decomposed)
-        {
-            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-                sb.Append(c);
-        }
-        return sb.ToString();
-    }
 
     /// <summary>
     /// Première catégorie dont un mot-clé (mot entier) ou une expression (séquence exacte de mots)
@@ -231,7 +216,7 @@ public class ProjectStatsService : IProjectStatsService
 
         foreach (var content in questions)
         {
-            var category = CategorizeQuestion(NormalizeText(content));
+            var category = CategorizeQuestion(TextNormalizer.Normalize(content));
             counts[category]++;
 
             // "questions" est déjà trié du plus récent au plus ancien — on garde donc naturellement

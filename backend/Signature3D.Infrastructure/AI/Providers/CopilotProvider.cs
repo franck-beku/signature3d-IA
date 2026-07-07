@@ -12,7 +12,7 @@ namespace Signature3D.Infrastructure.AI.Providers;
 /// Utilise l'API Azure OpenAI — compatible avec les entreprises qui ont Azure.
 /// Implémente IAIProvider pour être interchangeable.
 /// </summary>
-public class CopilotProvider : IAIProvider
+public class CopilotProvider : IAIProvider, IEmbeddingProvider
 {
     private readonly CopilotSettings _settings;
     private readonly HttpClient _http;

@@ -124,9 +124,9 @@ public class ChatService : IChatService
     /// </summary>
     internal static string? ScoreAndSelectChunks(List<DocumentChunk> chunks, string query)
     {
-        // Extraire les mots significatifs du query (>3 caractères)
-        var queryWords = query
-            .ToLowerInvariant()
+        // Extraire les mots significatifs du query (>3 caractères) — normalisés (minuscules
+        // + accents supprimés) pour matcher indépendamment de la casse et des accents.
+        var queryWords = TextNormalizer.Normalize(query)
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .Where(w => w.Length > 3)
             .ToArray();
@@ -137,11 +137,12 @@ public class ChatService : IChatService
             return string.Join("\n\n---\n\n", chunks.Take(3).Select(c => c.Content));
         }
 
-        // Scorer chaque chunk selon les mots du query
+        // Scorer chaque chunk selon les mots du query — le contenu original (non normalisé)
+        // reste utilisé pour le contexte final envoyé au LLM, seule la comparaison est normalisée.
         var scored = chunks.Select(chunk =>
         {
-            var contentLower = chunk.Content.ToLowerInvariant();
-            var score = queryWords.Count(word => contentLower.Contains(word));
+            var normalizedContent = TextNormalizer.Normalize(chunk.Content);
+            var score = queryWords.Count(word => normalizedContent.Contains(word));
             return new { Chunk = chunk, Score = score };
         })
         .OrderByDescending(x => x.Score)

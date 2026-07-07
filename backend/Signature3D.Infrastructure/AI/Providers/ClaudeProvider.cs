@@ -75,10 +75,4 @@ public class ClaudeProvider : IAIProvider
             return Result<string>.Fail($"Erreur Claude : {ex.Message}");
         }
     }
-
-    /// <summary>Claude ne supporte pas les embeddings — utiliser OpenAI.</summary>
-    public Task<Result<float[]>> GenerateEmbeddingAsync(string text) =>
-        Task.FromResult(Result<float[]>.Fail(
-            "Claude ne supporte pas les embeddings. Utilisez OpenAI."
-        ));
 }

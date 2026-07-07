@@ -18,7 +18,4 @@ public interface IAIProvider
         List<(string Role, string Content)> messages,
         string? context = null
     );
-
-    /// <summary>Génère un vecteur d'embedding pour la recherche sémantique RAG.</summary>
-    Task<Result<float[]>> GenerateEmbeddingAsync(string text);
 }

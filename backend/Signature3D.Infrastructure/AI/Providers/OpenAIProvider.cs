@@ -12,7 +12,7 @@ namespace Signature3D.Infrastructure.AI.Providers;
 /// Supporte les embeddings contrairement à Groq.
 /// Utilisé pour la vectorisation RAG des documents.
 /// </summary>
-public class OpenAIProvider : IAIProvider
+public class OpenAIProvider : IAIProvider, IEmbeddingProvider
 {
     private readonly OpenAISettings _settings;
     private readonly HttpClient _http;

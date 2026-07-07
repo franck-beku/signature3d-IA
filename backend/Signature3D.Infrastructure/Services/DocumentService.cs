@@ -21,18 +21,16 @@ public class DocumentService : IDocumentService
 {
     private readonly AppDbContext _db;
     private readonly IStorageService _storage;
-    private readonly IAIProvider _aiProvider;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMemoryCache _cache;
 
     private const int MaxChunkSize = 800;   // ~600 tokens
     private const int ChunkOverlap = 100;   // chevauchement pour contexte
 
-    public DocumentService(AppDbContext db, IStorageService storage, IAIProvider aiProvider, IServiceScopeFactory scopeFactory, IMemoryCache cache)
+    public DocumentService(AppDbContext db, IStorageService storage, IServiceScopeFactory scopeFactory, IMemoryCache cache)
     {
         _db = db;
         _storage = storage;
-        _aiProvider = aiProvider;
         _scopeFactory = scopeFactory;
         _cache = cache;
     }

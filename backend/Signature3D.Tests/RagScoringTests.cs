@@ -69,4 +69,21 @@ public class RagScoringTests
         Assert.Contains("Troisième chunk", result);
         Assert.DoesNotContain("Quatrième chunk", result);
     }
+
+    [Fact]
+    public void MotAvecAccentDansLeChunk_MatcheRequeteSansAccent()
+    {
+        var chunks = new List<DocumentChunk>
+        {
+            Chunk(0, "Pour une réservation, contactez-nous une semaine à l'avance."),
+            Chunk(1, "Autre chunk sans rapport avec le sujet."),
+        };
+
+        // Le visiteur tape sans accent — doit quand même matcher "réservation"
+        var result = ChatService.ScoreAndSelectChunks(chunks, "Comment faire une reservation ?");
+
+        Assert.NotNull(result);
+        Assert.Contains("réservation", result);
+        Assert.DoesNotContain("Autre chunk", result);
+    }
 }
