@@ -47,6 +47,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
   const [statsLoading, setStatsLoading] = useState(true)
   const [statsError, setStatsError]     = useState(false)
   const [generatingPdf, setGeneratingPdf] = useState(false)
+  const [error, setError]               = useState<string | null>(null)
 
   useEffect(() => {
     projectsApi.getBySlug(projetSlug)
@@ -58,8 +59,10 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
   useEffect(() => {
     if (!project) return
 
-    documentsApi.getByProject(project.id).then((docs) => setDocuments(docs as DocumentDto[])).catch(() => {})
-    leadsApi.getByProject(project.id).then((ls) => setLeads(ls as LeadDto[])).catch(() => {})
+    documentsApi.getByProject(project.id).then((docs) => setDocuments(docs as DocumentDto[]))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur lors du chargement des documents.'))
+    leadsApi.getByProject(project.id).then((ls) => setLeads(ls as LeadDto[]))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur lors du chargement des leads.'))
 
     setStatsLoading(true)
     setStatsError(false)
@@ -175,6 +178,12 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
         </div>
 
         <div style={{ padding: '28px 40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+          {error && (
+            <div style={{ padding: '12px 16px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '10px', color: 'var(--dash-error)', fontSize: '13px' }}>
+              {error}
+            </div>
+          )}
 
           {/* Preview + Lien + Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px' }} className="preview-grid">

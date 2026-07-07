@@ -31,6 +31,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics]       = useState<AnalyticsData | null>(null)
   const [loading, setLoading]           = useState(true)
   const [loadingAnalytics, setLoadingAnalytics] = useState(false)
+  const [error, setError]               = useState<string | null>(null)
 
   /* Charger les clients */
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function AnalyticsPage() {
         setClients(items)
         if (items.length > 0) setSelectedClient(items[0].id)
       })
-      .catch(console.error)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur lors du chargement des clients.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -53,7 +54,7 @@ export default function AnalyticsPage() {
         setProjects(items)
         if (items.length > 0) setSelectedProject(items[0].id)
       })
-      .catch(console.error)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur lors du chargement des projets.'))
   }, [selectedClient])
 
   /* Charger les analytics du projet sélectionné */
@@ -101,6 +102,12 @@ export default function AnalyticsPage() {
         </div>
 
         <div style={{ padding: '28px 40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+          {error && (
+            <div style={{ padding: '12px 16px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '10px', color: 'var(--dash-error)', fontSize: '13px' }}>
+              {error}
+            </div>
+          )}
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '80px', color: 'var(--dash-text-muted)', fontSize: '13px' }}>Chargement...</div>

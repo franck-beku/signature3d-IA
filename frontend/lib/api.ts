@@ -449,6 +449,13 @@ export interface VisitStatsDto {
   to?: string | null
 }
 
+export interface GlobalVisitStatsDto {
+  total: number
+  last30Days: number
+  from?: string | null
+  to?: string | null
+}
+
 export interface ButtonClickStatsDto {
   buttonLabel: string
   clickCount: number
@@ -518,6 +525,10 @@ export const statsApi = {
   /** Questions posées à Luxedia, regroupées par catégorie */
   getQuestions: (projectId: string, from?: string, to?: string) =>
     apiFetch<ProjectQuestionStatsDto>(`/api/stats/project/${projectId}/questions${statsQuery(from, to)}`),
+
+  /** Statistiques de visites tous projets confondus */
+  getGlobalVisits: (from?: string, to?: string) =>
+    apiFetch<GlobalVisitStatsDto>(`/api/stats/visits/total${statsQuery(from, to)}`),
 }
 
 /* ══════════════════════════════════════

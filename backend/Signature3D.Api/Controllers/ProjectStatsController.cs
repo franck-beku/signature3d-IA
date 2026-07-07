@@ -39,6 +39,21 @@ public class ProjectStatsController : ControllerBase
     }
 
     /// <summary>
+    /// Retourne les statistiques de visites tous projets confondus — utilisé par la vue globale du dashboard.
+    /// GET /api/stats/visits/total?from=&amp;to=
+    /// </summary>
+    [HttpGet("visits/total")]
+    public async Task<IActionResult> GetGlobalVisitStats([FromQuery] DateTime? from, [FromQuery] DateTime? to)
+    {
+        var result = await _statsService.GetGlobalVisitStatsAsync(from, to);
+
+        if (!result.Success)
+            return NotFound(new { message = result.Error });
+
+        return Ok(result.Data);
+    }
+
+    /// <summary>
     /// Retourne le nombre de clics par bouton d'action d'un projet, trié du plus cliqué au moins cliqué.
     /// GET /api/stats/project/{projectId}/button-clicks?from=&amp;to=
     /// Regroupement par libellé de bouton (pas de lien ProjectButtonId aujourd'hui — voir ButtonClickStatsDto).

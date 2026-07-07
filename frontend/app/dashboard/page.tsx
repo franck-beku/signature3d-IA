@@ -10,13 +10,15 @@ import { useEffect, useState } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import { Bell, Plus, Users, FolderOpen, TrendingUp, Clock } from 'lucide-react'
 import Link from 'next/link'
-import { clientsApi, type ClientDto } from '@/lib/api'
+import { clientsApi, leadsApi, statsApi, type ClientDto } from '@/lib/api'
 
 export default function DashboardPage() {
   const [userName, setUserName]   = useState('...')
   const [clients, setClients]     = useState<ClientDto[]>([])
   const [loading, setLoading]     = useState(true)
   const [totalProjets, setTotalProjets] = useState(0)
+  const [totalLeads, setTotalLeads]     = useState<number | null>(null)
+  const [visitStats, setVisitStats]     = useState<{ total: number; last30Days: number } | null>(null)
 
   useEffect(() => {
     /* Nom depuis localStorage */
@@ -35,6 +37,16 @@ export default function DashboardPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false))
+
+    /* Charger le nombre total de leads */
+    leadsApi.getAll(1, 1)
+      .then((result) => setTotalLeads(result.totalCount))
+      .catch(console.error)
+
+    /* Charger le total de visites tous projets confondus */
+    statsApi.getGlobalVisits()
+      .then((result) => setVisitStats({ total: result.total, last30Days: result.last30Days }))
+      .catch(console.error)
   }, [])
 
   const actifs = clients.filter((c) => c.status === 'Actif').length
@@ -42,8 +54,8 @@ export default function DashboardPage() {
   const kpis = [
     { icon: Users,      value: loading ? '...' : String(clients.length), label: 'Clients',     sub: `${actifs} actifs`        },
     { icon: FolderOpen, value: loading ? '...' : String(totalProjets),   label: 'Expériences', sub: 'Matterport live'         },
-    { icon: TrendingUp, value: '—', label: 'Leads reçus',  sub: 'Connecté au backend'    },
-    { icon: Clock,      value: '—', label: 'Visiteurs',    sub: 'Connecté au backend'    },
+    { icon: TrendingUp, value: totalLeads === null ? '...' : String(totalLeads), label: 'Leads reçus', sub: 'Tous clients confondus' },
+    { icon: Clock,      value: visitStats === null ? '...' : String(visitStats.total), label: 'Visiteurs', sub: visitStats === null ? '...' : `${visitStats.last30Days} sur 30 jours` },
   ]
 
   return (

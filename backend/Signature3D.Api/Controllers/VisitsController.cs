@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Signature3D.Application.DTOs.Visits;
 using Signature3D.Application.Interfaces;
 
@@ -9,9 +10,11 @@ namespace Signature3D.Api.Controllers;
 /// Enregistre chaque visite sur une expérience embed.
 /// Route : /api/visits
 /// Public — les visiteurs n'ont pas besoin de s'authentifier.
+/// Limité à 20 requêtes/minute par IP (policy "visits").
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("visits")]
 public class VisitsController : ControllerBase
 {
     private readonly IVisitService _visitService;

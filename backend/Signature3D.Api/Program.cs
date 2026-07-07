@@ -149,6 +149,19 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0,
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst
             }));
+
+    // Généreuse — /api/visits est du tracking légitime (chaque ouverture d'expérience),
+    // mais ne doit pas rester totalement illimité.
+    options.AddPolicy("visits", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            }));
 });
 
 /* ══════════════════════════════════════════

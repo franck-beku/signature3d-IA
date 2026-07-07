@@ -104,6 +104,33 @@ public class ProjectStatsService : IProjectStatsService
     }
 
     /// <summary>
+    /// Statistiques de visites tous projets confondus — même pattern que GetVisitStatsAsync,
+    /// sans le filtre par projet. Utilisé par la vue globale du dashboard.
+    /// </summary>
+    public async Task<Result<GlobalVisitStatsDto>> GetGlobalVisitStatsAsync(DateTime? from = null, DateTime? to = null)
+    {
+        var query = _db.Visits.AsQueryable();
+
+        if (from is not null) query = query.Where(v => v.CreatedAt >= from);
+        if (to is not null) query = query.Where(v => v.CreatedAt <= to);
+
+        var total = await query.CountAsync();
+
+        var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
+        var last30Days = await _db.Visits
+            .Where(v => v.CreatedAt >= thirtyDaysAgo)
+            .CountAsync();
+
+        return Result<GlobalVisitStatsDto>.Ok(new GlobalVisitStatsDto
+        {
+            Total = total,
+            Last30Days = last30Days,
+            From = from,
+            To = to
+        });
+    }
+
+    /// <summary>
     /// Nombre de clics par bouton d'action d'un projet, trié du plus cliqué au moins cliqué.
     /// Regroupe par libellé (Metadata) — voir limite documentée sur ButtonClickStatsDto.
     /// </summary>
