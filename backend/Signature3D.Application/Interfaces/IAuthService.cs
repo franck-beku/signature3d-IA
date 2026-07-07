@@ -10,4 +10,5 @@ public interface IAuthService
 {
     Task<Result<AuthResponseDto>> LoginAsync(LoginDto dto);
     Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
+    Task<Result> UpdateProfileAsync(Guid userId, string name, string email);
 }

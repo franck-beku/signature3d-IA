@@ -78,6 +78,13 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ currentPassword, newPassword }),
     }),
+
+  /** Met à jour le nom et l'email de l'utilisateur connecté */
+  updateProfile: (name: string, email: string) =>
+    apiFetch('/api/auth/me', {
+      method: 'PATCH',
+      body: JSON.stringify({ name, email }),
+    }),
 }
 
 /* ══════════════════════════════════════

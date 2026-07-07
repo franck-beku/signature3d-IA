@@ -35,6 +35,8 @@ export default function ParametresPage() {
   const [showCurrent, setShowCurrent]   = useState(false)
   const [showNew, setShowNew]           = useState(false)
   const [savedProfile, setSavedProfile] = useState(false)
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [profileError, setProfileError] = useState<string | null>(null)
   const [savingPwd, setSavingPwd]       = useState(false)
   const [pwdSuccess, setPwdSuccess]     = useState(false)
   const [pwdError, setPwdError]         = useState<string | null>(null)
@@ -65,12 +67,21 @@ export default function ParametresPage() {
     }
   }, [])
 
-  /* Sauvegarder le profil localement */
-  const handleSaveProfile = () => {
-    const user = JSON.parse(localStorage.getItem('user') ?? '{}')
-    localStorage.setItem('user', JSON.stringify({ ...user, name: profile.name, email: profile.email }))
-    setSavedProfile(true)
-    setTimeout(() => setSavedProfile(false), 3000)
+  /* Sauvegarder le profil via le backend */
+  const handleSaveProfile = async () => {
+    setProfileError(null)
+    setSavingProfile(true)
+    try {
+      await authApi.updateProfile(profile.name, profile.email)
+      const user = JSON.parse(localStorage.getItem('user') ?? '{}')
+      localStorage.setItem('user', JSON.stringify({ ...user, name: profile.name, email: profile.email }))
+      setSavedProfile(true)
+      setTimeout(() => setSavedProfile(false), 3000)
+    } catch (err: unknown) {
+      setProfileError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde du profil.')
+    } finally {
+      setSavingProfile(false)
+    }
   }
 
   /* Changer le mot de passe via le backend */
@@ -149,20 +160,31 @@ export default function ParametresPage() {
                 <input type="text" value="Signature 3D IA" disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
               </div>
             </div>
+
+            {profileError && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '8px', color: 'var(--dash-error)', fontSize: '13px', marginBottom: '16px' }}>
+                <AlertTriangle size={14} /> {profileError}
+              </div>
+            )}
+
             <button
               onClick={handleSaveProfile}
+              disabled={savingProfile}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
                 fontSize: '12px', fontWeight: 600, padding: '9px 20px',
-                borderRadius: '8px', border: 'none', cursor: 'pointer',
+                borderRadius: '8px', border: 'none', cursor: savingProfile ? 'not-allowed' : 'pointer',
                 backgroundColor: savedProfile ? 'var(--dash-success-bg)' : 'var(--dash-gold)',
                 color: savedProfile ? 'var(--dash-success)' : '#000',
                 outline: savedProfile ? '1px solid var(--dash-success-ring)' : 'none',
+                opacity: savingProfile ? 0.7 : 1,
                 transition: 'all 0.3s ease',
               }}
               className="save-btn"
             >
-              {savedProfile ? <><Check size={13} /> Sauvegardé</> : <><Save size={13} /> Sauvegarder le profil</>}
+              {savedProfile
+                ? <><Check size={13} /> Sauvegardé</>
+                : <><Save size={13} /> {savingProfile ? 'Sauvegarde...' : 'Sauvegarder le profil'}</>}
             </button>
           </div>
 

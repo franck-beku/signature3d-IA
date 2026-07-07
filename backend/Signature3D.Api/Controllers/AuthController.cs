@@ -80,7 +80,31 @@ public class AuthController : ControllerBase
             role  = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value,
         });
     }
+
+    /// <summary>
+    /// Met à jour le nom et l'email de l'utilisateur connecté.
+    /// PATCH /api/auth/me
+    /// Requiert : token JWT valide
+    /// </summary>
+    [HttpPatch("me")]
+    [Authorize]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var result = await _authService.UpdateProfileAsync(userId, dto.Name, dto.Email);
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(new { message = "Profil mis à jour avec succès." });
+    }
 }
 
 /// <summary>DTO pour changer le mot de passe.</summary>
 public record ChangePasswordDto(string CurrentPassword, string NewPassword);
+
+/// <summary>DTO pour mettre à jour le profil.</summary>
+public record UpdateProfileDto(string Name, string Email);

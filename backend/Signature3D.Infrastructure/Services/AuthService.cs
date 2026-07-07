@@ -76,6 +76,33 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
+    /// Met à jour le nom et l'email d'un utilisateur.
+    /// </summary>
+    public async Task<Result> UpdateProfileAsync(Guid userId, string name, string email)
+    {
+        var user = await _db.Users.FindAsync(userId);
+        if (user is null)
+            return Result.Fail("Utilisateur introuvable.");
+
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Fail("Le nom ne peut pas être vide.");
+
+        if (string.IsNullOrWhiteSpace(email))
+            return Result.Fail("L'email ne peut pas être vide.");
+
+        var emailTaken = await _db.Users.AnyAsync(u => u.Id != userId && u.Email == email);
+        if (emailTaken)
+            return Result.Fail("Cet email est déjà utilisé par un autre compte.");
+
+        user.Name      = name;
+        user.Email     = email;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        return Result.Ok();
+    }
+
+    /// <summary>
     /// Génère un token JWT signé avec les claims de l'utilisateur.
     /// </summary>
     private string GenerateToken(Guid userId, string email, string name, string role)

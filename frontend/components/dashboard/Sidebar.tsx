@@ -9,7 +9,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Users, Box, Inbox, Layers, Sparkles, HelpCircle, FileText, BarChart2, Calendar, Bell, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, Box, Inbox, Layers, Sparkles, HelpCircle, BarChart2, Calendar, Bell, Settings, LogOut } from 'lucide-react'
 
 const navItems = [
   { label: 'Vue globale',   href: '/dashboard',               icon: LayoutDashboard },
@@ -21,7 +21,6 @@ const navItems = [
   { label: 'Secteurs',      href: '/dashboard/secteurs',      icon: Layers },
   { label: 'Offres',        href: '/dashboard/offres',        icon: Sparkles },
   { label: 'FAQ',           href: '/dashboard/faq',           icon: HelpCircle },
-  { label: 'Documents',     href: '/dashboard/documents',     icon: FileText },
   // Analyse
   { label: 'Analytics',     href: '/dashboard/analytics',     icon: BarChart2 },
   // Organisation
@@ -43,6 +42,7 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem('user')
+    localStorage.removeItem('token')
     router.push('/dashboard/login')
   }
 
