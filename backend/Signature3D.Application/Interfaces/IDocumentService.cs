@@ -16,4 +16,7 @@ public interface IDocumentService
 
     /// <summary>Génère une URL signée à durée limitée pour consulter un document interne.</summary>
     Task<Result<string>> GetSignedUrlAsync(Guid documentId);
+
+    /// <summary>Traite un job d'indexation en file d'attente — appelé par DocumentIndexingBackgroundService.</summary>
+    Task ProcessIndexingJobAsync(Guid jobId);
 }

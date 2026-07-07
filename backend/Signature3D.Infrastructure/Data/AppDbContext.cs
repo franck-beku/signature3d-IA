@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
     public DbSet<QrCode> QrCodes => Set<QrCode>();
     public DbSet<Contact> Contacts => Set<Contact>();
     public DbSet<AgendaEvent> AgendaEvents => Set<AgendaEvent>();
+    public DbSet<IndexingJob> IndexingJobs => Set<IndexingJob>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -256,6 +257,21 @@ modelBuilder.Entity<Lead>(e =>
             e.HasOne(x => x.Contact).WithMany()
              .HasForeignKey(x => x.ContactId).IsRequired(false)
              .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        /* ── IndexingJob (file d'indexation RAG persistée) ── */
+        modelBuilder.Entity<IndexingJob>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Status).HasConversion<string>();
+
+            e.HasOne(x => x.Document).WithMany()
+             .HasForeignKey(x => x.DocumentId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(x => x.Project).WithMany()
+             .HasForeignKey(x => x.ProjectId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

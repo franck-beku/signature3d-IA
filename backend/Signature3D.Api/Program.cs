@@ -174,6 +174,9 @@ else
 
 builder.Services.AddScoped<IRealtimeService, NullRealtimeService>();
 
+// File d'indexation RAG persistée — remplace le Task.Run fire-and-forget (survit à un redémarrage)
+builder.Services.AddHostedService<Signature3D.Infrastructure.BackgroundServices.DocumentIndexingBackgroundService>();
+
 /* ══════════════════════════════════════════
    7. CONTROLLERS + SWAGGER
    ══════════════════════════════════════════ */

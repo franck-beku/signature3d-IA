@@ -8,6 +8,7 @@ using Signature3D.Application.Common;
 using Signature3D.Application.DTOs.Documents;
 using Signature3D.Application.Interfaces;
 using Signature3D.Domain.Entities;
+using Signature3D.Domain.Enums;
 using Signature3D.Infrastructure.Data;
 
 namespace Signature3D.Infrastructure.Services;
@@ -94,9 +95,14 @@ public class DocumentService : IDocumentService
         _db.Documents.Add(document);
         await _db.SaveChangesAsync();
 
-        // Indexation uniquement si le document est destiné à la base de connaissances IA
+        // Indexation uniquement si le document est destiné à la base de connaissances IA —
+        // enfilée en base (IndexingJob) plutôt que lancée en Task.Run : survit à un redémarrage
+        // du process, traitée par DocumentIndexingBackgroundService.
         if (!isInternal)
-            _ = Task.Run(() => IndexWithBytesInScopeAsync(document.Id, fileBytes));
+        {
+            _db.IndexingJobs.Add(new IndexingJob { ProjectId = projectId, DocumentId = document.Id });
+            await _db.SaveChangesAsync();
+        }
 
         return Result<DocumentDto>.Ok(new DocumentDto
         {
@@ -139,15 +145,32 @@ public class DocumentService : IDocumentService
         if (document is null)
             return Result.Fail("Document introuvable.");
 
+        byte[] pdfBytes;
+        try
+        {
+            pdfBytes = await FetchDocumentBytesAsync(document);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.Message);
+        }
+
+        // Indexation dans un scope dédié — même chemin que l'upload
+        return await IndexWithBytesInScopeAsync(documentId, pdfBytes);
+    }
+
+    /// <summary>Télécharge les bytes d'un document depuis Supabase Storage (URL signée si interne, publique sinon).</summary>
+    private async Task<byte[]> FetchDocumentBytesAsync(Document document)
+    {
         string downloadUrl;
         if (document.IsInternal)
         {
             if (string.IsNullOrEmpty(document.PrivateStorageReference))
-                return Result.Fail("Référence de stockage privée manquante.");
+                throw new InvalidOperationException("Référence de stockage privée manquante.");
 
             var signedUrlResult = await _storage.GetSignedUrlAsync(document.PrivateStorageReference);
             if (!signedUrlResult.Success)
-                return Result.Fail(signedUrlResult.Error!);
+                throw new InvalidOperationException(signedUrlResult.Error!);
 
             downloadUrl = signedUrlResult.Data!;
         }
@@ -157,10 +180,7 @@ public class DocumentService : IDocumentService
         }
 
         using var httpClient = new HttpClient();
-        var pdfBytes = await httpClient.GetByteArrayAsync(downloadUrl);
-
-        // Indexation dans un scope dédié — même chemin que l'upload
-        return await IndexWithBytesInScopeAsync(documentId, pdfBytes);
+        return await httpClient.GetByteArrayAsync(downloadUrl);
     }
 
     /// <summary>Bascule un document entre interne et base de connaissances IA.</summary>
@@ -211,20 +231,9 @@ public class DocumentService : IDocumentService
             document.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
 
-            var publicUrl = document.StorageUrl;
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    using var httpClient = new HttpClient();
-                    var pdfBytes = await httpClient.GetByteArrayAsync(publicUrl);
-                    await IndexWithBytesInScopeAsync(documentId, pdfBytes);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[DocumentService] ❌ Erreur téléchargement post-bascule interne→IA : {ex.Message}");
-                }
-            });
+            // Ré-indexation enfilée (voir commentaire équivalent dans UploadAsync)
+            _db.IndexingJobs.Add(new IndexingJob { ProjectId = document.ProjectId, DocumentId = documentId });
+            await _db.SaveChangesAsync();
         }
 
         return Result.Ok();
@@ -243,15 +252,56 @@ public class DocumentService : IDocumentService
         return await _storage.GetSignedUrlAsync(document.PrivateStorageReference);
     }
 
+    /// <summary>Traite un job d'indexation en file d'attente — appelé par DocumentIndexingBackgroundService.</summary>
+    public async Task ProcessIndexingJobAsync(Guid jobId)
+    {
+        var job = await _db.IndexingJobs.FindAsync(jobId);
+        if (job is null) return;
+
+        job.Status = IndexingJobStatus.Processing;
+        job.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        Result result;
+        try
+        {
+            var document = await _db.Documents.FindAsync(job.DocumentId);
+            if (document is null)
+                throw new InvalidOperationException("Document introuvable.");
+
+            var pdfBytes = await FetchDocumentBytesAsync(document);
+            result = await IndexDocumentCoreAsync(_db, job.DocumentId, pdfBytes);
+        }
+        catch (Exception ex)
+        {
+            result = Result.Fail(ex.Message);
+        }
+
+        job.Status = result.Success ? IndexingJobStatus.Completed : IndexingJobStatus.Failed;
+        job.ErrorMessage = result.Success ? null : result.Error;
+        job.ProcessedAt = DateTime.UtcNow;
+        job.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+    }
+
     /* ── Extraction + indexation — toujours dans un scope dédié ── */
 
     private async Task<Result> IndexWithBytesInScopeAsync(Guid documentId, byte[] pdfBytes)
     {
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await IndexDocumentCoreAsync(db, documentId, pdfBytes);
+    }
+
+    /// <summary>
+    /// Cœur de l'indexation — extraction texte, chunking, sauvegarde. Prend un AppDbContext fourni
+    /// par l'appelant (qui gère son propre scope), pour être réutilisable depuis un scope de requête,
+    /// un scope créé à la volée (IndexWithBytesInScopeAsync), ou le scope du BackgroundService.
+    /// </summary>
+    private async Task<Result> IndexDocumentCoreAsync(AppDbContext db, Guid documentId, byte[] pdfBytes)
+    {
         try
         {
-            using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
             var document = await db.Documents
                 .Include(d => d.Chunks)
                 .FirstOrDefaultAsync(d => d.Id == documentId);
