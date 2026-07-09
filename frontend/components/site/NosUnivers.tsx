@@ -7,62 +7,51 @@ import { useLanguage } from '@/context/LanguageContext';
 type Univers = {
   slug: string;
   image: string;
-  titre: string;
+  label: { fr: string; en: string };
+  titre: { fr: string; en: string };
   accroche: { fr: string; en: string };
 };
 
 const GOLD = '#C8A45D';
-const CREAM = '#F7F5F2';
 const WHITE = '#FCFBF8';
 const INK = '#101010';
-const MUTED = '#5E5A52';
 const BORDER = '#E7DED0';
 
 const UNIVERS: Univers[] = [
   {
     slug: 'automobile',
-    image: '/assets/univers/auto.jpg',
-    titre: 'Automobile',
-    accroche: {
-      fr: 'Mettez en valeur vos véhicules et vos espaces.',
-      en: 'Showcase your vehicles and spaces.',
-    },
+    image: '/assets/univers/automobile-nouveau.jpeg',
+    label: { fr: 'SHOWROOM', en: 'SHOWROOM' },
+    titre: { fr: 'Automobile', en: 'Automotive' },
+    accroche: { fr: 'Chaque modèle, exploré en détail.', en: 'Every model, explored in detail.' },
   },
   {
     slug: 'immobilier',
     image: '/assets/univers/immobilier.jpg',
-    titre: 'Immobilier',
-    accroche: {
-      fr: 'Valorisez chaque propriété et maximisez son potentiel.',
-      en: 'Enhance every property and maximize its potential.',
-    },
+    label: { fr: 'RÉSIDENTIEL & COMMERCIAL', en: 'RESIDENTIAL & COMMERCIAL' },
+    titre: { fr: 'Immobilier', en: 'Real Estate' },
+    accroche: { fr: 'Visite pièce par pièce.', en: 'Room by room.' },
   },
   {
     slug: 'restaurant',
-    image: '/assets/univers/resto.jpg',
-    titre: 'Restauration',
-    accroche: {
-      fr: 'Faites découvrir l’ambiance avant la première visite.',
-      en: 'Reveal the atmosphere before the first visit.',
-    },
+    image: '/assets/univers/restaurant-nouveau.jpeg',
+    label: { fr: 'AMBIANCE', en: 'ATMOSPHERE' },
+    titre: { fr: 'Restauration', en: 'Restaurants' },
+    accroche: { fr: 'L’atmosphère avant la réservation.', en: 'The atmosphere before the reservation.' },
   },
   {
     slug: 'hotellerie',
-    image: '/assets/univers/hotel.jpg',
-    titre: 'Hôtellerie',
-    accroche: {
-      fr: 'Offrez une expérience qui commence en ligne.',
-      en: 'Offer an experience that begins online.',
-    },
+    image: '/assets/univers/hotellerie-nouveau.jpeg',
+    label: { fr: 'CHAMBRES & ESPACES', en: 'ROOMS & SPACES' },
+    titre: { fr: 'Hôtellerie', en: 'Hospitality' },
+    accroche: { fr: 'Réserver en connaissance de cause.', en: 'Book with confidence.' },
   },
   {
     slug: 'commerce',
-    image: '/assets/univers/commerce.jpg',
-    titre: 'Commerce',
-    accroche: {
-      fr: 'Présentez vos espaces et vos produits autrement.',
-      en: 'Present your spaces and products differently.',
-    },
+    image: '/assets/univers/commerce-nouveau.jpeg',
+    label: { fr: 'BOUTIQUE', en: 'STOREFRONT' },
+    titre: { fr: 'Commerce', en: 'Retail' },
+    accroche: { fr: 'La découverte avant la visite.', en: 'Discovery before the visit.' },
   },
 ];
 
@@ -115,6 +104,7 @@ export default function NosUnivers() {
         }}
         className="univers-wrap"
       >
+        {/* ── En-tête de section — inchangé ── */}
         <motion.div
           initial="hidden"
           whileInView="show"
@@ -191,6 +181,7 @@ export default function NosUnivers() {
           </motion.div>
         </motion.div>
 
+        {/* ── Grille — nouveau format paysage, 2 par ligne ── */}
         <motion.div
           initial="hidden"
           whileInView="show"
@@ -203,109 +194,25 @@ export default function NosUnivers() {
               key={univers.slug}
               variants={item}
               className="univers-card"
-              style={{
-                backgroundColor: CREAM,
-                border: `1px solid ${BORDER}`,
-                overflow: 'hidden',
-                borderRadius: '18px',
-                minHeight: '430px',
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease',
-              }}
             >
-              <Link
-                href={`/realisations/${univers.slug}`}
-                style={{
-                  display: 'block',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  height: '100%',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'relative',
-                    height: '230px',
-                    overflow: 'hidden',
-                    backgroundColor: '#ddd',
-                  }}
-                >
-                  <img
-                    src={univers.image}
-                    alt={univers.titre}
-                    className="univers-img"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                      transition: 'transform 0.8s ease',
-                    }}
-                  />
-                </div>
+              <Link href={`/realisations/${univers.slug}`} className="univers-media">
+                <img
+                  src={univers.image}
+                  alt={t(univers.titre.fr, univers.titre.en)}
+                  className="univers-img"
+                />
 
-                <div style={{ padding: '28px 24px 30px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '14px',
-                      marginBottom: '20px',
-                    }}
-                  >
-                    <h3
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        letterSpacing: '0.18em',
-                        textTransform: 'uppercase',
-                        color: INK,
-                        margin: 0,
-                      }}
-                    >
-                      {univers.titre}
-                    </h3>
+                <div className="univers-scrim" aria-hidden="true" />
 
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        flex: 1,
-                        height: '1px',
-                        backgroundColor: 'rgba(200,164,93,0.65)',
-                      }}
-                    />
-                  </div>
+                <div className="univers-overlay">
+                  <p className="univers-cat">{t(univers.label.fr, univers.label.en)}</p>
+                  <h3 className="univers-name">{t(univers.titre.fr, univers.titre.en)}</h3>
+                  <p className="univers-tagline">{t(univers.accroche.fr, univers.accroche.en)}</p>
 
-                  <p
-                    style={{
-                      fontSize: '15px',
-                      lineHeight: 1.75,
-                      color: MUTED,
-                      margin: 0,
-                      minHeight: '54px',
-                    }}
-                  >
-                    {t(univers.accroche.fr, univers.accroche.en)}
-                  </p>
-
-                  <div
-                    className="univers-card-link"
-                    style={{
-                      marginTop: '26px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      color: GOLD,
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      letterSpacing: '0.16em',
-                      textTransform: 'uppercase',
-                    }}
-                  >
+                  <span className="univers-card-link">
                     {t('Voir les projets', 'View projects')}
-                    <span>→</span>
-                  </div>
+                    <span aria-hidden="true">→</span>
+                  </span>
                 </div>
               </Link>
             </motion.article>
@@ -316,22 +223,105 @@ export default function NosUnivers() {
       <style>{`
         .univers-grid {
           display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 18px;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
+        }
+
+        .univers-card:last-child {
+          grid-column: 1 / -1;
+        }
+
+        .univers-card {
+          position: relative;
+          border-radius: 20px;
+          overflow: hidden;
+          border: 1px solid ${BORDER};
+          box-shadow: 0 18px 50px rgba(0,0,0,0.06);
+          transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
         }
 
         .univers-card:hover {
           transform: translateY(-10px);
           box-shadow: 0 34px 80px rgba(0,0,0,0.10);
-          border-color: rgba(200,164,93,0.48) !important;
+          border-color: rgba(200,164,93,0.48);
+        }
+
+        .univers-media {
+          position: relative;
+          display: block;
+          aspect-ratio: 3 / 2;
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .univers-img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.8s ease;
         }
 
         .univers-card:hover .univers-img {
           transform: scale(1.06);
         }
 
+        .univers-scrim {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(11,11,11,0.78) 0%, rgba(11,11,11,0.25) 45%, transparent 75%);
+        }
+
+        .univers-overlay {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          padding: 30px 32px 32px;
+        }
+
+        .univers-cat {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: ${GOLD};
+          margin: 0 0 12px;
+        }
+
+        .univers-name {
+          font-family: var(--font-cormorant), serif;
+          font-weight: 500;
+          font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+          line-height: 1.05;
+          color: #FFFFFF;
+          margin: 0 0 8px;
+        }
+
+        .univers-tagline {
+          font-size: 14.5px;
+          font-style: italic;
+          line-height: 1.6;
+          color: rgba(247,245,242,0.78);
+          margin: 0 0 20px;
+        }
+
+        .univers-card-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          color: ${GOLD};
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          transition: gap 0.25s ease;
+        }
+
         .univers-card:hover .univers-card-link {
-          gap: 16px !important;
+          gap: 16px;
         }
 
         .univers-all-link:hover {
@@ -340,13 +330,7 @@ export default function NosUnivers() {
           border-color: #101010 !important;
         }
 
-        @media (max-width: 1180px) {
-          .univers-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-
-        @media (max-width: 780px) {
+        @media (max-width: 760px) {
           .univers-wrap {
             padding: 120px 24px 130px !important;
           }
@@ -360,8 +344,8 @@ export default function NosUnivers() {
             grid-template-columns: 1fr;
           }
 
-          .univers-card {
-            min-height: auto !important;
+          .univers-card:last-child {
+            grid-column: auto;
           }
         }
       `}</style>
