@@ -3,6 +3,7 @@
 import { useLanguage } from '@/context/LanguageContext'
 import Navbar from '@/components/site/Navbar'
 import Hero from '@/components/site/Hero'
+import NouvelleFacon from '@/components/site/NouvelleFacon'
 import Manifeste from '@/components/site/Manifeste'
 import NosUnivers from '@/components/site/NosUnivers'
 import Realisations from '@/components/site/Realisations'
@@ -24,6 +25,7 @@ export default function Home() {
     <main className="overflow-hidden" key={lang}>
       <Navbar />
       <Hero />
+      <NouvelleFacon />
       <Manifeste />
       <NosUnivers />
       <Realisations />
