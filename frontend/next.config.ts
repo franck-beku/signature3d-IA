@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "teumxzxubxirivjofxqm.supabase.co" },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/comment-ca-marche", destination: "/", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import LuxuryCursor from "@/components/site/LuxuryCursor";
@@ -17,6 +17,13 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Signature 3D IA | Immersive Intelligence",
   description: "Transformez vos espaces en expériences 360° et 3D intelligentes. Matterport + IA — disponible 24/7.",
@@ -24,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${cormorant.variable}`}>
+    <html lang="fr" className={`${inter.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}>
       <body style={{
         backgroundColor: '#FFFFFF',
         color: '#1A1400',
