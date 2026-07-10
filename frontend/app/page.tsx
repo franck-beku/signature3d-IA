@@ -5,15 +5,13 @@ import Navbar from '@/components/site/Navbar'
 import Hero from '@/components/site/Hero'
 import NouvelleFacon from '@/components/site/NouvelleFacon'
 import NosUnivers from '@/components/site/NosUnivers'
-import Realisations from '@/components/site/Realisations'
-import Demo8020 from '@/components/site/Demo8020'
+import Luxedia from '@/components/site/Luxedia'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
+import RealisationsVedettes from '@/components/site/RealisationsVedettes'
 import Services from '@/components/site/Services'
 import Final from '@/components/site/Final'
 import Footer from '@/components/site/Footer'
 
-// À refaire en premium avant de réafficher sur l'accueil :
-//   Realisations (teaser « preuve avant tech » → lien vers la page /realisations)
 // Sections retirées définitivement (doublons / pas de matière réelle) :
 //   PourquoiNous, PreuveSociale
 
@@ -26,9 +24,9 @@ export default function Home() {
       <Hero />
       <NouvelleFacon />
       <NosUnivers />
-      <Realisations />
-      <Demo8020 />
+      <Luxedia />
       <CommentCaMarche />
+      <RealisationsVedettes />
       <Services />
       <Final />
       <Footer />
