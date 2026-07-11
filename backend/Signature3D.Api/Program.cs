@@ -198,6 +198,7 @@ builder.Services.AddScoped<IAgendaService,    AgendaService>();
 builder.Services.AddScoped<ITimelineService,  TimelineService>();
 builder.Services.AddScoped<IOfferingService,  OfferingService>();
 builder.Services.AddScoped<IFaqService, FaqService>();
+builder.Services.AddScoped<ITestimonialService, TestimonialService>();
 
 builder.Services.AddScoped<IAIProvider, GroqProvider>();
 

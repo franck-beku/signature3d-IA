@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Sector> Sectors => Set<Sector>();
     public DbSet<Offering> Offerings => Set<Offering>();
     public DbSet<Faq> Faqs => Set<Faq>();
+    public DbSet<Testimonial> Testimonials => Set<Testimonial>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ProjectButton> ProjectButtons => Set<ProjectButton>();

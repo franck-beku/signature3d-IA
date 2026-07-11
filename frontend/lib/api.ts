@@ -699,6 +699,38 @@ export const faqApi = {
   delete: (id: string) => apiFetch(`/api/faq/${id}`, { method: 'DELETE' }),
 }
 
+export interface TestimonialDto {
+  id: string
+  name: string
+  company?: string
+  quote: string
+  photoUrl?: string
+  displayOrder: number
+  isPublished: boolean
+}
+
+export const testimonialsApi = {
+  /** PUBLIC — témoignages publiés (site vitrine) */
+  getPublished: () => apiFetch<TestimonialDto[]>('/api/testimonials/published'),
+
+  /** DASHBOARD — tous les témoignages */
+  getAll: () => apiFetch<TestimonialDto[]>('/api/testimonials/all'),
+
+  /** DASHBOARD — un témoignage par Id */
+  getById: (id: string) => apiFetch<TestimonialDto>(`/api/testimonials/by-id/${id}`),
+
+  /** DASHBOARD — créer un témoignage */
+  create: (data: { name: string; company?: string; quote: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+    apiFetch<TestimonialDto>('/api/testimonials', { method: 'POST', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — modifier un témoignage */
+  update: (id: string, data: { name: string; company?: string; quote: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+    apiFetch<TestimonialDto>(`/api/testimonials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — supprimer un témoignage */
+  delete: (id: string) => apiFetch(`/api/testimonials/${id}`, { method: 'DELETE' }),
+}
+
 /* ══════════════════════════════════════
    CONTACTS
    ══════════════════════════════════════ */
