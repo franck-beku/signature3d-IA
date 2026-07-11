@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
-import { Plus, Search, Trash2, Pencil, AlertTriangle, X, Check, Eye, EyeOff } from 'lucide-react'
+import { Plus, Search, Trash2, Pencil, AlertTriangle, X, Check, Eye, EyeOff, Star, StarOff } from 'lucide-react'
 import { offeringsApi, type OfferingDto } from '@/lib/api'
 
 const thStyle = {
@@ -37,11 +37,12 @@ interface OfferingForm {
   imageUrl: string
   displayOrder: number
   isActive: boolean
+  isFeatured: boolean
 }
 
 const emptyForm: OfferingForm = {
   id: null, name: '', shortDescription: '', shortDescriptionEn: '', longDescription: '', longDescriptionEn: '',
-  level: '', levelEn: '', icon: '', imageUrl: '', displayOrder: 0, isActive: true,
+  level: '', levelEn: '', icon: '', imageUrl: '', displayOrder: 0, isActive: true, isFeatured: false,
 }
 
 export default function OffresPage() {
@@ -80,6 +81,7 @@ export default function OffresPage() {
       imageUrl: o.imageUrl ?? '',
       displayOrder: o.displayOrder,
       isActive: o.isActive,
+      isFeatured: o.isFeatured,
     })
   }
 
@@ -101,6 +103,7 @@ export default function OffresPage() {
         imageUrl: form.imageUrl || undefined,
         displayOrder: form.displayOrder,
         isActive: form.isActive,
+        isFeatured: form.isFeatured,
       }
       if (form.id) await offeringsApi.update(form.id, payload)
       else await offeringsApi.create(payload)
@@ -287,6 +290,13 @@ export default function OffresPage() {
                 <button onClick={() => setForm({ ...form, isActive: !form.isActive })} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-input)', color: form.isActive ? 'var(--dash-success)' : 'var(--dash-text-subtle)', cursor: 'pointer', fontSize: '13px', width: '100%' }}>
                   {form.isActive ? <Eye size={14} /> : <EyeOff size={14} />}
                   {form.isActive ? 'Active — visible sur le site' : 'Masquée — invisible sur le site'}
+                </button>
+              </div>
+              <div>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Mise en avant</label>
+                <button onClick={() => setForm({ ...form, isFeatured: !form.isFeatured })} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-input)', color: form.isFeatured ? 'var(--dash-gold)' : 'var(--dash-text-subtle)', cursor: 'pointer', fontSize: '13px', width: '100%' }}>
+                  {form.isFeatured ? <Star size={14} fill="currentColor" /> : <StarOff size={14} />}
+                  {form.isFeatured ? 'Mise en avant sur l’accueil' : 'Pas mise en avant sur l’accueil'}
                 </button>
               </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>

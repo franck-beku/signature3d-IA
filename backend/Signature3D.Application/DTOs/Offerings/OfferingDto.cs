@@ -16,6 +16,7 @@ public class OfferingDto
     public string? LevelEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
+    public bool IsFeatured { get; set; }
 }
 
 /// <summary>Données pour créer une offre depuis le dashboard.</summary>
@@ -32,6 +33,7 @@ public class CreateOfferingDto
     public string? LevelEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool IsFeatured { get; set; } = false;
 }
 
 /// <summary>Données pour modifier une offre existante.</summary>
@@ -48,4 +50,5 @@ public class UpdateOfferingDto
     public string? LevelEn { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
+    public bool IsFeatured { get; set; }
 }

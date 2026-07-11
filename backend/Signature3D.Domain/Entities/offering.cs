@@ -19,6 +19,7 @@ public class Offering : BaseEntity
     public string? LevelEn { get; set; }                       // traduction anglaise (nullable)
     public int DisplayOrder { get; set; }                     // ordre d'affichage
     public bool IsActive { get; set; } = true;                // visible sur le site public
+    public bool IsFeatured { get; set; } = false;              // mis en avant dans le teaser de l'accueil
 
     /* Navigation — un Offering est utilisé par plusieurs projets */
     public ICollection<Project> Projects { get; set; } = [];

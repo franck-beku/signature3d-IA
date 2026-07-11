@@ -635,6 +635,7 @@ export interface OfferingDto {
   levelEn?: string
   displayOrder: number
   isActive: boolean
+  isFeatured: boolean
 }
 
 export const offeringsApi = {
@@ -651,14 +652,14 @@ export const offeringsApi = {
   create: (data: {
     name: string; shortDescription?: string; shortDescriptionEn?: string
     longDescription?: string; longDescriptionEn?: string
-    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean
+    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean; isFeatured: boolean
   }) => apiFetch<OfferingDto>('/api/offerings', { method: 'POST', body: JSON.stringify(data) }),
 
   /** DASHBOARD — modifier une offre */
   update: (id: string, data: {
     name: string; shortDescription?: string; shortDescriptionEn?: string
     longDescription?: string; longDescriptionEn?: string
-    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean
+    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean; isFeatured: boolean
   }) => apiFetch<OfferingDto>(`/api/offerings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   /** DASHBOARD — supprimer une offre */

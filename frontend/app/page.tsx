@@ -8,7 +8,7 @@ import NosUnivers from '@/components/site/NosUnivers'
 import Luxedia from '@/components/site/Luxedia'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
 import RealisationsVedettes from '@/components/site/RealisationsVedettes'
-import Services from '@/components/site/Services'
+import OffresVedettes from '@/components/site/OffresVedettes'
 import Final from '@/components/site/Final'
 import Footer from '@/components/site/Footer'
 
@@ -27,7 +27,7 @@ export default function Home() {
       <Luxedia />
       <CommentCaMarche />
       <RealisationsVedettes />
-      <Services />
+      <OffresVedettes />
       <Final />
       <Footer />
     </main>

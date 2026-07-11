@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Play, ArrowRight } from 'lucide-react';
+import { Play, ArrowRight, Orbit } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { projectsApi, type ProjectCardDto } from '@/lib/api';
 import { colors } from '@/config/theme';
@@ -56,6 +56,7 @@ export default function RealisationsVedettes() {
 
   return (
     <section
+      id="realisations-recentes"
       aria-label={t('Réalisations récentes', 'Recent work')}
       style={{
         backgroundColor: colors.white,
@@ -121,6 +122,10 @@ export default function RealisationsVedettes() {
                     <span className="rv-badge-live">
                       <span className="rv-dot" />
                       Live
+                    </span>
+
+                    <span className="rv-badge-3d" aria-hidden="true">
+                      <Orbit size={14} strokeWidth={1.8} />
                     </span>
 
                     <Link href={`/embed/${p.slug}`} className="rv-overlay">
@@ -301,6 +306,22 @@ export default function RealisationsVedettes() {
         @keyframes rv-pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.4; }
+        }
+
+        .rv-badge-3d {
+          position: absolute;
+          bottom: 14px;
+          right: 14px;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background-color: rgba(0,0,0,0.65);
+          backdrop-filter: blur(4px);
+          border: 1px solid rgba(255,255,255,0.15);
+          color: #FFFFFF;
         }
 
         .rv-overlay {
