@@ -5,10 +5,10 @@
 
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
-import { Plus, Search, Trash2, Pencil, AlertTriangle, X, Check, Eye, EyeOff } from 'lucide-react'
-import { testimonialsApi, type TestimonialDto } from '@/lib/api'
+import { Plus, Search, Trash2, Pencil, AlertTriangle, X, Check, Eye, EyeOff, Upload } from 'lucide-react'
+import { testimonialsApi, uploadApi, type TestimonialDto } from '@/lib/api'
 
 const thStyle = {
   textAlign: 'left' as const, padding: '14px 16px',
@@ -36,6 +36,7 @@ interface TestimonialForm {
   id: string | null
   name: string
   company: string
+  companyEn: string
   quote: string
   quoteEn: string
   photoUrl: string
@@ -44,7 +45,7 @@ interface TestimonialForm {
 }
 
 const emptyForm: TestimonialForm = {
-  id: null, name: '', company: '', quote: '', quoteEn: '', photoUrl: '', displayOrder: 0, isPublished: false,
+  id: null, name: '', company: '', companyEn: '', quote: '', quoteEn: '', photoUrl: '', displayOrder: 0, isPublished: false,
 }
 
 export default function TemoignagesPage() {
@@ -55,6 +56,10 @@ export default function TemoignagesPage() {
   const [form, setForm]                   = useState<TestimonialForm | null>(null)
   const [saving, setSaving]               = useState(false)
   const [error, setError]                 = useState<string | null>(null)
+  const [uploading, setUploading]         = useState(false)
+  const [isDragging, setIsDragging]       = useState(false)
+  const [uploadError, setUploadError]     = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const load = () => {
     setLoading(true)
@@ -74,6 +79,7 @@ export default function TemoignagesPage() {
       id: t.id,
       name: t.name,
       company: t.company ?? '',
+      companyEn: t.companyEn ?? '',
       quote: t.quote,
       quoteEn: t.quoteEn ?? '',
       photoUrl: t.photoUrl ?? '',
@@ -91,6 +97,7 @@ export default function TemoignagesPage() {
       const payload = {
         name: form.name,
         company: form.company || undefined,
+        companyEn: form.companyEn || undefined,
         quote: form.quote,
         quoteEn: form.quoteEn || undefined,
         photoUrl: form.photoUrl || undefined,
@@ -105,6 +112,28 @@ export default function TemoignagesPage() {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!form) return
+    if (!/\.(jpe?g|png)$/i.test(file.name)) {
+      setUploadError('Seuls les fichiers JPEG et PNG sont acceptés.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('Le fichier ne doit pas dépasser 5 MB.')
+      return
+    }
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const { url } = await uploadApi.image(file, 'testimonials')
+      setForm((prev) => (prev ? { ...prev, photoUrl: url } : prev))
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : 'Erreur lors de l\'upload.')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -236,6 +265,10 @@ export default function TemoignagesPage() {
                 <input type="text" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="Concession Automobile XYZ" style={inputStyle} className="dash-input" />
               </div>
               <div>
+                <label style={labelStyle}>Entreprise / titre (EN)</label>
+                <input type="text" value={form.companyEn} onChange={(e) => setForm({ ...form, companyEn: e.target.value })} placeholder="XYZ Car Dealership" style={inputStyle} className="dash-input" />
+              </div>
+              <div>
                 <label style={labelStyle}>Citation *</label>
                 <textarea value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} rows={4} placeholder="Signature Immersion a transformé notre façon de présenter nos véhicules..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
               </div>
@@ -245,7 +278,49 @@ export default function TemoignagesPage() {
               </div>
               <div>
                 <label style={labelStyle}>URL de la photo</label>
-                <input type="text" value={form.photoUrl} onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} placeholder="https://..." style={inputStyle} className="dash-input" />
+                <input type="text" value={form.photoUrl} onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} placeholder="https://... (ou uploadez ci-dessous)" style={inputStyle} className="dash-input" />
+
+                {uploadError && (
+                  <p style={{ color: 'var(--dash-error)', fontSize: '12px', margin: '8px 0 0' }}>{uploadError}</p>
+                )}
+
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    setIsDragging(false)
+                    const file = e.dataTransfer.files?.[0]
+                    if (file) handlePhotoUpload(file)
+                  }}
+                  onClick={() => !uploading && fileInputRef.current?.click()}
+                  style={{
+                    marginTop: '10px',
+                    border: `1.5px dashed ${isDragging ? 'var(--dash-gold)' : 'var(--dash-border-input)'}`,
+                    borderRadius: '10px', padding: '18px', textAlign: 'center',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.25s ease',
+                    backgroundColor: isDragging ? 'var(--dash-gold-muted)' : 'transparent',
+                    opacity: uploading ? 0.6 : 1,
+                  }}
+                  className="photo-upload-zone"
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handlePhotoUpload(file)
+                      e.target.value = ''
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                  <Upload size={18} style={{ color: uploading ? 'rgba(200,164,93,0.3)' : 'rgba(200,164,93,0.7)', margin: '0 auto 8px' }} />
+                  <p style={{ color: 'var(--dash-text-subtle)', fontSize: '12px', margin: 0 }}>
+                    {uploading ? 'Upload en cours...' : <>Glissez une image ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span> — JPEG/PNG, max 5 MB</>}
+                  </p>
+                </div>
               </div>
               <div>
                 <label style={labelStyle}>Ordre d'affichage</label>
@@ -275,6 +350,7 @@ export default function TemoignagesPage() {
         .close-btn:hover  { color: var(--dash-text) !important; }
         .save-btn:hover   { background-color: #b8943d !important; }
         .dash-input:focus { border-color: var(--dash-gold) !important; }
+        .photo-upload-zone:hover { border-color: var(--dash-gold-ring) !important; }
       `}</style>
     </div>
   )

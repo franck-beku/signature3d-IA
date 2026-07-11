@@ -40,7 +40,7 @@ public class SupabaseStorageService : IStorageService
     /// au format "documents-private/{chemin}" (isPrivate = true) — jamais une URL
     /// directement exploitable dans ce second cas.
     /// </summary>
-    public async Task<Result<string>> UploadAsync(Stream fileStream, string fileName, string folder, bool isPrivate = false)
+    public async Task<Result<string>> UploadAsync(Stream fileStream, string fileName, string folder, bool isPrivate = false, string contentType = "application/pdf")
     {
         try
         {
@@ -50,7 +50,7 @@ public class SupabaseStorageService : IStorageService
             var filePath = $"{folder}/{fileName}";
 
             using var content = new StreamContent(fileStream);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+            content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
 
             var response = await _http.PostAsync(
                 $"object/{bucket}/{filePath}",

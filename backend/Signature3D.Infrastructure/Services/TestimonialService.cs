@@ -23,6 +23,7 @@ public class TestimonialService : ITestimonialService
         Id = t.Id,
         Name = t.Name,
         Company = t.Company,
+        CompanyEn = t.CompanyEn,
         Quote = t.Quote,
         QuoteEn = t.QuoteEn,
         PhotoUrl = t.PhotoUrl,
@@ -41,6 +42,7 @@ public class TestimonialService : ITestimonialService
                 Id = t.Id,
                 Name = t.Name,
                 Company = t.Company,
+                CompanyEn = t.CompanyEn,
                 Quote = t.Quote,
                 QuoteEn = t.QuoteEn,
                 PhotoUrl = t.PhotoUrl,
@@ -62,6 +64,7 @@ public class TestimonialService : ITestimonialService
                 Id = t.Id,
                 Name = t.Name,
                 Company = t.Company,
+                CompanyEn = t.CompanyEn,
                 Quote = t.Quote,
                 QuoteEn = t.QuoteEn,
                 PhotoUrl = t.PhotoUrl,
@@ -91,6 +94,7 @@ public class TestimonialService : ITestimonialService
         {
             Name = dto.Name,
             Company = dto.Company,
+            CompanyEn = dto.CompanyEn,
             Quote = dto.Quote,
             QuoteEn = dto.QuoteEn,
             PhotoUrl = dto.PhotoUrl,
@@ -113,6 +117,7 @@ public class TestimonialService : ITestimonialService
 
         testimonial.Name = dto.Name;
         testimonial.Company = dto.Company;
+        testimonial.CompanyEn = dto.CompanyEn;
         testimonial.Quote = dto.Quote;
         testimonial.QuoteEn = dto.QuoteEn;
         testimonial.PhotoUrl = dto.PhotoUrl;

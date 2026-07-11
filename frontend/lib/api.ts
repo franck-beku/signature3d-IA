@@ -703,6 +703,7 @@ export interface TestimonialDto {
   id: string
   name: string
   company?: string
+  companyEn?: string
   quote: string
   quoteEn?: string
   photoUrl?: string
@@ -721,15 +722,46 @@ export const testimonialsApi = {
   getById: (id: string) => apiFetch<TestimonialDto>(`/api/testimonials/by-id/${id}`),
 
   /** DASHBOARD — créer un témoignage */
-  create: (data: { name: string; company?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+  create: (data: { name: string; company?: string; companyEn?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
     apiFetch<TestimonialDto>('/api/testimonials', { method: 'POST', body: JSON.stringify(data) }),
 
   /** DASHBOARD — modifier un témoignage */
-  update: (id: string, data: { name: string; company?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+  update: (id: string, data: { name: string; company?: string; companyEn?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
     apiFetch<TestimonialDto>(`/api/testimonials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   /** DASHBOARD — supprimer un témoignage */
   delete: (id: string) => apiFetch(`/api/testimonials/${id}`, { method: 'DELETE' }),
+}
+
+export const uploadApi = {
+  /** DASHBOARD — upload générique d'une image (JPEG/PNG), retourne son URL publique */
+  image: async (file: File, folder?: string): Promise<{ url: string }> => {
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem('token')
+      : null
+
+    const formData = new FormData()
+    formData.append('file', file)
+    if (folder) formData.append('folder', folder)
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/upload/image`,
+      {
+        method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Erreur upload' }))
+      throw new Error(error.message ?? `Erreur ${response.status}`)
+    }
+
+    return response.json()
+  },
 }
 
 /* ══════════════════════════════════════

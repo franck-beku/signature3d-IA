@@ -58,6 +58,7 @@ export default function Temoignages() {
 
   const current = testimonials[index];
   const quote = current ? (lang === 'en' ? current.quoteEn || current.quote : current.quote) : '';
+  const company = current ? (lang === 'en' ? current.companyEn || current.company : current.company) : undefined;
 
   return (
     <section
@@ -116,7 +117,7 @@ export default function Temoignages() {
                   <p className="tm-quote">“{quote}”</p>
 
                   <p className="tm-name">{current.name}</p>
-                  {current.company && <p className="tm-company">{current.company}</p>}
+                  {company && <p className="tm-company">{company}</p>}
                 </motion.div>
               </AnimatePresence>
             )}

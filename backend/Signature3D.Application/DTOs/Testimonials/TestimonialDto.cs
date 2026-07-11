@@ -6,6 +6,7 @@ public class TestimonialDto
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Company { get; set; }
+    public string? CompanyEn { get; set; }
     public string Quote { get; set; } = string.Empty;
     public string? QuoteEn { get; set; }
     public string? PhotoUrl { get; set; }
@@ -18,6 +19,7 @@ public class CreateTestimonialDto
 {
     public string Name { get; set; } = string.Empty;
     public string? Company { get; set; }
+    public string? CompanyEn { get; set; }
     public string Quote { get; set; } = string.Empty;
     public string? QuoteEn { get; set; }
     public string? PhotoUrl { get; set; }
@@ -30,6 +32,7 @@ public class UpdateTestimonialDto
 {
     public string Name { get; set; } = string.Empty;
     public string? Company { get; set; }
+    public string? CompanyEn { get; set; }
     public string Quote { get; set; } = string.Empty;
     public string? QuoteEn { get; set; }
     public string? PhotoUrl { get; set; }

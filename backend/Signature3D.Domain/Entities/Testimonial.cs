@@ -8,6 +8,7 @@ public class Testimonial : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
     public string? Company { get; set; }
+    public string? CompanyEn { get; set; }              // traduction anglaise (nullable)
     public string Quote { get; set; } = string.Empty;
     public string? QuoteEn { get; set; }                // traduction anglaise (nullable)
     public string? PhotoUrl { get; set; }

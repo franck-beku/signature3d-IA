@@ -9,7 +9,7 @@ namespace Signature3D.Infrastructure.Services;
 /// </summary>
 public class NullStorageService : IStorageService
 {
-    public Task<Result<string>> UploadAsync(Stream fileStream, string fileName, string folder, bool isPrivate = false)
+    public Task<Result<string>> UploadAsync(Stream fileStream, string fileName, string folder, bool isPrivate = false, string contentType = "application/pdf")
         => Task.FromResult(Result<string>.Ok(isPrivate
             ? $"documents-private/{folder}/{fileName}"
             : $"https://placeholder.storage/{folder}/{fileName}"));
