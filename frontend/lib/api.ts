@@ -704,6 +704,7 @@ export interface TestimonialDto {
   name: string
   company?: string
   quote: string
+  quoteEn?: string
   photoUrl?: string
   displayOrder: number
   isPublished: boolean
@@ -720,11 +721,11 @@ export const testimonialsApi = {
   getById: (id: string) => apiFetch<TestimonialDto>(`/api/testimonials/by-id/${id}`),
 
   /** DASHBOARD — créer un témoignage */
-  create: (data: { name: string; company?: string; quote: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+  create: (data: { name: string; company?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
     apiFetch<TestimonialDto>('/api/testimonials', { method: 'POST', body: JSON.stringify(data) }),
 
   /** DASHBOARD — modifier un témoignage */
-  update: (id: string, data: { name: string; company?: string; quote: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+  update: (id: string, data: { name: string; company?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
     apiFetch<TestimonialDto>(`/api/testimonials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   /** DASHBOARD — supprimer un témoignage */

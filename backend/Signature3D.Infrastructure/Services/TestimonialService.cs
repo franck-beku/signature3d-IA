@@ -24,6 +24,7 @@ public class TestimonialService : ITestimonialService
         Name = t.Name,
         Company = t.Company,
         Quote = t.Quote,
+        QuoteEn = t.QuoteEn,
         PhotoUrl = t.PhotoUrl,
         DisplayOrder = t.DisplayOrder,
         IsPublished = t.IsPublished
@@ -41,6 +42,7 @@ public class TestimonialService : ITestimonialService
                 Name = t.Name,
                 Company = t.Company,
                 Quote = t.Quote,
+                QuoteEn = t.QuoteEn,
                 PhotoUrl = t.PhotoUrl,
                 DisplayOrder = t.DisplayOrder,
                 IsPublished = t.IsPublished
@@ -61,6 +63,7 @@ public class TestimonialService : ITestimonialService
                 Name = t.Name,
                 Company = t.Company,
                 Quote = t.Quote,
+                QuoteEn = t.QuoteEn,
                 PhotoUrl = t.PhotoUrl,
                 DisplayOrder = t.DisplayOrder,
                 IsPublished = t.IsPublished
@@ -89,6 +92,7 @@ public class TestimonialService : ITestimonialService
             Name = dto.Name,
             Company = dto.Company,
             Quote = dto.Quote,
+            QuoteEn = dto.QuoteEn,
             PhotoUrl = dto.PhotoUrl,
             DisplayOrder = dto.DisplayOrder,
             IsPublished = dto.IsPublished
@@ -110,6 +114,7 @@ public class TestimonialService : ITestimonialService
         testimonial.Name = dto.Name;
         testimonial.Company = dto.Company;
         testimonial.Quote = dto.Quote;
+        testimonial.QuoteEn = dto.QuoteEn;
         testimonial.PhotoUrl = dto.PhotoUrl;
         testimonial.DisplayOrder = dto.DisplayOrder;
         testimonial.IsPublished = dto.IsPublished;

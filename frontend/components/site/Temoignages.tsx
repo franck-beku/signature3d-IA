@@ -10,7 +10,7 @@ import { colors } from '@/config/theme';
 const AUTOPLAY_MS = 7000;
 
 export default function Temoignages() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [testimonials, setTestimonials] = useState<TestimonialDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -57,6 +57,7 @@ export default function Temoignages() {
   if (!loading && count === 0) return null;
 
   const current = testimonials[index];
+  const quote = current ? (lang === 'en' ? current.quoteEn || current.quote : current.quote) : '';
 
   return (
     <section
@@ -112,7 +113,7 @@ export default function Temoignages() {
                     )}
                   </div>
 
-                  <p className="tm-quote">“{current.quote}”</p>
+                  <p className="tm-quote">“{quote}”</p>
 
                   <p className="tm-name">{current.name}</p>
                   {current.company && <p className="tm-company">{current.company}</p>}

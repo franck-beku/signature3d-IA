@@ -37,13 +37,14 @@ interface TestimonialForm {
   name: string
   company: string
   quote: string
+  quoteEn: string
   photoUrl: string
   displayOrder: number
   isPublished: boolean
 }
 
 const emptyForm: TestimonialForm = {
-  id: null, name: '', company: '', quote: '', photoUrl: '', displayOrder: 0, isPublished: false,
+  id: null, name: '', company: '', quote: '', quoteEn: '', photoUrl: '', displayOrder: 0, isPublished: false,
 }
 
 export default function TemoignagesPage() {
@@ -74,6 +75,7 @@ export default function TemoignagesPage() {
       name: t.name,
       company: t.company ?? '',
       quote: t.quote,
+      quoteEn: t.quoteEn ?? '',
       photoUrl: t.photoUrl ?? '',
       displayOrder: t.displayOrder,
       isPublished: t.isPublished,
@@ -90,6 +92,7 @@ export default function TemoignagesPage() {
         name: form.name,
         company: form.company || undefined,
         quote: form.quote,
+        quoteEn: form.quoteEn || undefined,
         photoUrl: form.photoUrl || undefined,
         displayOrder: form.displayOrder,
         isPublished: form.isPublished,
@@ -235,6 +238,10 @@ export default function TemoignagesPage() {
               <div>
                 <label style={labelStyle}>Citation *</label>
                 <textarea value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} rows={4} placeholder="Signature Immersion a transformé notre façon de présenter nos véhicules..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
+              </div>
+              <div>
+                <label style={labelStyle}>Citation (EN)</label>
+                <textarea value={form.quoteEn} onChange={(e) => setForm({ ...form, quoteEn: e.target.value })} rows={4} placeholder="Signature Immersion has transformed the way we present our vehicles..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />
               </div>
               <div>
                 <label style={labelStyle}>URL de la photo</label>

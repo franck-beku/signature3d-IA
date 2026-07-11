@@ -7,6 +7,7 @@ public class TestimonialDto
     public string Name { get; set; } = string.Empty;
     public string? Company { get; set; }
     public string Quote { get; set; } = string.Empty;
+    public string? QuoteEn { get; set; }
     public string? PhotoUrl { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsPublished { get; set; }
@@ -18,6 +19,7 @@ public class CreateTestimonialDto
     public string Name { get; set; } = string.Empty;
     public string? Company { get; set; }
     public string Quote { get; set; } = string.Empty;
+    public string? QuoteEn { get; set; }
     public string? PhotoUrl { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsPublished { get; set; } = false;
@@ -29,6 +31,7 @@ public class UpdateTestimonialDto
     public string Name { get; set; } = string.Empty;
     public string? Company { get; set; }
     public string Quote { get; set; } = string.Empty;
+    public string? QuoteEn { get; set; }
     public string? PhotoUrl { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsPublished { get; set; }
