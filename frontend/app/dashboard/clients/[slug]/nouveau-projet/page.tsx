@@ -10,7 +10,7 @@ import { use } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, Check, Upload, Plus, Trash2 } from 'lucide-react'
-import { clientsApi, projectsApi, type ClientDto } from '@/lib/api'
+import { clientsApi, projectsApi, sectorsApi, offeringsApi, type ClientDto, type SectorDto, type OfferingDto } from '@/lib/api'
 
 /* ─── Types ─── */
 interface Bouton { id: string; label: string; url: string; action: 'link' | 'form' | 'call' }
@@ -24,6 +24,8 @@ interface FormData {
   leadEmail:      string
   boutons:        Bouton[]
   notes:          string
+  sectorId:       string
+  offeringId:     string
 }
 
 /* ─── Config ─── */
@@ -93,6 +95,8 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
   const [createdSlug, setCreatedSlug] = useState('')
   const [error, setError]             = useState<string | null>(null)
   const [client, setClient]           = useState<ClientDto | null>(null)
+  const [sectors, setSectors]         = useState<SectorDto[]>([])
+  const [offerings, setOfferings]     = useState<OfferingDto[]>([])
 
   const [form, setForm] = useState<FormData>({
     name:           '',
@@ -103,6 +107,8 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
     leadEmail:      '',
     boutons:        [newBouton()],
     notes:          '',
+    sectorId:       '',
+    offeringId:     '',
   })
 
   useEffect(() => {
@@ -110,6 +116,11 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
       .then((c) => setClient(c as ClientDto))
       .catch(console.error)
   }, [slug])
+
+  useEffect(() => {
+    sectorsApi.getAll().then((s) => setSectors(s as SectorDto[])).catch(() => {})
+    offeringsApi.getAll().then((o) => setOfferings(o as OfferingDto[])).catch(() => {})
+  }, [])
 
   const set = (key: string, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -145,6 +156,11 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
         welcomeMessage: form.welcomeMessage || undefined,
         leadEmail:     form.leadEmail || undefined,
         clientId:      client.id,
+        sectorId:      form.sectorId || undefined,
+        offeringId:    form.offeringId || undefined,
+        isPublished:   false,
+        isFeatured:    false,
+        displayOrder:  0,
         buttons:       form.type !== 'matterport'
           ? form.boutons.map((b, i) => ({
               label:  b.label,
@@ -154,6 +170,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
             }))
           : [],
         suggestions: [],
+        details: [],
       })
 
       setCreatedSlug(result.slug)
@@ -265,6 +282,22 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Email de réception des leads</label>
                     <input type="email" value={form.leadEmail} onChange={(e) => set('leadEmail', e.target.value)} placeholder="contact@client.ca" style={inputStyle} className="dash-input" />
                     <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '6px' }}>Les leads seront transmis à cette adresse</p>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Secteur</label>
+                      <select value={form.sectorId} onChange={(e) => set('sectorId', e.target.value)} style={inputStyle} className="dash-input">
+                        <option value="">Aucun</option>
+                        {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Offre / Service</label>
+                      <select value={form.offeringId} onChange={(e) => set('offeringId', e.target.value)} style={inputStyle} className="dash-input">
+                        <option value="">Aucune</option>
+                        {offerings.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                      </select>
+                    </div>
                   </div>
                   <div>
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Notes internes</label>
