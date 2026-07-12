@@ -6,6 +6,7 @@ import { pdf } from '@react-pdf/renderer'
 import Sidebar from '@/components/dashboard/Sidebar'
 import KPICard from '@/components/dashboard/KPICard'
 import ReportDocument from '@/components/dashboard/ProjectReportPDF'
+import QRCodeLogo from '@/components/dashboard/QRCodeLogo'
 import Link from 'next/link'
 import { ArrowLeft, Copy, Download, Upload, FileText, Mail, Phone, Check, TrendingUp } from 'lucide-react'
 import {
@@ -48,6 +49,8 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
   const [statsError, setStatsError]     = useState(false)
   const [generatingPdf, setGeneratingPdf] = useState(false)
   const [error, setError]               = useState<string | null>(null)
+  const [uploadingDoc, setUploadingDoc]   = useState(false)
+  const [showQr, setShowQr]               = useState(false)
 
   useEffect(() => {
     projectsApi.getBySlug(projetSlug)
@@ -81,6 +84,19 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
       .catch(() => setStatsError(true))
       .finally(() => setStatsLoading(false))
   }, [project])
+
+  const handleUploadDocument = async (file: File) => {
+    if (!project) return
+    setUploadingDoc(true)
+    try {
+      const doc = await documentsApi.upload(project.id, file, false)
+      setDocuments((prev) => [doc as DocumentDto, ...prev])
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'upload du document.")
+    } finally {
+      setUploadingDoc(false)
+    }
+  }
 
   const embedUrl = project?.embedUrl ?? ''
   const handleCopy = () => {
@@ -221,7 +237,11 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
                     <p style={{ color: '#999', fontSize: '10px', textAlign: 'center' }}>QR Code bientôt</p>
                   </div>
                 </div>
-                <button style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', fontSize: '11px', padding: '8px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="dl-btn">
+                <button
+                  onClick={() => setShowQr(true)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', fontSize: '11px', padding: '8px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                  className="dl-btn"
+                >
                   <Download size={12} /> Télécharger PNG
                 </button>
               </div>
@@ -243,9 +263,14 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', margin: 0 }}>Documents — {documents.length}</h2>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', padding: '6px 12px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="upload-btn">
-                <Upload size={11} /> Uploader un PDF
-              </button>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', padding: '6px 12px', borderRadius: '8px', background: 'none', cursor: uploadingDoc ? 'default' : 'pointer', transition: 'all 0.2s ease' }} className="upload-btn">
+                <Upload size={11} /> {uploadingDoc ? 'Upload...' : 'Uploader un PDF'}
+                <input
+                  type="file" accept=".pdf" style={{ display: 'none' }}
+                  disabled={uploadingDoc}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadDocument(f); e.target.value = '' }}
+                />
+              </label>
             </div>
             {documents.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed var(--dash-border-input)', borderRadius: '10px' }}>
@@ -450,6 +475,10 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
           .perf-charts-grid  { grid-template-columns: 1fr !important; }
         }
       `}</style>
+
+      {showQr && project && (
+        <QRCodeLogo url={embedUrl} projectName={project.name} onClose={() => setShowQr(false)} />
+      )}
     </div>
   )
 }
