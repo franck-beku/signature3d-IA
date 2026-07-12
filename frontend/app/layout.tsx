@@ -25,8 +25,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Signature 3D IA | Immersive Intelligence",
-  description: "Transformez vos espaces en expériences 360° et 3D intelligentes. Matterport + IA — disponible 24/7.",
+  title: "Signature Immersion | Visites 3D & 360° augmentées par l'IA",
+  description: "Signature Immersion transforme vos espaces en expériences immersives 3D et 360°, enrichies par Luxedia, votre assistante IA disponible 24/7.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

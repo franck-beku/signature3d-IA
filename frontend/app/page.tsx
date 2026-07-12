@@ -1,37 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import HomeClient from '@/components/site/HomeClient'
 
-import { useLanguage } from '@/context/LanguageContext'
-import Navbar from '@/components/site/Navbar'
-import Hero from '@/components/site/Hero'
-import NouvelleFacon from '@/components/site/NouvelleFacon'
-import NosUnivers from '@/components/site/NosUnivers'
-import Luxedia from '@/components/site/Luxedia'
-import CommentCaMarche from '@/components/site/CommentCaMarche'
-import RealisationsVedettes from '@/components/site/RealisationsVedettes'
-import Temoignages from '@/components/site/Temoignages'
-import OffresVedettes from '@/components/site/OffresVedettes'
-import Final from '@/components/site/Final'
-import Footer from '@/components/site/Footer'
-
-// Sections retirées définitivement (doublons / pas de matière réelle) :
-//   PourquoiNous, PreuveSociale
+export const metadata: Metadata = {
+  title: "Signature Immersion | Visites 3D & 360° augmentées par l'IA",
+  description: "Signature Immersion transforme vos espaces en expériences immersives 3D et 360°, enrichies par Luxedia, votre assistante IA disponible 24/7.",
+}
 
 export default function Home() {
-  const { lang } = useLanguage()
-
-  return (
-    <main className="overflow-hidden" key={lang}>
-      <Navbar />
-      <Hero />
-      <NouvelleFacon />
-      <NosUnivers />
-      <Luxedia />
-      <CommentCaMarche />
-      <RealisationsVedettes />
-      <Temoignages />
-      <OffresVedettes />
-      <Final />
-      <Footer />
-    </main>
-  )
+  return <HomeClient />
 }
