@@ -142,9 +142,9 @@ public class AppDbContext : DbContext
         {
             e.HasKey(x => x.Id);
 
-            // Ignorer l'embedding float[] — pgvector sera activé via migration SQL manuelle
-            // après que l'extension vector soit activée dans Supabase
-            e.Ignore(x => x.Embedding);
+            // Embedding stocké en colonne pgvector (768 dimensions — text-embedding-004).
+            e.Property(x => x.Embedding)
+             .HasColumnType("vector(768)");
 
             e.HasOne(x => x.Document)
              .WithMany(x => x.Chunks)

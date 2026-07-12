@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Npgsql;
+using Pgvector.EntityFrameworkCore;
 using Signature3D.Application.Interfaces;
 using Signature3D.Infrastructure.AI.Providers;
 using Signature3D.Infrastructure.Configurations;
@@ -40,10 +42,14 @@ var appUrlsSettings  = builder.Configuration.GetSection("AppUrlsSettings").Get<A
    2. BASE DE DONNÉES — PostgreSQL + Supabase
    ══════════════════════════════════════════ */
 
+var npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(supabaseSettings.ConnectionString);
+npgsqlDataSourceBuilder.UseVector();
+var npgsqlDataSource = npgsqlDataSourceBuilder.Build();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
-        supabaseSettings.ConnectionString,
-        npgsql => npgsql.EnableRetryOnFailure(3)
+        npgsqlDataSource,
+        npgsql => npgsql.EnableRetryOnFailure(3).UseVector()
     )
 );
 
