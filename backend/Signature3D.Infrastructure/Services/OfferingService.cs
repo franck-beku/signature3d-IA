@@ -52,26 +52,9 @@ public class OfferingService : IOfferingService
         var offerings = await _db.Offerings
             .Where(o => o.IsActive)
             .OrderBy(o => o.DisplayOrder).ThenBy(o => o.Name)
-            .Select(o => new OfferingDto
-            {
-                Id = o.Id,
-                Name = o.Name,
-                Slug = o.Slug,
-                ShortDescription = o.ShortDescription,
-                ShortDescriptionEn = o.ShortDescriptionEn,
-                LongDescription = o.LongDescription,
-                LongDescriptionEn = o.LongDescriptionEn,
-                Icon = o.Icon,
-                ImageUrl = o.ImageUrl,
-                Level = o.Level,
-                LevelEn = o.LevelEn,
-                DisplayOrder = o.DisplayOrder,
-                IsActive = o.IsActive,
-                IsFeatured = o.IsFeatured
-            })
             .ToListAsync();
 
-        return Result<List<OfferingDto>>.Ok(offerings);
+        return Result<List<OfferingDto>>.Ok(offerings.Select(ToDto).ToList());
     }
 
     /// <summary>DASHBOARD — toutes les offres, même inactives.</summary>
@@ -79,26 +62,9 @@ public class OfferingService : IOfferingService
     {
         var offerings = await _db.Offerings
             .OrderBy(o => o.DisplayOrder).ThenBy(o => o.Name)
-            .Select(o => new OfferingDto
-            {
-                Id = o.Id,
-                Name = o.Name,
-                Slug = o.Slug,
-                ShortDescription = o.ShortDescription,
-                ShortDescriptionEn = o.ShortDescriptionEn,
-                LongDescription = o.LongDescription,
-                LongDescriptionEn = o.LongDescriptionEn,
-                Icon = o.Icon,
-                ImageUrl = o.ImageUrl,
-                Level = o.Level,
-                LevelEn = o.LevelEn,
-                DisplayOrder = o.DisplayOrder,
-                IsActive = o.IsActive,
-                IsFeatured = o.IsFeatured
-            })
             .ToListAsync();
 
-        return Result<List<OfferingDto>>.Ok(offerings);
+        return Result<List<OfferingDto>>.Ok(offerings.Select(ToDto).ToList());
     }
 
     /// <summary>Offre par son slug (ex: "matterport-ia").</summary>
