@@ -55,7 +55,7 @@ export default function Manifeste() {
   return (
     <section
       ref={sectionRef}
-      aria-label={t('Notre vision', 'Our vision')}
+      aria-label={t('Notre manifeste', 'Our manifesto')}
       style={{
         position: 'relative',
         backgroundColor: CREAM,        // ← FOND CRÈME
@@ -112,7 +112,7 @@ export default function Manifeste() {
                 marginBottom: '28px',
               }}
             >
-              {t('Notre vision', 'Our vision')}
+              {t('Notre manifeste', 'Our manifesto')}
             </p>
 
             <h2

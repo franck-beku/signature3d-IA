@@ -17,6 +17,7 @@ const navLinks = {
   fr: [
     { label: 'Services',          href: '/services'          },
     { label: 'Réalisations',      href: '/realisations'      },
+    { label: 'À propos',          href: '/a-propos'          },
     { label: 'Comment ça marche', href: '/comment-ca-marche' },
     { label: 'FAQ',               href: '/faq'               },
     { label: 'Contact',           href: '/contact'           },
@@ -24,6 +25,7 @@ const navLinks = {
   en: [
     { label: 'Services',        href: '/services'          },
     { label: 'Portfolio',       href: '/realisations'      },
+    { label: 'About',           href: '/a-propos'          },
     { label: 'How it works',    href: '/comment-ca-marche' },
     { label: 'FAQ',             href: '/faq'               },
     { label: 'Contact',         href: '/contact'           },
