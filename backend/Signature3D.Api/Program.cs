@@ -207,6 +207,7 @@ builder.Services.AddScoped<IFaqService, FaqService>();
 builder.Services.AddScoped<ITestimonialService, TestimonialService>();
 
 builder.Services.AddScoped<IAIProvider, GroqProvider>();
+builder.Services.AddScoped<IEmbeddingProvider, GeminiProvider>();
 
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 

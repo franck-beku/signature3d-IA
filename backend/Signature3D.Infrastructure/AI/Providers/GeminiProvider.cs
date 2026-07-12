@@ -104,7 +104,9 @@ public class GeminiProvider : IAIProvider, IEmbeddingProvider
     }
 
     /// <summary>
-    /// Génère un vecteur d'embedding via Gemini text-embedding-004.
+    /// Génère un vecteur d'embedding via Gemini gemini-embedding-001 (tronqué à 768 dimensions
+    /// via outputDimensionality — text-embedding-004 n'est plus disponible pour cette clé API,
+    /// confirmé par sondage direct de l'API le 2026-07-12).
     /// </summary>
     public async Task<Result<float[]>> GenerateEmbeddingAsync(string text)
     {
@@ -115,12 +117,13 @@ public class GeminiProvider : IAIProvider, IEmbeddingProvider
                 content = new
                 {
                     parts = new[] { new { text } }
-                }
+                },
+                outputDimensionality = 768,
             };
 
             var json     = JsonSerializer.Serialize(requestBody);
             var content  = new StringContent(json, Encoding.UTF8, "application/json");
-            var url      = $"models/text-embedding-004:embedContent?key={_settings.ApiKey}";
+            var url      = $"models/gemini-embedding-001:embedContent?key={_settings.ApiKey}";
             var response = await _http.PostAsync(url, content);
             var responseJson = await response.Content.ReadAsStringAsync();
 
