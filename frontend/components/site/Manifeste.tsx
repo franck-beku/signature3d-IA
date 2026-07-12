@@ -94,7 +94,7 @@ export default function Manifeste() {
           viewport={{ once: true, amount: 0.45 }}
           style={{
             display: 'grid',
-            gridTemplateColumns: '1.25fr 1px 0.9fr', // gauche / séparateur / droite
+            gridTemplateColumns: '1.5fr 1px 0.9fr', // gauche / séparateur / droite — élargie pour le H2 3-lignes
             gap: '72px',
             alignItems: 'center',
           }}
@@ -123,7 +123,7 @@ export default function Manifeste() {
                 color: INK,
                 lineHeight: 1.08,
                 letterSpacing: '-0.02em',
-                fontSize: 'clamp(2.4rem, 4.2vw, 4.2rem)',
+                fontSize: 'clamp(1.4rem, 1.8vw, 1.6rem)',
                 margin: 0,
                 maxWidth: '720px',
               }}
