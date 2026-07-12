@@ -232,7 +232,7 @@ export default function ServicesPage() {
               marginBottom: '1rem',
             }}
           >
-            {t('Trouvons la solution faite pour vous.', 'Let\u2019s find the right fit for you.')}
+            {t('Le tarif dépend de la taille et de la complexité de votre espace.', 'Pricing depends on the size and complexity of your space.')}
           </motion.h2>
           <p style={{
             fontSize: '1rem',
@@ -243,8 +243,8 @@ export default function ServicesPage() {
             lineHeight: 1.7,
           }}>
             {t(
-              'Présentez-nous votre espace : nous concevons l\u2019expérience immersive qui lui correspond.',
-              'Tell us about your space: we\u2019ll design the immersive experience that fits it.'
+              'Présentez-nous votre espace : nous vous répondons avec une proposition adaptée.',
+              'Tell us about your space: we’ll get back to you with a tailored proposal.'
             )}
           </p>
           <Link
@@ -266,7 +266,7 @@ export default function ServicesPage() {
             }}
             className="services-cta"
           >
-            {t('Demander une démonstration', 'Request a demonstration')}
+            {t('Demander une soumission', 'Request a quote')}
             <span>→</span>
           </Link>
         </div>
