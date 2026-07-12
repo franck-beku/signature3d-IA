@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Pgvector;
+using Pgvector.EntityFrameworkCore;
 using Signature3D.Application.Common;
 using Signature3D.Application.DTOs.Chat;
 using Signature3D.Application.Interfaces;
@@ -10,21 +12,24 @@ namespace Signature3D.Infrastructure.Services;
 
 /// <summary>
 /// Service de chat Luxedia IA.
-/// Architecture : Message → Recherche RAG (mots-clés) → Contexte → Groq → Réponse
+/// Architecture : Message → Recherche RAG hybride (vectorielle si des embeddings existent
+/// pour le projet, repli mots-clés sinon) → Contexte → Groq → Réponse
 /// </summary>
 public class ChatService : IChatService
 {
     private readonly AppDbContext _db;
     private readonly IAIProvider _aiProvider;
     private readonly IMemoryCache _cache;
+    private readonly IEmbeddingProvider _embeddingProvider;
 
     private static readonly TimeSpan ChunkCacheDuration = TimeSpan.FromMinutes(3);
 
-    public ChatService(AppDbContext db, IAIProvider aiProvider, IMemoryCache cache)
+    public ChatService(AppDbContext db, IAIProvider aiProvider, IMemoryCache cache, IEmbeddingProvider embeddingProvider)
     {
         _db = db;
         _aiProvider = aiProvider;
         _cache = cache;
+        _embeddingProvider = embeddingProvider;
     }
 
     /// <summary>Traite un message visiteur et retourne la réponse de Luxedia.</summary>
@@ -95,12 +100,33 @@ public class ChatService : IChatService
     }
 
     /// <summary>
-    /// Recherche RAG par mots-clés — trouve les chunks les plus pertinents.
-    /// Stratégie : score basé sur le nombre de mots du query trouvés dans le chunk.
-    /// Fallback vers les 3 premiers chunks si aucun match.
+    /// Recherche RAG hybride : tente d'abord la similarité vectorielle (pgvector) si l'embedding
+    /// de la question peut être généré ET qu'au moins un chunk du projet a déjà un embedding.
+    /// Repli intégral sur le scoring par mots-clés sinon (Gemini indisponible, aucun chunk
+    /// embeddé pour ce projet, ou toute autre erreur) — le RAG ne doit jamais échouer totalement.
     /// </summary>
     private async Task<string?> SearchRelevantContextAsync(Guid projectId, string query)
     {
+        try
+        {
+            var embeddingResult = await _embeddingProvider.GenerateEmbeddingAsync(query);
+            if (embeddingResult.Success)
+            {
+                var queryVector = new Vector(embeddingResult.Data!);
+                var vectorChunks = await SearchByVectorAsync(projectId, queryVector);
+                if (vectorChunks.Count > 0)
+                {
+                    Console.WriteLine($"[ChatService] RAG vectoriel : {vectorChunks.Count} chunks trouvés pour '{query}'");
+                    return string.Join("\n\n---\n\n", vectorChunks.Select(c => c.Content));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ChatService] ⚠️ Recherche vectorielle indisponible, repli mots-clés : {ex.Message}");
+        }
+
+        // Repli — chemin mots-clés existant, inchangé.
         var chunks = await _cache.GetOrCreateAsync(RagCacheKeys.ForProject(projectId), async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = ChunkCacheDuration;
@@ -114,6 +140,22 @@ public class ChatService : IChatService
         if (chunks is null || !chunks.Any()) return null;
 
         return ScoreAndSelectChunks(chunks, query);
+    }
+
+    /// <summary>
+    /// Recherche par similarité cosinus (pgvector, opérateur &lt;=&gt;) — requête SQL directe,
+    /// pas via le cache mémoire des chunks (le classement doit se faire côté Postgres).
+    /// Retourne une liste vide si aucun chunk du projet n'a encore d'embedding — c'est ce signal
+    /// (liste vide) qui déclenche le repli vers la recherche par mots-clés.
+    /// </summary>
+    private async Task<List<DocumentChunk>> SearchByVectorAsync(Guid projectId, Vector queryEmbedding)
+    {
+        return await _db.DocumentChunks
+            .Where(c => c.Document.ProjectId == projectId && c.Document.IsIndexed
+                     && !c.Document.IsInternal && c.Embedding != null)
+            .OrderBy(c => c.Embedding!.CosineDistance(queryEmbedding))
+            .Take(3)
+            .ToListAsync();
     }
 
     /// <summary>

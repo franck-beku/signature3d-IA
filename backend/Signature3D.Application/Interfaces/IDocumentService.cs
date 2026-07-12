@@ -19,4 +19,7 @@ public interface IDocumentService
 
     /// <summary>Traite un job d'indexation en file d'attente — appelé par DocumentIndexingBackgroundService.</summary>
     Task ProcessIndexingJobAsync(Guid jobId);
+
+    /// <summary>Génère l'embedding manquant des chunks existants qui n'en ont pas encore (rattrapage).</summary>
+    Task<Result<EmbeddingBackfillResultDto>> BackfillEmbeddingsAsync();
 }

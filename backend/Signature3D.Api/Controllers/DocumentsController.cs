@@ -130,6 +130,20 @@ public class DocumentsController : ControllerBase
             return BadRequest(new { message = result.Error });
         return Ok(new { url = result.Data });
     }
+
+    /// <summary>
+    /// Rattrapage : génère l'embedding des chunks existants qui n'en ont pas encore.
+    /// Traitement séquentiel, throttlé — peut prendre du temps selon le nombre de chunks à traiter.
+    /// POST /api/documents/backfill-embeddings
+    /// </summary>
+    [HttpPost("backfill-embeddings")]
+    public async Task<IActionResult> BackfillEmbeddings()
+    {
+        var result = await _documentService.BackfillEmbeddingsAsync();
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+        return Ok(result.Data);
+    }
 }
 
 public record SetCategoryRequest(bool IsInternal);

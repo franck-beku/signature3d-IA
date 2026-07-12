@@ -4,6 +4,7 @@ using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Pgvector;
 using Signature3D.Application.Common;
 using Signature3D.Application.DTOs.Documents;
 using Signature3D.Application.Interfaces;
@@ -23,16 +24,19 @@ public class DocumentService : IDocumentService
     private readonly IStorageService _storage;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMemoryCache _cache;
+    private readonly IEmbeddingProvider _embeddingProvider;
 
     private const int MaxChunkSize = 800;   // ~600 tokens
     private const int ChunkOverlap = 100;   // chevauchement pour contexte
+    private static readonly TimeSpan BackfillDelay = TimeSpan.FromMilliseconds(1200); // marge tier gratuit Gemini
 
-    public DocumentService(AppDbContext db, IStorageService storage, IServiceScopeFactory scopeFactory, IMemoryCache cache)
+    public DocumentService(AppDbContext db, IStorageService storage, IServiceScopeFactory scopeFactory, IMemoryCache cache, IEmbeddingProvider embeddingProvider)
     {
         _db = db;
         _storage = storage;
         _scopeFactory = scopeFactory;
         _cache = cache;
+        _embeddingProvider = embeddingProvider;
     }
 
     /// <summary>Retourne tous les documents d'un projet.</summary>
@@ -264,6 +268,52 @@ public class DocumentService : IDocumentService
         return await _storage.GetSignedUrlAsync(document.PrivateStorageReference);
     }
 
+    /// <summary>
+    /// Rattrapage : génère l'embedding des chunks existants qui n'en ont pas encore (Embedding IS NULL).
+    /// Traitement séquentiel avec délai entre chaque appel pour rester sous les limites de taux
+    /// du tier gratuit Gemini. Sauvegarde au fur et à mesure — une interruption ne perd pas le travail déjà fait.
+    /// </summary>
+    public async Task<Result<EmbeddingBackfillResultDto>> BackfillEmbeddingsAsync()
+    {
+        var chunks = await _db.DocumentChunks
+            .Where(c => c.Embedding == null)
+            .OrderBy(c => c.CreatedAt)
+            .ToListAsync();
+
+        var stats = new EmbeddingBackfillResultDto();
+
+        foreach (var chunk in chunks)
+        {
+            stats.Processed++;
+            try
+            {
+                var embeddingResult = await _embeddingProvider.GenerateEmbeddingAsync(chunk.Content);
+                if (embeddingResult.Success)
+                {
+                    chunk.Embedding = new Vector(embeddingResult.Data!);
+                    stats.Succeeded++;
+                }
+                else
+                {
+                    Console.WriteLine($"[DocumentService] ⚠️ Rattrapage embedding chunk {chunk.Id} échoué : {embeddingResult.Error}");
+                    stats.Failed++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DocumentService] ⚠️ Rattrapage embedding chunk {chunk.Id} exception : {ex.Message}");
+                stats.Failed++;
+            }
+
+            await _db.SaveChangesAsync();
+
+            if (stats.Processed < chunks.Count)
+                await Task.Delay(BackfillDelay);
+        }
+
+        return Result<EmbeddingBackfillResultDto>.Ok(stats);
+    }
+
     /// <summary>Traite un job d'indexation en file d'attente — appelé par DocumentIndexingBackgroundService.</summary>
     public async Task ProcessIndexingJobAsync(Guid jobId)
     {
@@ -343,14 +393,34 @@ public class DocumentService : IDocumentService
             var chunks = ChunkText(extractedText, MaxChunkSize, ChunkOverlap);
             Console.WriteLine($"[DocumentService] {chunks.Count} chunks créés");
 
-            // Créer les chunks (sans embeddings pour l'instant — RAG basé sur texte)
-            var chunkEntities = chunks.Select((content, i) => new DocumentChunk
+            // Créer les chunks — un embedding est généré par chunk (RAG sémantique), mais un échec
+            // (timeout, quota Gemini dépassé) n'empêche jamais la sauvegarde du chunk : le RAG par
+            // mots-clés reste le filet de sécurité si l'embedding est absent (Embedding = null).
+            var chunkEntities = new List<DocumentChunk>();
+            for (int i = 0; i < chunks.Count; i++)
             {
-                DocumentId = documentId,
-                Content    = content,
-                ChunkIndex = i,
-                Embedding  = null  // pgvector sera activé plus tard
-            }).ToList();
+                Vector? embedding = null;
+                try
+                {
+                    var embeddingResult = await _embeddingProvider.GenerateEmbeddingAsync(chunks[i]);
+                    if (embeddingResult.Success)
+                        embedding = new Vector(embeddingResult.Data!);
+                    else
+                        Console.WriteLine($"[DocumentService] ⚠️ Embedding chunk {i} échoué : {embeddingResult.Error}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DocumentService] ⚠️ Embedding chunk {i} exception : {ex.Message}");
+                }
+
+                chunkEntities.Add(new DocumentChunk
+                {
+                    DocumentId = documentId,
+                    Content    = chunks[i],
+                    ChunkIndex = i,
+                    Embedding  = embedding
+                });
+            }
 
             db.DocumentChunks.AddRange(chunkEntities);
             document.IsIndexed  = true;
