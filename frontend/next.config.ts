@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/comment-ca-marche", destination: "/", permanent: true },
+      { source: "/comment-ca-marche", destination: "/#comment-ca-marche", permanent: true },
     ];
   },
 };

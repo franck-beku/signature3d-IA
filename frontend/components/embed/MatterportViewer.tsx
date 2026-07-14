@@ -1,7 +1,6 @@
 'use client'
 
 import { getMatterportEmbedUrl } from '@/lib/matterport'
-import Image from 'next/image'
 
 interface MatterportViewerProps {
   matterportId: string
@@ -20,10 +19,25 @@ export default function MatterportViewer({ matterportId, projectName }: Matterpo
         <span style={{ color: '#d4af37', fontSize: '12px', letterSpacing: '0.05em' }}>{projectName}</span>
       </div>
 
-      {/* Branding */}
-      <div style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 10, opacity: 0.85 }}>
-        <Image src="/logo-dark.png" alt="Signature Immersion" width={120} height={39} style={{ height: '100px', width: 'auto' }} />
-      </div>
+      {/* Branding — icône seule, monochrome blanc, recadrée depuis logo-signature.png
+          (bbox de l'icône mesurée dans le fichier source 612×408 : x[58,190] y[98,266]) */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          bottom: '16px',
+          right: '16px',
+          zIndex: 10,
+          width: 'calc(30px * 132 / 168)',
+          height: '30px',
+          opacity: 0.8,
+          backgroundImage: 'url(/logo-signature.png)',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'calc(30px * 612 / 168) calc(30px * 408 / 168)',
+          backgroundPosition: 'calc(-30px * 58 / 168) calc(-30px * 98 / 168)',
+          filter: 'brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.5))',
+        }}
+      />
 
       {/* Iframe */}
       <iframe

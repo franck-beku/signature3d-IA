@@ -65,12 +65,14 @@ export default function CommentCaMarche() {
 
   return (
     <section
+      id="comment-ca-marche"
       aria-label={t('Comment ça marche', 'How it works')}
       style={{
         backgroundColor: colors.cream,
         color: colors.ink,
         position: 'relative',
         overflow: 'hidden',
+        scrollMarginTop: '80px',
         borderTop: `1px solid ${BORDER}`,
         borderBottom: `1px solid ${BORDER}`,
       }}

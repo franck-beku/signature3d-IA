@@ -17,7 +17,7 @@ const navLinks = {
     { label: 'Services',          href: '/services'          },
     { label: 'Réalisations',      href: '/realisations'      },
     { label: 'À propos',          href: '/a-propos'          },
-    { label: 'Comment ça marche', href: '/comment-ca-marche' },
+    { label: 'Comment ça marche', href: '/#comment-ca-marche'},
     { label: 'FAQ',               href: '/faq'               },
     { label: 'Contact',           href: '/contact'           },
   ],
@@ -25,7 +25,7 @@ const navLinks = {
     { label: 'Services',        href: '/services'          },
     { label: 'Portfolio',       href: '/realisations'      },
     { label: 'About',           href: '/a-propos'          },
-    { label: 'How it works',    href: '/comment-ca-marche' },
+    { label: 'How it works',    href: '/#comment-ca-marche'},
     { label: 'FAQ',             href: '/faq'               },
     { label: 'Contact',         href: '/contact'           },
   ],
@@ -64,7 +64,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <Image src="/logo-signature.png" alt="Signature Immersion" width={200} height={64} priority style={{ height: '52px', width: 'auto', display: 'block' }} />
+            <Image src="/logo-signature.png" alt="Signature Immersion" width={200} height={64} priority style={{ height: '60px', width: 'auto', display: 'block' }} />
           </Link>
 
           {/* Desktop nav */}
