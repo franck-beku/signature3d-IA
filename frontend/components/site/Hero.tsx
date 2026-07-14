@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
@@ -71,7 +72,7 @@ export default function Hero() {
       }}
     >
       {/* ── Diaporama d'images en fondu + Ken Burns ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <AnimatePresence>
           <motion.div
             key={index}
@@ -85,15 +86,17 @@ export default function Hero() {
               initial={{ scale: 1 }}
               animate={{ scale: reduceMotion ? 1 : 1.08 }}
               transition={{ duration: CYCLE / 1000, ease: 'linear' }}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url("${SLIDES[index]}")`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
-            />
+              style={{ position: 'absolute', inset: 0 }}
+            >
+              <Image
+                src={SLIDES[index]}
+                alt=""
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
+              />
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
