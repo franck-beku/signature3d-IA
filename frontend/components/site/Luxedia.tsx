@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { MessageCircle, Compass, UserCheck, Clock } from 'lucide-react';
+import { MessageCircle, Compass, UserCheck, Clock, Send } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { colors, aiSignal } from '@/config/theme';
 
@@ -18,27 +19,35 @@ const PERSONAS = [
     key: 'aria',
     name: 'Aria',
     color: aiSignal.indigo,
-    messageFr: 'Bonjour ! Je suis Aria, comment puis-je vous aider ?',
-    messageEn: "Hi! I'm Aria, how can I help you?",
+    questionFr: 'Quelles sont les disponibilités cette semaine ?',
+    questionEn: 'What availability is there this week?',
+    answerFr: 'Je peux vérifier ça pour vous immédiatement.',
+    answerEn: 'I can check that for you right away.',
   },
   {
     key: 'max',
     name: 'Max',
     color: colors.gold,
-    messageFr: 'Salut, je suis Max — posez-moi vos questions !',
-    messageEn: "Hey, I'm Max — ask me anything!",
+    questionFr: 'Puis-je avoir plus de détails sur ce modèle ?',
+    questionEn: 'Can I get more details on this model?',
+    answerFr: 'Bien sûr, laissez-moi vous montrer les caractéristiques.',
+    answerEn: 'Of course, let me show you the features.',
   },
   {
     key: 'nova',
     name: 'Nova',
     color: '#3FA796',
-    messageFr: 'Bienvenue, je suis Nova, ravie de vous accompagner.',
-    messageEn: "Welcome, I'm Nova, happy to help.",
+    questionFr: 'Une visite est-elle possible ce soir ?',
+    questionEn: 'Is a visit possible tonight?',
+    answerFr: 'Oui, je vous montre les créneaux disponibles.',
+    answerEn: 'Yes, let me show you the available slots.',
   },
 ];
 
 export default function Luxedia() {
   const { t } = useLanguage();
+  const [active, setActive] = useState(0);
+  const activePersona = PERSONAS[active];
 
   const container = {
     hidden: {},
@@ -122,25 +131,70 @@ export default function Luxedia() {
           </motion.div>
         </motion.div>
 
-        {/* ── Partie 2 : personnalisation ── */}
+        {/* ── Partie 2 : démonstration d'interface ── */}
         <motion.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.25 }}
           variants={container}
-          className="luxedia-personas"
+          className="luxedia-demo"
         >
-          {PERSONAS.map((p) => (
-            <motion.div key={p.key} variants={item} className="luxedia-persona">
-              <div className="luxedia-avatar" style={{ borderColor: p.color, boxShadow: `0 0 34px ${p.color}33` }}>
-                <Image src="/luxedia-avatar.png" alt={p.name} width={72} height={72} />
+          <motion.div
+            variants={item}
+            className="luxedia-tabs"
+            role="tablist"
+            aria-label={t('Choisir une personnalisation', 'Choose a customization')}
+          >
+            {PERSONAS.map((p, i) => (
+              <button
+                key={p.key}
+                role="tab"
+                aria-selected={i === active}
+                onClick={() => setActive(i)}
+                className="luxedia-tab"
+                style={{
+                  backgroundColor: i === active ? p.color : 'transparent',
+                  color: i === active ? '#0B0B0B' : 'rgba(247,245,242,0.55)',
+                  borderColor: i === active ? p.color : 'rgba(255,255,255,0.1)',
+                }}
+              >
+                {p.name}
+              </button>
+            ))}
+          </motion.div>
+
+          <motion.div variants={item} className="luxedia-panel">
+            <span className="luxedia-panel-tag">{t('Aperçu', 'Preview')}</span>
+
+            <div className="luxedia-panel-header">
+              <div className="luxedia-panel-avatar" style={{ borderColor: activePersona.color }}>
+                <Image src="/luxedia-avatar.png" alt={activePersona.name} width={42} height={42} />
               </div>
-              <p className="luxedia-name" style={{ color: p.color }}>{p.name}</p>
-              <div className="luxedia-bubble" style={{ borderLeftColor: p.color }}>
-                {t(p.messageFr, p.messageEn)}
+              <div>
+                <p className="luxedia-panel-name">{activePersona.name}</p>
+                <div className="luxedia-panel-status">
+                  <span className="luxedia-panel-dot" />
+                  {t('En ligne', 'Online')}
+                </div>
               </div>
-            </motion.div>
-          ))}
+            </div>
+
+            <div className="luxedia-panel-body">
+              <div className="luxedia-panel-msg luxedia-panel-msg-user" style={{ backgroundColor: activePersona.color }}>
+                {t(activePersona.questionFr, activePersona.questionEn)}
+              </div>
+              <div className="luxedia-panel-msg luxedia-panel-msg-ai" style={{ borderLeftColor: activePersona.color }}>
+                {t(activePersona.answerFr, activePersona.answerEn)}
+              </div>
+            </div>
+
+            <div className="luxedia-panel-input">
+              <span className="luxedia-panel-placeholder">{t('Posez votre question…', 'Ask your question…')}</span>
+              <span className="luxedia-panel-send" style={{ backgroundColor: activePersona.color }}>
+                <Send size={13} color="#0B0B0B" />
+              </span>
+            </div>
+          </motion.div>
         </motion.div>
 
         <motion.p
@@ -159,12 +213,22 @@ export default function Luxedia() {
 
       <style>{`
         .luxedia-label {
+          font-family: var(--font-jetbrains-mono), monospace;
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.34em;
           text-transform: uppercase;
           color: ${aiSignal.indigo};
           margin-bottom: 20px;
+        }
+
+        .luxedia-label::after {
+          content: '_';
+          animation: luxedia-blink 1.1s step-end infinite;
+        }
+
+        @keyframes luxedia-blink {
+          50% { opacity: 0; }
         }
 
         .luxedia-title {
@@ -216,55 +280,160 @@ export default function Luxedia() {
           color: ${aiSignal.indigo};
         }
 
-        .luxedia-personas {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 24px;
+        .luxedia-demo {
           margin-top: 12px;
         }
 
-        .luxedia-persona {
-          text-align: center;
+        .luxedia-tabs {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 24px;
+        }
+
+        .luxedia-tab {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          padding: 8px 18px;
+          border-radius: 999px;
+          border: 1px solid;
+          cursor: pointer;
+          transition: all 0.25s ease;
+        }
+
+        .luxedia-panel {
+          position: relative;
+          max-width: 420px;
+          margin: 0 auto;
           background: rgba(255,255,255,0.03);
           border: 1px solid rgba(255,255,255,0.08);
           border-radius: 18px;
-          padding: 34px 24px;
+          overflow: hidden;
         }
 
-        .luxedia-avatar {
-          width: 72px;
-          height: 72px;
-          margin: 0 auto 18px;
-          border-radius: 50%;
-          border: 2px solid;
-          overflow: hidden;
+        .luxedia-panel-tag {
+          position: absolute;
+          top: 14px;
+          right: 16px;
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 9px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(247,245,242,0.35);
+        }
+
+        .luxedia-panel-header {
           display: flex;
           align-items: center;
-          justify-content: center;
+          gap: 12px;
+          padding: 18px 20px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        .luxedia-avatar img {
+        .luxedia-panel-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          border: 1.5px solid;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        .luxedia-panel-avatar img {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
 
-        .luxedia-name {
-          font-family: var(--font-cormorant), serif;
-          font-size: 1.5rem;
-          font-weight: 500;
-          margin: 0 0 16px;
+        .luxedia-panel-name {
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 13px;
+          font-weight: 600;
+          color: #FFFFFF;
+          margin: 0 0 4px;
         }
 
-        .luxedia-bubble {
-          text-align: left;
-          background: rgba(255,255,255,0.05);
-          border-left: 3px solid;
-          border-radius: 8px;
-          padding: 12px 14px;
+        .luxedia-panel-status {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          color: #4ade80;
+        }
+
+        .luxedia-panel-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #4ade80;
+          animation: luxedia-pulse 2s infinite;
+        }
+
+        @keyframes luxedia-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+
+        .luxedia-panel-body {
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .luxedia-panel-msg {
           font-size: 13px;
-          line-height: 1.55;
-          color: rgba(247,245,242,0.82);
+          line-height: 1.6;
+          padding: 10px 14px;
+          border-radius: 12px;
+          max-width: 85%;
+        }
+
+        .luxedia-panel-msg-user {
+          align-self: flex-end;
+          color: #0B0B0B;
+          font-weight: 500;
+          border-top-right-radius: 4px;
+        }
+
+        .luxedia-panel-msg-ai {
+          align-self: flex-start;
+          background: rgba(255,255,255,0.06);
+          border-left: 3px solid;
+          color: rgba(247,245,242,0.85);
+          border-top-left-radius: 4px;
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 12.5px;
+        }
+
+        .luxedia-panel-input {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 0 20px 20px;
+          padding: 10px 14px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .luxedia-panel-placeholder {
+          flex: 1;
+          font-family: var(--font-jetbrains-mono), monospace;
+          font-size: 12px;
+          color: rgba(247,245,242,0.3);
+        }
+
+        .luxedia-panel-send {
+          width: 26px;
+          height: 26px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
         }
 
         .luxedia-caption {
@@ -279,8 +448,11 @@ export default function Luxedia() {
           .luxedia-wrap {
             padding: 110px 24px !important;
           }
-          .luxedia-personas {
-            grid-template-columns: 1fr;
+          .luxedia-panel {
+            max-width: 100%;
+          }
+          .luxedia-tabs {
+            flex-wrap: wrap;
           }
         }
       `}</style>
