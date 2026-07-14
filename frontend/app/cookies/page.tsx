@@ -22,11 +22,11 @@ export default function CookiesPage() {
         (aussi appelés « témoins de connexion ») sur son site.
       </p>
 
-      <h2>1. Qu'est-ce qu'un cookie ?</h2>
+      <h2>1. Qu&apos;est-ce qu&apos;un cookie ?</h2>
       <p>
         Un cookie est un petit fichier déposé sur votre appareil lorsque vous visitez un site. Il
         permet de faire fonctionner certaines fonctionnalités, de mémoriser vos préférences ou de
-        mesurer l'audience.
+        mesurer l&apos;audience.
       </p>
 
       <h2>2. Les cookies que nous utilisons</h2>
@@ -37,16 +37,16 @@ export default function CookiesPage() {
         langue (français ou anglais). Ils ne peuvent pas être désactivés.
       </p>
 
-      <h3>Cookies de mesure d'audience</h3>
+      <h3>Cookies de mesure d&apos;audience</h3>
       <p>
-        Nous pouvons utiliser des outils de mesure d'audience pour comprendre comment notre site est
-        consulté (pages visitées, durée de visite) de façon agrégée et anonyme, afin d'améliorer
-        l'expérience.
+        Nous pouvons utiliser des outils de mesure d&apos;audience pour comprendre comment notre site est
+        consulté (pages visitées, durée de visite) de façon agrégée et anonyme, afin d&apos;améliorer
+        l&apos;expérience.
       </p>
       <p>
-        <span className="todo">[À COMPLÉTER]</span> Préciser le ou les outils d'analytics réellement
+        <span className="todo">[À COMPLÉTER]</span> Préciser le ou les outils d&apos;analytics réellement
         utilisés (ex. Google Analytics, Vercel Analytics, Plausible), ou retirer cette section si
-        aucun n'est employé.
+        aucun n&apos;est employé.
       </p>
 
       <h3>Cookies de préférences</h3>
@@ -59,7 +59,7 @@ export default function CookiesPage() {
       <p>
         Certaines fonctionnalités intégrées à notre site sont fournies par des services tiers. Ces
         services peuvent déposer leurs propres cookies, selon leurs politiques respectives, sur
-        lesquelles nous n'avons pas de contrôle. C'est notamment le cas du lecteur immersif{' '}
+        lesquelles nous n&apos;avons pas de contrôle. C&apos;est notamment le cas du lecteur immersif{' '}
         <strong>Matterport</strong> utilisé pour afficher les visites 3D.
       </p>
       <p>
@@ -80,7 +80,7 @@ export default function CookiesPage() {
 
       <h2>4. Consentement</h2>
       <p>
-        Lorsque la loi l'exige, nous demanderons votre consentement avant l'utilisation de certains
+        Lorsque la loi l&apos;exige, nous demanderons votre consentement avant l&apos;utilisation de certains
         cookies non essentiels. Vous pourrez modifier vos préférences à tout moment.
       </p>
 

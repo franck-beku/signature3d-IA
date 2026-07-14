@@ -19,7 +19,7 @@ export default function ConditionsPage() {
       updatedDate="21 juin 2026"
     >
       <p>
-        Les présentes conditions encadrent l'utilisation du site de{' '}
+        Les présentes conditions encadrent l&apos;utilisation du site de{' '}
         <strong>Signature Immersion</strong> et des services qui y sont présentés. En accédant à ce
         site, vous acceptez les conditions décrites ci-dessous.
       </p>
@@ -34,15 +34,15 @@ export default function ConditionsPage() {
       <h2>2. Utilisation du site</h2>
       <p>Vous vous engagez à utiliser ce site de manière loyale et à ne pas :</p>
       <ul>
-        <li>tenter d'accéder à des zones non publiques ou sécurisées du site ;</li>
+        <li>tenter d&apos;accéder à des zones non publiques ou sécurisées du site ;</li>
         <li>perturber le fonctionnement du site ou des services ;</li>
-        <li>collecter des données d'autres utilisateurs sans autorisation ;</li>
+        <li>collecter des données d&apos;autres utilisateurs sans autorisation ;</li>
         <li>utiliser le contenu à des fins illégales ou non autorisées.</li>
       </ul>
 
       <h2>3. Propriété intellectuelle</h2>
       <p>
-        L'ensemble des éléments du site (textes, visuels, logos, identité « Signature Immersion »,
+        L&apos;ensemble des éléments du site (textes, visuels, logos, identité « Signature Immersion »,
         expériences immersives, assistant Luxedia) est protégé et demeure la propriété exclusive de
         Signature Immersion ou de ses partenaires. Toute reproduction ou réutilisation sans
         autorisation écrite préalable est interdite.
@@ -56,11 +56,11 @@ export default function ConditionsPage() {
       <p>
         Les informations intégrées dans les expériences immersives (fiches, descriptions, prix,
         menus, documents, visuels, etc.) peuvent être fournies par les clients de Signature
-        Immersion. Ces clients demeurent <strong>seuls responsables</strong> de l'exactitude, de la
-        mise à jour et de la légalité des contenus qu'ils nous transmettent.
+        Immersion. Ces clients demeurent <strong>seuls responsables</strong> de l&apos;exactitude, de la
+        mise à jour et de la légalité des contenus qu&apos;ils nous transmettent.
       </p>
       <p>
-        Signature Immersion ne saurait être tenue responsable d'une information inexacte, périmée ou
+        Signature Immersion ne saurait être tenue responsable d&apos;une information inexacte, périmée ou
         non conforme transmise par un client et intégrée à une expérience.
       </p>
 
@@ -73,41 +73,41 @@ export default function ConditionsPage() {
 
       <h2>6. Assistant Luxedia</h2>
       <p>
-        L'assistant Luxedia fournit des réponses générées automatiquement à titre informatif. Bien
+        L&apos;assistant Luxedia fournit des réponses générées automatiquement à titre informatif. Bien
         que nous veillions à leur pertinence, ces réponses ne constituent pas un engagement
         contractuel. En cas de doute, nous vous invitons à nous contacter directement.
       </p>
       <p>
-        L'utilisateur s'engage à ne pas utiliser Luxedia à des fins illégales, frauduleuses,
+        L&apos;utilisateur s&apos;engage à ne pas utiliser Luxedia à des fins illégales, frauduleuses,
         diffamatoires, abusives ou contraires aux lois applicables.
       </p>
 
       <h2>7. Disponibilité des services</h2>
       <p>
-        Nous nous efforçons d'assurer la disponibilité du site et des services. Nous nous réservons
+        Nous nous efforçons d&apos;assurer la disponibilité du site et des services. Nous nous réservons
         toutefois le droit de modifier, suspendre ou interrompre tout ou partie du site ou des
         services, sans préavis, lorsque des contraintes techniques, de sécurité ou contractuelles
-        l'exigent.
+        l&apos;exigent.
       </p>
 
       <h2>8. Limitation de responsabilité</h2>
       <p>
-        Signature Immersion s'efforce d'assurer l'exactitude des informations présentées et le bon
+        Signature Immersion s&apos;efforce d&apos;assurer l&apos;exactitude des informations présentées et le bon
         fonctionnement du site, sans pouvoir le garantir de façon absolue. Notre responsabilité ne
-        saurait être engagée en cas d'interruption du service, d'erreur, ou de dommage indirect lié
-        à l'utilisation du site.
+        saurait être engagée en cas d&apos;interruption du service, d&apos;erreur, ou de dommage indirect lié
+        à l&apos;utilisation du site.
       </p>
 
       <h2>9. Liens externes</h2>
       <p>
-        Ce site peut contenir des liens vers des sites tiers. Signature Immersion n'exerce aucun
+        Ce site peut contenir des liens vers des sites tiers. Signature Immersion n&apos;exerce aucun
         contrôle sur ces sites et décline toute responsabilité quant à leur contenu.
       </p>
 
       <h2>10. Mineurs</h2>
       <p>
-        Ce site n'est pas destiné aux personnes de moins de 14 ans sans l'autorisation d'un parent
-        ou d'un tuteur. Si vous êtes mineur, vous ne devez nous transmettre aucun renseignement
+        Ce site n&apos;est pas destiné aux personnes de moins de 14 ans sans l&apos;autorisation d&apos;un parent
+        ou d&apos;un tuteur. Si vous êtes mineur, vous ne devez nous transmettre aucun renseignement
         personnel sans cette autorisation.
       </p>
 
