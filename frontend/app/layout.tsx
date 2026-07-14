@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
-import LuxuryCursor from "@/components/site/LuxuryCursor";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,7 +40,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       }}>
         <LanguageProvider>
           {children}
-          <LuxuryCursor />
           <div
             aria-hidden="true"
             style={{
