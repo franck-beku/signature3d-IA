@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { offeringsApi, type OfferingDto } from '@/lib/api';
@@ -10,6 +10,7 @@ import { colors } from '@/config/theme';
 
 export default function OffresVedettes() {
   const { t, lang } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const [offerings, setOfferings] = useState<OfferingDto[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,15 +37,15 @@ export default function OffresVedettes() {
 
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+    show: { transition: { staggerChildren: reduceMotion ? 0 : 0.12, delayChildren: reduceMotion ? 0 : 0.1 } },
   };
 
   const item = {
-    hidden: { opacity: 0, y: 24 },
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 24 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: reduceMotion ? 0.2 : 0.75, ease: [0.22, 1, 0.36, 1] as const },
     },
   };
 

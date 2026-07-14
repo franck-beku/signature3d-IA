@@ -103,7 +103,7 @@ export default function Navbar() {
             <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.08)' }} />
 
             {/* CTA */}
-            <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', color: '#0B0B0B', borderRadius: '6px', padding: '9px 18px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s ease', whiteSpace: 'nowrap' }} className="nav-cta">
+            <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', color: '#0B0B0B', borderRadius: '10px', padding: '9px 18px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s ease', whiteSpace: 'nowrap' }} className="nav-cta">
               {t('Demander une démo', 'Request a demo')}
               <span style={{ color: GOLD, fontSize: '13px' }}>→</span>
             </Link>
@@ -137,7 +137,7 @@ export default function Navbar() {
                 </button>
               ))}
             </div>
-            <Link href="/contact" onClick={() => setIsOpen(false)} style={{ flex: 1, textAlign: 'center', backgroundColor: '#FFFFFF', color: '#0B0B0B', borderRadius: '6px', padding: '11px 20px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
+            <Link href="/contact" onClick={() => setIsOpen(false)} className="mobile-nav-cta" style={{ flex: 1, textAlign: 'center', backgroundColor: '#FFFFFF', color: '#0B0B0B', borderRadius: '10px', padding: '11px 20px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}>
               {t('Demander une démo', 'Request a demo')}
             </Link>
           </div>
@@ -148,6 +148,15 @@ export default function Navbar() {
         .nav-link:hover        { color: rgba(255,255,255,0.9) !important; }
         .nav-cta:hover         { background-color: ${GOLD} !important; color: #000 !important; }
         .mobile-nav-link:hover { color: rgba(255,255,255,0.9) !important; background: rgba(255,255,255,0.03) !important; }
+
+        .nav-link:focus-visible,
+        .nav-cta:focus-visible,
+        .mobile-nav-link:focus-visible,
+        .mobile-nav-cta:focus-visible {
+          outline: 2px solid ${GOLD} !important;
+          outline-offset: 3px !important;
+        }
+
         @media (max-width: 1100px) {
           .nav-desktop    { display: none !important; }
           .nav-right      { display: none !important; }

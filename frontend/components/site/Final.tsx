@@ -169,7 +169,7 @@ export default function ContactFinal() {
           gap: 14px;
           background: ${GOLD};
           color: #FFFFFF;
-          border-radius: 7px;
+          border-radius: 10px;
           padding: 19px 40px;
           font-size: 12px;
           font-weight: 700;
@@ -184,6 +184,11 @@ export default function ContactFinal() {
           background: #FFFFFF;
           color: #101010;
           transform: translateY(-3px);
+        }
+
+        .final-cta:focus-visible {
+          outline: 2px solid #FFFFFF !important;
+          outline-offset: 3px !important;
         }
 
         @media (max-width: 640px) {

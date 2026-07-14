@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
 type Univers = {
@@ -57,18 +57,19 @@ const UNIVERS: Univers[] = [
 
 export default function NosUnivers() {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
 
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+    show: { transition: { staggerChildren: reduceMotion ? 0 : 0.1, delayChildren: reduceMotion ? 0 : 0.1 } },
   };
 
   const item = {
-    hidden: { opacity: 0, y: 26 },
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 26 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: reduceMotion ? 0.2 : 0.75, ease: [0.22, 1, 0.36, 1] as const },
     },
   };
 

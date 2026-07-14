@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
 /**
@@ -26,11 +26,13 @@ const BORDER = '#E7DED0';   // filets haut/bas très discrets
 
 export default function Manifeste() {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const h2Ref = useRef<HTMLHeadingElement>(null);
   const h2InView = useInView(h2Ref, { once: true, margin: '-80px' });
 
   // Légère parallaxe : le bloc texte monte doucement au scroll.
+  // (le hook doit toujours être appelé — on neutralise seulement son usage plus bas si reduceMotion)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
@@ -41,14 +43,14 @@ export default function Manifeste() {
   // Apparition séquencée des éléments au scroll.
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
+    show: { transition: { staggerChildren: reduceMotion ? 0 : 0.18, delayChildren: reduceMotion ? 0 : 0.1 } },
   };
   const item = {
-    hidden: { opacity: 0, y: 24 },
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 24 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: reduceMotion ? 0.25 : 0.9, ease: [0.22, 1, 0.36, 1] as const },
     },
   };
 
@@ -101,7 +103,7 @@ export default function Manifeste() {
           className="manifeste-grid"
         >
           {/* ── Colonne gauche : la vision (grand titre Cormorant) ── */}
-          <motion.div variants={item} style={{ y: yLeft }}>
+          <motion.div variants={item} style={reduceMotion ? undefined : { y: yLeft }}>
             <p
               style={{
                 fontSize: '11px',
@@ -131,9 +133,9 @@ export default function Manifeste() {
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <motion.span
                   style={{ display: 'block' }}
-                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  initial={reduceMotion ? { clipPath: 'inset(0% 0 0 0)' } : { clipPath: 'inset(100% 0 0 0)' }}
                   animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0 }}
                 >
                   {t('Nous ne créons pas simplement des visites.', 'We do not simply create tours.')}
                 </motion.span>
@@ -141,9 +143,9 @@ export default function Manifeste() {
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <motion.span
                   style={{ display: 'block' }}
-                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  initial={reduceMotion ? { clipPath: 'inset(0% 0 0 0)' } : { clipPath: 'inset(100% 0 0 0)' }}
                   animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.14 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0.14 }}
                 >
                   {t('Nous ', 'We ')}
                   <span style={{ color: GOLD }}>
@@ -154,9 +156,9 @@ export default function Manifeste() {
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <motion.span
                   style={{ display: 'block' }}
-                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  initial={reduceMotion ? { clipPath: 'inset(0% 0 0 0)' } : { clipPath: 'inset(100% 0 0 0)' }}
                   animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.28 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0.28 }}
                 >
                   {t(
                     'en expériences immersives qui captivent, informent et convertissent.',
@@ -181,7 +183,7 @@ export default function Manifeste() {
           />
 
           {/* ── Colonne droite : la mission + signature ── */}
-          <motion.div variants={item} style={{ maxWidth: '390px', y: yRight }}>
+          <motion.div variants={item} style={reduceMotion ? { maxWidth: '390px' } : { maxWidth: '390px', y: yRight }}>
             <p
               style={{
                 fontSize: '16px',
