@@ -157,7 +157,7 @@ export default function ParametresPage() {
               </div>
               <div>
                 <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Entreprise</label>
-                <input type="text" value="Signature 3D IA" disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
+                <input type="text" value="Signature Immersion" disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
               </div>
             </div>
 
