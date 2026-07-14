@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { colors } from '@/config/theme';
 
 /**
  * Manifeste — Acte 2 du film (VERSION CLAIRE V2).
@@ -18,11 +19,7 @@ import { useLanguage } from '@/context/LanguageContext';
  *               padding vertical réduit à 110px.
  */
 
-const GOLD = '#C8A45D';     // or champagne — accents uniquement
-const CREAM = '#F7F5F2';    // fond de la section (niveau "crème")
-const INK = '#101010';      // texte principal sombre sur fond clair
-const MUTED = '#5E5A52';    // texte secondaire (mission)
-const BORDER = '#E7DED0';   // filets haut/bas très discrets
+const MUTED = '#5E5A52';    // texte secondaire (mission) — valeur distincte de colors.muted, non centralisée
 
 export default function Manifeste() {
   const { t } = useLanguage();
@@ -60,11 +57,11 @@ export default function Manifeste() {
       aria-label={t('Notre manifeste', 'Our manifesto')}
       style={{
         position: 'relative',
-        backgroundColor: CREAM,        // ← FOND CRÈME
-        color: INK,
+        backgroundColor: colors.cream,        // ← FOND CRÈME
+        color: colors.ink,
         overflow: 'hidden',
-        borderTop: `1px solid ${BORDER}`,
-        borderBottom: `1px solid ${BORDER}`,
+        borderTop: `1px solid ${colors.border}`,
+        borderBottom: `1px solid ${colors.border}`,
       }}
     >
       {/* Halo doré très léger en fond, pour ne pas avoir un crème totalement plat. */}
@@ -110,7 +107,7 @@ export default function Manifeste() {
                 fontWeight: 700,
                 letterSpacing: '0.34em',
                 textTransform: 'uppercase',
-                color: GOLD,            // eyebrow doré (accent)
+                color: colors.gold,            // eyebrow doré (accent)
                 marginBottom: '28px',
               }}
             >
@@ -122,7 +119,7 @@ export default function Manifeste() {
               style={{
                 fontFamily: 'var(--font-cormorant), serif',
                 fontWeight: 400,
-                color: INK,
+                color: colors.ink,
                 lineHeight: 1.08,
                 letterSpacing: '-0.02em',
                 fontSize: 'clamp(1.4rem, 1.8vw, 1.6rem)',
@@ -148,7 +145,7 @@ export default function Manifeste() {
                   transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0.14 }}
                 >
                   {t('Nous ', 'We ')}
-                  <span style={{ color: GOLD }}>
+                  <span style={{ color: colors.gold }}>
                     {t('transformons des espaces', 'transform spaces')}
                   </span>
                 </motion.span>
@@ -216,7 +213,7 @@ export default function Manifeste() {
             <div
               style={{
                 marginTop: '42px',
-                color: GOLD,
+                color: colors.gold,
                 fontFamily: 'var(--font-cormorant), serif',
                 fontStyle: 'italic',
                 fontSize: '2.5rem',
@@ -230,7 +227,7 @@ export default function Manifeste() {
               style={{
                 marginTop: '14px',
                 fontSize: '13px',
-                color: INK,
+                color: colors.ink,
               }}
             >
               {t("L’équipe Signature Immersion", 'The Signature Immersion team')}

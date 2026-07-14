@@ -10,8 +10,7 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
-
-const GOLD = '#C8A45D'
+import { colors } from '@/config/theme'
 
 const navLinks = {
   fr: [
@@ -90,7 +89,7 @@ export default function Navbar() {
                     fontSize: '10px', fontWeight: 600, padding: '4px 10px',
                     borderRadius: '4px', border: 'none', cursor: 'pointer',
                     textTransform: 'uppercase', letterSpacing: '0.1em',
-                    backgroundColor: lang === l ? GOLD : 'transparent',
+                    backgroundColor: lang === l ? colors.gold : 'transparent',
                     color: lang === l ? '#000' : 'rgba(255,255,255,0.3)',
                     transition: 'all 0.2s ease',
                   }}
@@ -105,7 +104,7 @@ export default function Navbar() {
             {/* CTA */}
             <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', color: '#0B0B0B', borderRadius: '10px', padding: '9px 18px', fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s ease', whiteSpace: 'nowrap' }} className="nav-cta">
               {t('Demander une démo', 'Request a demo')}
-              <span style={{ color: GOLD, fontSize: '13px' }}>→</span>
+              <span style={{ color: colors.gold, fontSize: '13px' }}>→</span>
             </Link>
           </div>
 
@@ -132,7 +131,7 @@ export default function Navbar() {
           <div style={{ display: 'flex', gap: '10px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255,255,255,0.06)' }}>
               {(['fr', 'en'] as const).map((l) => (
-                <button key={l} onClick={() => setLang(l)} style={{ fontSize: '10px', fontWeight: 600, padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', textTransform: 'uppercase', backgroundColor: lang === l ? GOLD : 'transparent', color: lang === l ? '#000' : 'rgba(255,255,255,0.3)', transition: 'all 0.2s ease' }}>
+                <button key={l} onClick={() => setLang(l)} style={{ fontSize: '10px', fontWeight: 600, padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', textTransform: 'uppercase', backgroundColor: lang === l ? colors.gold : 'transparent', color: lang === l ? '#000' : 'rgba(255,255,255,0.3)', transition: 'all 0.2s ease' }}>
                   {l}
                 </button>
               ))}
@@ -146,14 +145,14 @@ export default function Navbar() {
 
       <style>{`
         .nav-link:hover        { color: rgba(255,255,255,0.9) !important; }
-        .nav-cta:hover         { background-color: ${GOLD} !important; color: #000 !important; }
+        .nav-cta:hover         { background-color: ${colors.gold} !important; color: #000 !important; }
         .mobile-nav-link:hover { color: rgba(255,255,255,0.9) !important; background: rgba(255,255,255,0.03) !important; }
 
         .nav-link:focus-visible,
         .nav-cta:focus-visible,
         .mobile-nav-link:focus-visible,
         .mobile-nav-cta:focus-visible {
-          outline: 2px solid ${GOLD} !important;
+          outline: 2px solid ${colors.gold} !important;
           outline-offset: 3px !important;
         }
 

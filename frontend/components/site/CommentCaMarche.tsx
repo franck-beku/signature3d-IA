@@ -3,12 +3,8 @@
 import { motion } from 'framer-motion';
 import { Aperture, Layers, Sparkles, QrCode, MapPin } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { colors } from '@/config/theme';
 
-const GOLD = '#C8A45D';
-const CREAM = '#F7F5F2';
-const CARD = '#FCFBF8';
-const INK = '#101010';
-const MUTED = '#6B6458';
 const BORDER = '#E2D8C8';
 
 export default function CommentCaMarche() {
@@ -71,8 +67,8 @@ export default function CommentCaMarche() {
     <section
       aria-label={t('Comment ça marche', 'How it works')}
       style={{
-        backgroundColor: CREAM,
-        color: INK,
+        backgroundColor: colors.cream,
+        color: colors.ink,
         position: 'relative',
         overflow: 'hidden',
         borderTop: `1px solid ${BORDER}`,
@@ -169,7 +165,7 @@ export default function CommentCaMarche() {
           font-weight: 700;
           letter-spacing: 0.32em;
           text-transform: uppercase;
-          color: ${GOLD};
+          color: ${colors.gold};
           margin-bottom: 20px;
         }
 
@@ -177,14 +173,14 @@ export default function CommentCaMarche() {
           font-family: var(--font-cormorant), serif;
           font-size: clamp(2.3rem, 4vw, 4.2rem);
           font-weight: 400;
-          color: ${INK};
+          color: ${colors.ink};
           line-height: 1.05;
           letter-spacing: -0.02em;
           margin: 0;
         }
 
         .ccm-title span {
-          color: ${GOLD};
+          color: ${colors.gold};
           font-style: italic;
         }
 
@@ -213,7 +209,7 @@ export default function CommentCaMarche() {
           position: relative;
           z-index: 1;
           text-align: center;
-          background: ${CARD};
+          background: ${colors.white};
           border: 1px solid ${BORDER};
           border-radius: 18px;
           padding: 34px 24px 32px;
@@ -234,7 +230,7 @@ export default function CommentCaMarche() {
           border-radius: 50%;
           background: #FFFFFF;
           border: 1px solid rgba(200,164,93,0.55);
-          color: ${GOLD};
+          color: ${colors.gold};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -245,7 +241,7 @@ export default function CommentCaMarche() {
           font-family: var(--font-cormorant), serif;
           font-size: 16px;
           letter-spacing: 0.24em;
-          color: ${GOLD};
+          color: ${colors.gold};
           margin: 0 0 12px;
         }
 
@@ -253,7 +249,7 @@ export default function CommentCaMarche() {
           font-family: var(--font-cormorant), serif;
           font-size: clamp(1.3rem, 2vw, 1.65rem);
           font-weight: 400;
-          color: ${INK};
+          color: ${colors.ink};
           line-height: 1.25;
           margin: 0 0 14px;
         }
@@ -261,14 +257,14 @@ export default function CommentCaMarche() {
         .ccm-desc {
           font-size: 14px;
           line-height: 1.7;
-          color: ${MUTED};
+          color: ${colors.muted};
           margin: 0 auto;
           max-width: 230px;
         }
 
         .ccm-note {
           text-align: center;
-          color: ${MUTED};
+          color: ${colors.muted};
           font-size: 15px;
           line-height: 1.8;
           margin: 54px auto 0;
@@ -286,13 +282,13 @@ export default function CommentCaMarche() {
           border-radius: 999px;
           background: rgba(200,164,93,0.08);
           border: 1px solid rgba(200,164,93,0.28);
-          color: ${INK};
+          color: ${colors.ink};
           font-size: 13px;
           font-weight: 500;
         }
 
         .ccm-streetview svg {
-          color: ${GOLD};
+          color: ${colors.gold};
           flex-shrink: 0;
         }
 

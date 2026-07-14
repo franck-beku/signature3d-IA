@@ -9,10 +9,7 @@
 import { motion } from 'framer-motion'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
-
-const GOLD = '#C8A45D'
-const CREAM = '#F7F5F2'
-const INK = '#101010'
+import { colors } from '@/config/theme'
 
 interface LegalLayoutProps {
   eyebrow: string
@@ -27,7 +24,7 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
     <main
       style={{
         minHeight: '100vh',
-        background: `radial-gradient(120% 70% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)`,
+        background: `radial-gradient(120% 70% at 50% 0%, #FFFFFF 0%, ${colors.cream} 60%, #F1EEE8 100%)`,
       }}
     >
       <Navbar />
@@ -48,7 +45,7 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
             initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             style={{ marginBottom: '48px' }}
           >
-            <span style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.32em', color: GOLD, marginBottom: '16px' }}>
+            <span style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.32em', color: colors.gold, marginBottom: '16px' }}>
               {eyebrow}
             </span>
             <h1 style={{
@@ -56,7 +53,7 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
               fontSize: 'clamp(2.4rem, 5vw, 3.8rem)',
               fontWeight: 500,
               lineHeight: 1.08,
-              color: INK,
+              color: colors.ink,
               letterSpacing: '-0.01em',
               margin: 0,
             }}>
@@ -85,14 +82,14 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
           font-family: var(--font-cormorant), serif;
           font-size: 1.6rem;
           font-weight: 500;
-          color: ${INK};
+          color: ${colors.ink};
           margin: 44px 0 14px;
           letter-spacing: -0.01em;
         }
         .legal-prose h3 {
           font-size: 1rem;
           font-weight: 600;
-          color: ${INK};
+          color: ${colors.ink};
           margin: 28px 0 10px;
         }
         .legal-prose p {
@@ -112,12 +109,12 @@ export default function LegalLayout({ eyebrow, title, updatedLabel, updatedDate,
           margin-bottom: 6px;
         }
         .legal-prose a {
-          color: ${GOLD};
+          color: ${colors.gold};
           text-decoration: none;
           border-bottom: 1px solid rgba(200,164,93,0.3);
         }
-        .legal-prose a:hover { border-bottom-color: ${GOLD}; }
-        .legal-prose strong { color: ${INK}; font-weight: 600; }
+        .legal-prose a:hover { border-bottom-color: ${colors.gold}; }
+        .legal-prose strong { color: ${colors.ink}; font-weight: 600; }
         .legal-prose .todo {
           background: rgba(200,164,93,0.1);
           border: 1px dashed rgba(200,164,93,0.5);

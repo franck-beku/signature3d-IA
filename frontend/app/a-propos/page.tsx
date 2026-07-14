@@ -13,12 +13,10 @@ import { useLanguage } from '@/context/LanguageContext'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 import Manifeste from '@/components/site/Manifeste'
+import { colors } from '@/config/theme'
 
 /* ── Charte V2 ── */
-const GOLD = '#C8A45D'
-const CREAM = '#F7F5F2'
 const WHITE = '#FFFFFF'
-const INK = '#101010'
 const MUTED = '#5A4E3A'
 
 const HISTOIRE_PARAGRAPHS: [string, string][] = [
@@ -121,7 +119,7 @@ export default function AProposPage() {
       key={lang}
       style={{
         minHeight: '100vh',
-        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)`,
+        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${colors.cream} 60%, #F1EEE8 100%)`,
       }}
     >
       <Navbar />
@@ -138,7 +136,7 @@ export default function AProposPage() {
         <div className="container-main" style={{ position: 'relative', zIndex: 1, maxWidth: '780px' }}>
           <motion.span
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
-            className="section-eyebrow" style={{ color: GOLD }}
+            className="section-eyebrow" style={{ color: colors.gold }}
           >
             {t('À propos', 'About')}
           </motion.span>
@@ -149,7 +147,7 @@ export default function AProposPage() {
               fontSize: 'clamp(2.6rem, 5.5vw, 4.4rem)',
               fontWeight: 500,
               lineHeight: 1.08,
-              color: INK,
+              color: colors.ink,
               letterSpacing: '-0.01em',
               marginBottom: '2.2rem',
             }}
@@ -187,12 +185,12 @@ export default function AProposPage() {
                 fontSize: 'clamp(1.6rem, 3.2vw, 2.5rem)',
                 lineHeight: 1.35,
                 letterSpacing: '-0.01em',
-                color: INK,
+                color: colors.ink,
                 margin: 0,
               }}
             >
               {t('Nous ne vendons pas simplement des visites virtuelles. ', 'We do not simply sell virtual tours. ')}
-              <span style={{ color: GOLD }}>
+              <span style={{ color: colors.gold }}>
                 {t(
                   "Nous créons des expériences immersives qui permettent aux entreprises d'être découvertes autrement.",
                   'We create immersive experiences that let businesses be discovered in a different way.'
@@ -211,7 +209,7 @@ export default function AProposPage() {
         <div className="container-main" style={{ maxWidth: '760px', textAlign: 'center' }}>
           <motion.span
             initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
-            className="section-eyebrow" style={{ color: GOLD }}
+            className="section-eyebrow" style={{ color: colors.gold }}
           >
             {t('Notre vision', 'Our vision')}
           </motion.span>
@@ -222,7 +220,7 @@ export default function AProposPage() {
               fontSize: 'clamp(2rem, 3.5vw, 3rem)',
               fontWeight: 500,
               lineHeight: 1.15,
-              color: INK,
+              color: colors.ink,
               marginBottom: '2rem',
             }}
           >
@@ -246,11 +244,11 @@ export default function AProposPage() {
       </section>
 
       {/* ── 4. Notre mission ── */}
-      <section id="notre-mission" style={{ backgroundColor: CREAM, borderTop: '1px solid #E7DED0', borderBottom: '1px solid #E7DED0', paddingTop: '120px', paddingBottom: '120px' }}>
+      <section id="notre-mission" style={{ backgroundColor: colors.cream, borderTop: '1px solid #E7DED0', borderBottom: '1px solid #E7DED0', paddingTop: '120px', paddingBottom: '120px' }}>
         <div className="container-main" style={{ maxWidth: '760px', textAlign: 'center' }}>
           <motion.span
             initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
-            className="section-eyebrow" style={{ color: GOLD }}
+            className="section-eyebrow" style={{ color: colors.gold }}
           >
             {t('Notre mission', 'Our mission')}
           </motion.span>
@@ -261,7 +259,7 @@ export default function AProposPage() {
               fontSize: 'clamp(2rem, 3.5vw, 3rem)',
               fontWeight: 500,
               lineHeight: 1.15,
-              color: INK,
+              color: colors.ink,
               marginBottom: '2rem',
             }}
           >
@@ -291,7 +289,7 @@ export default function AProposPage() {
             initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
             style={{ textAlign: 'center', marginBottom: '60px' }}
           >
-            <span className="section-eyebrow" style={{ color: GOLD }}>
+            <span className="section-eyebrow" style={{ color: colors.gold }}>
               {t('Nos valeurs', 'Our values')}
             </span>
             <h2
@@ -300,7 +298,7 @@ export default function AProposPage() {
                 fontSize: 'clamp(2rem, 3.5vw, 3rem)',
                 fontWeight: 500,
                 lineHeight: 1.15,
-                color: INK,
+                color: colors.ink,
                 margin: 0,
               }}
             >
@@ -335,7 +333,7 @@ export default function AProposPage() {
               fontFamily: 'var(--font-cormorant), serif',
               fontSize: 'clamp(2rem, 3.5vw, 3rem)',
               fontWeight: 500,
-              color: CREAM,
+              color: colors.cream,
               lineHeight: 1.2,
               marginBottom: '1rem',
             }}
@@ -361,7 +359,7 @@ export default function AProposPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
-              backgroundColor: GOLD,
+              backgroundColor: colors.gold,
               color: '#FFFFFF',
               borderRadius: '999px',
               padding: '15px 34px',
@@ -392,7 +390,7 @@ export default function AProposPage() {
         }
 
         .valeur-card {
-          background: ${CREAM};
+          background: ${colors.cream};
           border: 1px solid #E7DED0;
           border-radius: 18px;
           padding: 36px 34px;
@@ -410,7 +408,7 @@ export default function AProposPage() {
           font-family: var(--font-cormorant), serif;
           font-size: clamp(1.3rem, 2vw, 1.55rem);
           font-weight: 500;
-          color: ${INK};
+          color: ${colors.ink};
           margin: 0 0 12px;
         }
 

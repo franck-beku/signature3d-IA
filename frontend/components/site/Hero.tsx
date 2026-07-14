@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { colors } from '@/config/theme';
 
 /**
  * Hero cinématique — Acte 1 du film.
@@ -20,8 +21,6 @@ import { useLanguage } from '@/context/LanguageContext';
  * le mouvement est ambiant, pas interactif.
  */
 
-const GOLD = '#C8A45D';
-const CHARBON = '#0B0B0B';
 
 /* Mêmes assets que la section Nos univers — cohérence du film. */
 const SLIDES = [
@@ -68,7 +67,7 @@ export default function Hero() {
         height: '100vh',
         minHeight: '640px',
         overflow: 'hidden',
-        backgroundColor: CHARBON,
+        backgroundColor: colors.charcoal,
       }}
     >
       {/* ── Diaporama d'images en fondu + Ken Burns ── */}
@@ -175,7 +174,7 @@ export default function Hero() {
           >
             {t('Chaque espace possède une histoire.', 'Every space holds a story.')}
             <br />
-            <span style={{ color: GOLD, fontStyle: 'italic' }}>
+            <span style={{ color: colors.gold, fontStyle: 'italic' }}>
               {t('Nous la rendons immersive.', 'We make it immersive.')}
             </span>
           </h1>
@@ -235,8 +234,8 @@ export default function Hero() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '10px',
-                backgroundColor: GOLD,
-                color: CHARBON,
+                backgroundColor: colors.gold,
+                color: colors.charcoal,
                 borderRadius: '10px',
                 padding: '15px 30px',
                 fontSize: '12px',
@@ -340,7 +339,7 @@ export default function Hero() {
               height: '2px',
               borderRadius: '2px',
               backgroundColor:
-                i === index ? GOLD : 'rgba(247,245,242,0.25)',
+                i === index ? colors.gold : 'rgba(247,245,242,0.25)',
               transition: 'all 0.5s ease',
             }}
           />

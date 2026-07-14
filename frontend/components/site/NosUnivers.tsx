@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { colors } from '@/config/theme';
 
 type Univers = {
   slug: string;
@@ -11,11 +12,6 @@ type Univers = {
   titre: { fr: string; en: string };
   accroche: { fr: string; en: string };
 };
-
-const GOLD = '#C8A45D';
-const WHITE = '#FCFBF8';
-const INK = '#101010';
-const BORDER = '#E7DED0';
 
 const UNIVERS: Univers[] = [
   {
@@ -77,11 +73,11 @@ export default function NosUnivers() {
     <section
       aria-label={t('Nos univers', 'Our worlds')}
       style={{
-        backgroundColor: WHITE,
-        color: INK,
+        backgroundColor: colors.white,
+        color: colors.ink,
         position: 'relative',
         overflow: 'hidden',
-        borderBottom: `1px solid ${BORDER}`,
+        borderBottom: `1px solid ${colors.border}`,
       }}
     >
       <div
@@ -127,7 +123,7 @@ export default function NosUnivers() {
                 fontWeight: 700,
                 letterSpacing: '0.34em',
                 textTransform: 'uppercase',
-                color: GOLD,
+                color: colors.gold,
                 marginBottom: '18px',
               }}
             >
@@ -138,7 +134,7 @@ export default function NosUnivers() {
               style={{
                 fontFamily: 'var(--font-cormorant), serif',
                 fontWeight: 400,
-                color: INK,
+                color: colors.ink,
                 lineHeight: 1.05,
                 letterSpacing: '-0.02em',
                 fontSize: 'clamp(2.2rem, 4vw, 4rem)',
@@ -148,7 +144,7 @@ export default function NosUnivers() {
             >
               {t('Des solutions immersives', 'Immersive solutions')}
               <br />
-              <span style={{ color: GOLD, fontStyle: 'italic' }}>
+              <span style={{ color: colors.gold, fontStyle: 'italic' }}>
                 {t('adaptées à chaque secteur.', 'designed for every sector.')}
               </span>
             </h2>
@@ -163,7 +159,7 @@ export default function NosUnivers() {
                 alignItems: 'center',
                 gap: '10px',
                 border: `1px solid rgba(200,164,93,0.7)`,
-                color: INK,
+                color: colors.ink,
                 backgroundColor: 'transparent',
                 borderRadius: '4px',
                 padding: '13px 22px',
@@ -177,7 +173,7 @@ export default function NosUnivers() {
               }}
             >
               {t('Découvrir tous les univers', 'Discover all worlds')}
-              <span style={{ color: GOLD }}>→</span>
+              <span style={{ color: colors.gold }}>→</span>
             </Link>
           </motion.div>
         </motion.div>
@@ -236,7 +232,7 @@ export default function NosUnivers() {
           position: relative;
           border-radius: 20px;
           overflow: hidden;
-          border: 1px solid ${BORDER};
+          border: 1px solid ${colors.border};
           box-shadow: 0 18px 50px rgba(0,0,0,0.06);
           transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
         }
@@ -288,7 +284,7 @@ export default function NosUnivers() {
           font-weight: 700;
           letter-spacing: 0.24em;
           text-transform: uppercase;
-          color: ${GOLD};
+          color: ${colors.gold};
           margin: 0 0 12px;
         }
 
@@ -313,7 +309,7 @@ export default function NosUnivers() {
           display: inline-flex;
           align-items: center;
           gap: 10px;
-          color: ${GOLD};
+          color: ${colors.gold};
           font-size: 11px;
           font-weight: 600;
           letter-spacing: 0.16em;

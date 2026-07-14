@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import { projectsApi } from '@/lib/api';
-
-const GOLD = '#C8A45D';
+import { colors } from '@/config/theme';
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1600&q=85&auto=format&fit=crop';
@@ -151,7 +150,7 @@ export default function ContactFinal() {
         }
 
         .final-line-accent {
-          color: ${GOLD};
+          color: ${colors.gold};
           font-style: italic;
         }
 
@@ -167,7 +166,7 @@ export default function ContactFinal() {
           display: inline-flex;
           align-items: center;
           gap: 14px;
-          background: ${GOLD};
+          background: ${colors.gold};
           color: #FFFFFF;
           border-radius: 10px;
           padding: 19px 40px;
