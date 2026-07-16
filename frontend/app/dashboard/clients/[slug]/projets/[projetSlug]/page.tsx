@@ -8,7 +8,7 @@ import KPICard from '@/components/dashboard/KPICard'
 import ReportDocument from '@/components/dashboard/ProjectReportPDF'
 import QRCodeLogo from '@/components/dashboard/QRCodeLogo'
 import Link from 'next/link'
-import { ArrowLeft, Copy, Download, Upload, FileText, Mail, Phone, Check, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Copy, Download, Upload, FileText, Mail, Phone, Check, TrendingUp, AlertTriangle } from 'lucide-react'
 import {
   projectsApi, documentsApi, leadsApi, statsApi,
   type ProjectDto, type DocumentDto, type LeadDto,
@@ -290,6 +290,14 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
                     <span title={doc.indexingError} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', flexShrink: 0, backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', cursor: doc.indexingError ? 'help' : 'default' }}>
                       {doc.isIndexed ? 'Indexé' : 'En attente'}
                     </span>
+                    {doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+                      <span
+                        title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
+                        style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                      >
+                        <AlertTriangle size={13} style={{ color: 'var(--dash-gold)' }} />
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
