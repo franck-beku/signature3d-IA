@@ -24,6 +24,13 @@ public class ChatService : IChatService
 
     private static readonly TimeSpan ChunkCacheDuration = TimeSpan.FromMinutes(3);
 
+    // Quota par document (au plus ce nombre de chunks retenus par document) puis plafond
+    // global sur le pool résultant — empêche un document volumineux (beaucoup de chunks)
+    // de noyer un document plus petit mais plus pertinent, uniquement parce qu'il a plus
+    // de chunks en lice dans un tri global par pertinence.
+    private const int PerDocumentChunkLimit = 3;
+    private const int MaxContextChunks = 6;
+
     public ChatService(AppDbContext db, IAIProvider aiProvider, IMemoryCache cache, IEmbeddingProvider embeddingProvider)
     {
         _db = db;
@@ -150,12 +157,21 @@ public class ChatService : IChatService
     /// </summary>
     private async Task<List<DocumentChunk>> SearchByVectorAsync(Guid projectId, Vector queryEmbedding)
     {
-        return await _db.DocumentChunks
+        var candidates = await _db.DocumentChunks
             .Where(c => c.Document.ProjectId == projectId && c.Document.IsIndexed
                      && !c.Document.IsInternal && c.Embedding != null)
-            .OrderBy(c => c.Embedding!.CosineDistance(queryEmbedding))
-            .Take(3)
+            .Select(c => new { Chunk = c, Distance = c.Embedding!.CosineDistance(queryEmbedding) })
+            .OrderBy(x => x.Distance)
             .ToListAsync();
+
+        // Quota par document puis re-tri global et plafond — voir PerDocumentChunkLimit/MaxContextChunks.
+        return candidates
+            .GroupBy(x => x.Chunk.DocumentId)
+            .SelectMany(g => g.Take(PerDocumentChunkLimit))
+            .OrderBy(x => x.Distance)
+            .Take(MaxContextChunks)
+            .Select(x => x.Chunk)
+            .ToList();
     }
 
     /// <summary>
@@ -175,8 +191,12 @@ public class ChatService : IChatService
 
         if (!queryWords.Any())
         {
-            // Retourner les 3 premiers chunks si query trop court
-            return string.Join("\n\n---\n\n", chunks.Take(3).Select(c => c.Content));
+            // Query trop court — appliquer quand même le quota par document plutôt qu'un Take brut.
+            var fallback = chunks
+                .GroupBy(c => c.DocumentId)
+                .SelectMany(g => g.Take(PerDocumentChunkLimit))
+                .Take(MaxContextChunks);
+            return string.Join("\n\n---\n\n", fallback.Select(c => c.Content));
         }
 
         // Scorer chaque chunk selon les mots du query — le contenu original (non normalisé)
@@ -190,10 +210,17 @@ public class ChatService : IChatService
         .OrderByDescending(x => x.Score)
         .ToList();
 
-        // Prendre les 3 meilleurs chunks avec score > 0, sinon les 3 premiers
-        var relevant = scored.Where(x => x.Score > 0).Take(3).ToList();
-        if (!relevant.Any())
-            relevant = scored.Take(3).ToList();
+        // Prendre les chunks avec score > 0 (sinon tous), puis quota par document + plafond —
+        // voir PerDocumentChunkLimit/MaxContextChunks (même logique que le chemin vectoriel).
+        var withMatches = scored.Where(x => x.Score > 0).ToList();
+        var pool = withMatches.Any() ? withMatches : scored;
+
+        var relevant = pool
+            .GroupBy(x => x.Chunk.DocumentId)
+            .SelectMany(g => g.Take(PerDocumentChunkLimit))
+            .OrderByDescending(x => x.Score)
+            .Take(MaxContextChunks)
+            .ToList();
 
         var context = string.Join("\n\n---\n\n", relevant.Select(x => x.Chunk.Content));
 

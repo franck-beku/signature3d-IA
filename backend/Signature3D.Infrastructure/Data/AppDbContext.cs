@@ -131,6 +131,10 @@ public class AppDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).HasMaxLength(512);
 
+            // Défaut requis pour une colonne non-nullable ajoutée à une table déjà peuplée —
+            // sans ça, la migration échoue sur les documents existants (NULL interdit).
+            e.Property(x => x.LowTextPageNumbers).HasDefaultValueSql("'{}'");
+
             e.HasOne(x => x.Project)
              .WithMany(x => x.Documents)
              .HasForeignKey(x => x.ProjectId)

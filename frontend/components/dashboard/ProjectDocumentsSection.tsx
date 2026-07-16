@@ -5,7 +5,7 @@
 
 'use client'
 
-import { FileText, Upload, Trash2 } from 'lucide-react'
+import { FileText, Upload, Trash2, AlertTriangle } from 'lucide-react'
 import type { DocumentDto } from '@/lib/api'
 
 const sectionTitle = {
@@ -72,6 +72,14 @@ export default function ProjectDocumentsSection({
                 }}>
                 {doc.isInternal ? 'Interne' : doc.isIndexed ? 'Indexé' : 'En attente'}
               </span>
+              {doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+                <span
+                  title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
+                  style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                >
+                  <AlertTriangle size={13} style={{ color: 'var(--dash-gold)' }} />
+                </span>
+              )}
               <button
                 onClick={() => onToggleCategory(doc)}
                 title={doc.isInternal ? 'Rendre disponible pour Luxedia' : 'Marquer interne'}

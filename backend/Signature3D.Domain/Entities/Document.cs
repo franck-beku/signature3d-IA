@@ -9,6 +9,7 @@ public class Document : BaseEntity
     public bool IsIndexed { get; set; } = false;
     public string? IndexingError { get; set; }
     public bool IsInternal { get; set; } = false;
+    public List<int> LowTextPageNumbers { get; set; } = [];
 
     /* Relations */
     public Guid ProjectId { get; set; }

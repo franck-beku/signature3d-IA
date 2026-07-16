@@ -6,7 +6,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, Trash2, X, RefreshCw } from 'lucide-react'
+import { Upload, FileText, Trash2, X, RefreshCw, AlertTriangle } from 'lucide-react'
 import { documentsApi, type DocumentDto } from '@/lib/api'
 
 interface Props {
@@ -159,6 +159,14 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
                 <span title={doc.indexingError} style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', flexShrink: 0, cursor: doc.indexingError ? 'help' : 'default' }}>
                   {doc.isIndexed ? 'Indexé' : 'En attente'}
                 </span>
+                {doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+                  <span
+                    title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
+                    style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                  >
+                    <AlertTriangle size={13} style={{ color: 'var(--dash-gold)' }} />
+                  </span>
+                )}
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                   {!doc.isIndexed && (
                     <button onClick={() => handleReindex(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-gold)' }} className="reindex-btn" title="Indexer">

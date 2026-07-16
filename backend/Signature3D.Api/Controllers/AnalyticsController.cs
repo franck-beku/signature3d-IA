@@ -23,13 +23,15 @@ public class AnalyticsController : ControllerBase
 
     /// <summary>
     /// Retourne les statistiques complètes d'un projet.
-    /// GET /api/analytics/project/{projectId}
+    /// GET /api/analytics/project/{projectId}                       — défaut : 30 derniers jours
+    /// GET /api/analytics/project/{projectId}?from=...&to=...        — période explicite
+    /// GET /api/analytics/project/{projectId}?to=...                 — depuis la création du projet jusqu'à "to"
     /// </summary>
     [HttpGet("project/{projectId:guid}")]
     [Authorize]
-    public async Task<IActionResult> GetByProject(Guid projectId)
+    public async Task<IActionResult> GetByProject(Guid projectId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
     {
-        var result = await _analyticsService.GetByProjectAsync(projectId);
+        var result = await _analyticsService.GetByProjectAsync(projectId, from, to);
 
         if (!result.Success)
             return NotFound(new { message = result.Error });

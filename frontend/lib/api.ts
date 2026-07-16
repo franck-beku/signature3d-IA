@@ -563,6 +563,7 @@ export interface DocumentDto {
   isIndexed: boolean
   indexingError?: string
   isInternal: boolean
+  lowTextPageNumbers: number[]
   chunkCount: number
   createdAt: string
 }

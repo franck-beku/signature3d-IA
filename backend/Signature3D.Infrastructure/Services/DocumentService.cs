@@ -28,6 +28,7 @@ public class DocumentService : IDocumentService
 
     private const int MaxChunkSize = 800;   // ~600 tokens
     private const int ChunkOverlap = 100;   // chevauchement pour contexte
+    private const int LowTextPageCharThreshold = 30; // en dessous, une page est signalée comme probablement mal extraite (encadré/image)
     private static readonly TimeSpan BackfillDelay = TimeSpan.FromMilliseconds(1200); // marge tier gratuit Gemini
 
     public DocumentService(AppDbContext db, IStorageService storage, IServiceScopeFactory scopeFactory, IMemoryCache cache, IEmbeddingProvider embeddingProvider)
@@ -71,6 +72,7 @@ public class DocumentService : IDocumentService
                     ? job.ErrorMessage
                     : null),
             IsInternal = d.IsInternal,
+            LowTextPageNumbers = d.LowTextPageNumbers,
             ChunkCount = d.Chunks?.Count ?? 0,
             CreatedAt  = d.CreatedAt
         }).ToList());
@@ -129,6 +131,7 @@ public class DocumentService : IDocumentService
             IsIndexed  = document.IsIndexed,
             IndexingError = document.IndexingError,
             IsInternal = document.IsInternal,
+            LowTextPageNumbers = document.LowTextPageNumbers,
             ChunkCount = 0,
             CreatedAt  = document.CreatedAt
         });
@@ -375,7 +378,8 @@ public class DocumentService : IDocumentService
                 db.DocumentChunks.RemoveRange(document.Chunks);
 
             // Extraire le texte avec iText7
-            var extractedText = ExtractTextFromPdf(pdfBytes);
+            var (extractedText, lowTextPages) = ExtractTextFromPdf(pdfBytes);
+            document.LowTextPageNumbers = lowTextPages;
 
             if (string.IsNullOrWhiteSpace(extractedText))
             {
@@ -439,8 +443,12 @@ public class DocumentService : IDocumentService
         }
     }
 
-    /// <summary>Extrait le texte d'un PDF avec iText7.</summary>
-    private static string ExtractTextFromPdf(byte[] pdfBytes)
+    /// <summary>
+    /// Extrait le texte d'un PDF avec iText7. Signale au passage les pages dont le texte brut
+    /// (avant nettoyage global) est anormalement court — signe probable d'un encadré/visuel
+    /// exporté en image plutôt qu'en texte réel, invisible à l'extraction sans OCR.
+    /// </summary>
+    private static (string Text, List<int> LowTextPages) ExtractTextFromPdf(byte[] pdfBytes)
     {
         try
         {
@@ -449,11 +457,14 @@ public class DocumentService : IDocumentService
             using var pdf    = new PdfDocument(reader);
 
             var sb = new System.Text.StringBuilder();
+            var lowTextPages = new List<int>();
 
             for (int page = 1; page <= pdf.GetNumberOfPages(); page++)
             {
                 var strategy = new SimpleTextExtractionStrategy();
                 var text     = PdfTextExtractor.GetTextFromPage(pdf.GetPage(page), strategy);
+                if (text.Trim().Length < LowTextPageCharThreshold)
+                    lowTextPages.Add(page);
                 sb.AppendLine(text);
             }
 
@@ -462,12 +473,12 @@ public class DocumentService : IDocumentService
             result = System.Text.RegularExpressions.Regex.Replace(result, @"\s{3,}", "  ");
             result = result.Trim();
 
-            return result;
+            return (result, lowTextPages);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[DocumentService] Erreur extraction PDF : {ex.Message}");
-            return string.Empty;
+            return (string.Empty, []);
         }
     }
 
