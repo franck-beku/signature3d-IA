@@ -26,12 +26,16 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
   const [uploading, setUploading]   = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError]           = useState<string | null>(null)
+  const [ocrPendingIds, setOcrPendingIds] = useState<Set<string>>(new Set())
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
     documentsApi.getByProject(projectId)
       .then((docs) => setDocuments(docs as DocumentDto[]))
       .catch(console.error)
+
+    return () => { isMountedRef.current = false }
   }, [projectId])
 
   const handleUpload = async (file: File) => {
@@ -82,6 +86,41 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
       setDocuments((prev) => prev.map((d) =>
         d.id === docId ? { ...d, isIndexed: true } : d
       ))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
+    }
+  }
+
+  /** Enfile l'OCR puis poll toutes les 3s (max 20x = 60s) jusqu'à ce que l'état de la page change. */
+  const pollOcrResult = (docId: string, attempt = 0) => {
+    if (attempt >= 20) {
+      if (isMountedRef.current) setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(docId); return next })
+      return
+    }
+    setTimeout(async () => {
+      if (!isMountedRef.current) return
+      try {
+        const docs = await documentsApi.getByProject(projectId) as DocumentDto[]
+        if (!isMountedRef.current) return
+        setDocuments(docs)
+        const updated = docs.find((d) => d.id === docId)
+        const stillProcessing = !!updated && updated.lowTextPageNumbers?.length > 0 && updated.ocrFailedPageNumbers?.length === 0
+        if (stillProcessing) {
+          pollOcrResult(docId, attempt + 1)
+        } else {
+          setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(docId); return next })
+        }
+      } catch {
+        pollOcrResult(docId, attempt + 1)
+      }
+    }, 3000)
+  }
+
+  const handleRequestOcr = async (docId: string) => {
+    try {
+      await documentsApi.requestOcrReindex(docId)
+      setOcrPendingIds((prev) => new Set(prev).add(docId))
+      pollOcrResult(docId)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
@@ -159,7 +198,14 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
                 <span title={doc.indexingError} style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', flexShrink: 0, cursor: doc.indexingError ? 'help' : 'default' }}>
                   {doc.isIndexed ? 'Indexé' : 'En attente'}
                 </span>
-                {doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+                {doc.isIndexed && doc.ocrFailedPageNumbers?.length > 0 ? (
+                  <span
+                    title={`Page${doc.ocrFailedPageNumbers.length > 1 ? 's' : ''} ${doc.ocrFailedPageNumbers.join(', ')} — OCR tenté sans succès, probablement illisible (image de mauvaise qualité ou sans texte réel).`}
+                    style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                  >
+                    <AlertTriangle size={13} style={{ color: 'var(--dash-error)' }} />
+                  </span>
+                ) : doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
                   <span
                     title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
                     style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
@@ -171,6 +217,17 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
                   {!doc.isIndexed && (
                     <button onClick={() => handleReindex(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-gold)' }} className="reindex-btn" title="Indexer">
                       <RefreshCw size={12} />
+                    </button>
+                  )}
+                  {doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && doc.ocrFailedPageNumbers?.length === 0 && (
+                    <button
+                      onClick={() => handleRequestOcr(doc.id)}
+                      disabled={ocrPendingIds.has(doc.id)}
+                      style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', cursor: ocrPendingIds.has(doc.id) ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-gold)', opacity: ocrPendingIds.has(doc.id) ? 0.5 : 1 }}
+                      className="reindex-btn"
+                      title={ocrPendingIds.has(doc.id) ? 'OCR en cours...' : 'Relancer l\'OCR sur les pages faibles'}
+                    >
+                      <RefreshCw size={12} className={ocrPendingIds.has(doc.id) ? 'spin' : undefined} />
                     </button>
                   )}
                   <button onClick={() => handleDelete(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-error)' }} className="del-btn" title="Supprimer">
@@ -194,6 +251,8 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
         .close-btn:hover   { color: var(--dash-text) !important; }
         .del-btn:hover     { background-color: var(--dash-error-bg) !important; }
         .reindex-btn:hover { background-color: var(--dash-gold-muted) !important; }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   )

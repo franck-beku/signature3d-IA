@@ -12,6 +12,9 @@ public interface IDocumentService
     Task<Result<DocumentDto>> UploadAsync(Guid projectId, Stream fileStream, string fileName, bool isInternal = false);
     Task<Result> DeleteAsync(Guid documentId);
     Task<Result> IndexAsync(Guid documentId);
+
+    /// <summary>Enfile un job de réindexation avec tentative OCR sur les pages à faible texte.</summary>
+    Task<Result> RequestOcrReindexAsync(Guid documentId);
     Task<Result> SetCategoryAsync(Guid documentId, bool isInternal);
 
     /// <summary>Génère une URL signée à durée limitée pour consulter un document interne.</summary>

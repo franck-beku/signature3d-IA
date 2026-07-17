@@ -10,6 +10,7 @@ public class Document : BaseEntity
     public string? IndexingError { get; set; }
     public bool IsInternal { get; set; } = false;
     public List<int> LowTextPageNumbers { get; set; } = [];
+    public List<int> OcrFailedPageNumbers { get; set; } = [];
 
     /* Relations */
     public Guid ProjectId { get; set; }

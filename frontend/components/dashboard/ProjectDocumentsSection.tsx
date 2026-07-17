@@ -5,7 +5,7 @@
 
 'use client'
 
-import { FileText, Upload, Trash2, AlertTriangle } from 'lucide-react'
+import { FileText, Upload, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
 import type { DocumentDto } from '@/lib/api'
 
 const sectionTitle = {
@@ -22,11 +22,14 @@ interface Props {
   onUpload: (file: File) => void
   onToggleCategory: (doc: DocumentDto) => void
   onDelete: (id: string) => void
+  onRequestOcr: (id: string) => void
+  ocrPendingIds: Set<string>
 }
 
 export default function ProjectDocumentsSection({
   documents, docsLoading, uploadingDoc, uploadIsInternal,
   onUploadIsInternalChange, onUpload, onToggleCategory, onDelete,
+  onRequestOcr, ocrPendingIds,
 }: Props) {
   return (
     <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
@@ -72,13 +75,30 @@ export default function ProjectDocumentsSection({
                 }}>
                 {doc.isInternal ? 'Interne' : doc.isIndexed ? 'Indexé' : 'En attente'}
               </span>
-              {doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+              {doc.isIndexed && doc.ocrFailedPageNumbers?.length > 0 ? (
                 <span
-                  title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
+                  title={`Page${doc.ocrFailedPageNumbers.length > 1 ? 's' : ''} ${doc.ocrFailedPageNumbers.join(', ')} — OCR tenté sans succès, probablement illisible (image de mauvaise qualité ou sans texte réel).`}
                   style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
                 >
-                  <AlertTriangle size={13} style={{ color: 'var(--dash-gold)' }} />
+                  <AlertTriangle size={13} style={{ color: 'var(--dash-error)' }} />
                 </span>
+              ) : doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+                <>
+                  <span
+                    title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
+                    style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                  >
+                    <AlertTriangle size={13} style={{ color: 'var(--dash-gold)' }} />
+                  </span>
+                  <button
+                    onClick={() => onRequestOcr(doc.id)}
+                    disabled={ocrPendingIds.has(doc.id)}
+                    title={ocrPendingIds.has(doc.id) ? 'OCR en cours...' : "Relancer l'OCR sur les pages faibles"}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', color: 'var(--dash-gold)', cursor: ocrPendingIds.has(doc.id) ? 'default' : 'pointer', flexShrink: 0, opacity: ocrPendingIds.has(doc.id) ? 0.5 : 1 }}
+                  >
+                    <RefreshCw size={11} className={ocrPendingIds.has(doc.id) ? 'ocr-spin' : undefined} />
+                  </button>
+                </>
               )}
               <button
                 onClick={() => onToggleCategory(doc)}
@@ -99,6 +119,11 @@ export default function ProjectDocumentsSection({
           ))}
         </div>
       )}
+
+      <style>{`
+        .ocr-spin { animation: ocr-spin 1s linear infinite; }
+        @keyframes ocr-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   )
 }

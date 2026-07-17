@@ -34,6 +34,7 @@ var groqSettings     = builder.Configuration.GetSection("GroqSettings").Get<Groq
 var openAiSettings   = builder.Configuration.GetSection("OpenAISettings").Get<OpenAISettings>()!;
 var claudeSettings   = builder.Configuration.GetSection("ClaudeSettings").Get<ClaudeSettings>()!;
 var geminiSettings   = builder.Configuration.GetSection("GeminiSettings").Get<GeminiSettings>()!;
+var googleVisionSettings = builder.Configuration.GetSection("GoogleVisionSettings").Get<GoogleVisionSettings>() ?? new GoogleVisionSettings();
 var copilotSettings  = builder.Configuration.GetSection("CopilotSettings").Get<CopilotSettings>()!;
 var resendSettings   = builder.Configuration.GetSection("ResendSettings").Get<ResendSettings>()!;
 var appUrlsSettings  = builder.Configuration.GetSection("AppUrlsSettings").Get<AppUrlsSettings>()!;
@@ -180,6 +181,7 @@ builder.Services.AddSingleton(groqSettings);
 builder.Services.AddSingleton(openAiSettings);
 builder.Services.AddSingleton(claudeSettings);
 builder.Services.AddSingleton(geminiSettings);
+builder.Services.AddSingleton(googleVisionSettings);
 builder.Services.AddSingleton(copilotSettings);
 builder.Services.AddSingleton(resendSettings);
 builder.Services.AddSingleton(appUrlsSettings);
@@ -208,6 +210,7 @@ builder.Services.AddScoped<ITestimonialService, TestimonialService>();
 
 builder.Services.AddScoped<IAIProvider, GroqProvider>();
 builder.Services.AddScoped<IEmbeddingProvider, GeminiProvider>();
+builder.Services.AddScoped<IOcrProvider, GoogleVisionOcrProvider>();
 
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 

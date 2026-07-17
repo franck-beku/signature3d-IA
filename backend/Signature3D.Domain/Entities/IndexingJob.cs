@@ -11,6 +11,7 @@ public class IndexingJob : BaseEntity
     public IndexingJobStatus Status { get; set; } = IndexingJobStatus.Pending;
     public DateTime? ProcessedAt { get; set; }
     public string? ErrorMessage { get; set; }
+    public bool AttemptOcr { get; set; } = false;
 
     /* Relations */
     public Guid ProjectId { get; set; }

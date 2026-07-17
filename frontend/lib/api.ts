@@ -403,10 +403,35 @@ export const chatApi = {
    ANALYTICS
    ══════════════════════════════════════ */
 
+export interface DailyStatDto {
+  date: string
+  visits: number
+  leads: number
+}
+
+export interface ProjectAnalyticsDto {
+  projectId: string
+  projectName: string
+  totalVisits: number
+  totalLeads: number
+  totalChatMessages: number
+  totalQrScans: number
+  avgDurationSeconds: number
+  dailyStats: DailyStatDto[]
+}
+
 export const analyticsApi = {
-  /** Retourne les stats d'un projet */
-  getByProject: (projectId: string) =>
-    apiFetch(`/api/analytics/project/${projectId}`),
+  /** Retourne les stats d'un projet.
+   *  - ni from ni to → 30 derniers jours
+   *  - seul to → depuis la création du projet
+   *  - les deux → période explicite */
+  getByProject: (projectId: string, from?: Date, to?: Date) => {
+    const params = new URLSearchParams()
+    if (from) params.set('from', from.toISOString())
+    if (to) params.set('to', to.toISOString())
+    const query = params.toString()
+    return apiFetch<ProjectAnalyticsDto>(`/api/analytics/project/${projectId}${query ? `?${query}` : ''}`)
+  },
 
   /** Enregistre un événement analytics */
   trackEvent: (eventType: string, projectSlug: string, metadata?: string) =>
@@ -564,6 +589,7 @@ export interface DocumentDto {
   indexingError?: string
   isInternal: boolean
   lowTextPageNumbers: number[]
+  ocrFailedPageNumbers: number[]
   chunkCount: number
   createdAt: string
 }
@@ -609,6 +635,10 @@ export const documentsApi = {
   /** Re-indexe un document pour le RAG */
   reindex: (documentId: string) =>
     apiFetch(`/api/documents/${documentId}/index`, { method: 'POST' }),
+
+  /** Enfile une réindexation avec tentative OCR sur les pages à faible texte (asynchrone) */
+  requestOcrReindex: (documentId: string) =>
+    apiFetch(`/api/documents/${documentId}/ocr-reindex`, { method: 'POST' }),
 
   /** Bascule un document entre interne et base de connaissances IA */
   setCategory: (documentId: string, isInternal: boolean) =>

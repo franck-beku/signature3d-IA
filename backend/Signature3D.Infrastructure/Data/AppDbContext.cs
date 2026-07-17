@@ -134,6 +134,7 @@ public class AppDbContext : DbContext
             // Défaut requis pour une colonne non-nullable ajoutée à une table déjà peuplée —
             // sans ça, la migration échoue sur les documents existants (NULL interdit).
             e.Property(x => x.LowTextPageNumbers).HasDefaultValueSql("'{}'");
+            e.Property(x => x.OcrFailedPageNumbers).HasDefaultValueSql("'{}'");
 
             e.HasOne(x => x.Project)
              .WithMany(x => x.Documents)

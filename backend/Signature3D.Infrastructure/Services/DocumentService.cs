@@ -1,7 +1,11 @@
+using Docnet.Core;
+using Docnet.Core.Models;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Pgvector;
@@ -25,19 +29,22 @@ public class DocumentService : IDocumentService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMemoryCache _cache;
     private readonly IEmbeddingProvider _embeddingProvider;
+    private readonly IOcrProvider _ocrProvider;
 
     private const int MaxChunkSize = 800;   // ~600 tokens
     private const int ChunkOverlap = 100;   // chevauchement pour contexte
     private const int LowTextPageCharThreshold = 30; // en dessous, une page est signalée comme probablement mal extraite (encadré/image)
+    private const int OcrRasterDpi = 150;   // résolution de rastérisation pour l'OCR — suffisant pour du texte imprimé
     private static readonly TimeSpan BackfillDelay = TimeSpan.FromMilliseconds(1200); // marge tier gratuit Gemini
 
-    public DocumentService(AppDbContext db, IStorageService storage, IServiceScopeFactory scopeFactory, IMemoryCache cache, IEmbeddingProvider embeddingProvider)
+    public DocumentService(AppDbContext db, IStorageService storage, IServiceScopeFactory scopeFactory, IMemoryCache cache, IEmbeddingProvider embeddingProvider, IOcrProvider ocrProvider)
     {
         _db = db;
         _storage = storage;
         _scopeFactory = scopeFactory;
         _cache = cache;
         _embeddingProvider = embeddingProvider;
+        _ocrProvider = ocrProvider;
     }
 
     /// <summary>Retourne tous les documents d'un projet.</summary>
@@ -73,6 +80,7 @@ public class DocumentService : IDocumentService
                     : null),
             IsInternal = d.IsInternal,
             LowTextPageNumbers = d.LowTextPageNumbers,
+            OcrFailedPageNumbers = d.OcrFailedPageNumbers,
             ChunkCount = d.Chunks?.Count ?? 0,
             CreatedAt  = d.CreatedAt
         }).ToList());
@@ -132,6 +140,7 @@ public class DocumentService : IDocumentService
             IndexingError = document.IndexingError,
             IsInternal = document.IsInternal,
             LowTextPageNumbers = document.LowTextPageNumbers,
+            OcrFailedPageNumbers = document.OcrFailedPageNumbers,
             ChunkCount = 0,
             CreatedAt  = document.CreatedAt
         });
@@ -176,6 +185,23 @@ public class DocumentService : IDocumentService
 
         // Indexation dans un scope dédié — même chemin que l'upload
         return await IndexWithBytesInScopeAsync(documentId, pdfBytes);
+    }
+
+    /// <summary>
+    /// Enfile un job de réindexation avec tentative OCR sur les pages à faible texte
+    /// (LowTextPageNumbers). Enfilé plutôt que synchrone — l'appel OCR + le re-embedding
+    /// complet peuvent prendre 15-30s, trop long pour bloquer une requête HTTP.
+    /// </summary>
+    public async Task<Result> RequestOcrReindexAsync(Guid documentId)
+    {
+        var document = await _db.Documents.FindAsync(documentId);
+        if (document is null)
+            return Result.Fail("Document introuvable.");
+
+        _db.IndexingJobs.Add(new IndexingJob { ProjectId = document.ProjectId, DocumentId = documentId, AttemptOcr = true });
+        await _db.SaveChangesAsync();
+
+        return Result.Ok();
     }
 
     /// <summary>Télécharge les bytes d'un document depuis Supabase Storage (URL signée si interne, publique sinon).</summary>
@@ -335,7 +361,7 @@ public class DocumentService : IDocumentService
                 throw new InvalidOperationException("Document introuvable.");
 
             var pdfBytes = await FetchDocumentBytesAsync(document);
-            result = await IndexDocumentCoreAsync(_db, job.DocumentId, pdfBytes);
+            result = await IndexDocumentCoreAsync(_db, job.DocumentId, pdfBytes, job.AttemptOcr);
         }
         catch (Exception ex)
         {
@@ -362,8 +388,12 @@ public class DocumentService : IDocumentService
     /// Cœur de l'indexation — extraction texte, chunking, sauvegarde. Prend un AppDbContext fourni
     /// par l'appelant (qui gère son propre scope), pour être réutilisable depuis un scope de requête,
     /// un scope créé à la volée (IndexWithBytesInScopeAsync), ou le scope du BackgroundService.
+    /// Si <paramref name="attemptOcr"/> est vrai, les pages détectées à faible texte
+    /// (LowTextPageNumbers) sont rastérisées et passées à l'OCR — leur texte est remplacé si
+    /// l'OCR trouve suffisamment de contenu, sinon la page passe dans OcrFailedPageNumbers
+    /// (état terminal — pas de nouvelle tentative automatique).
     /// </summary>
-    private async Task<Result> IndexDocumentCoreAsync(AppDbContext db, Guid documentId, byte[] pdfBytes)
+    private async Task<Result> IndexDocumentCoreAsync(AppDbContext db, Guid documentId, byte[] pdfBytes, bool attemptOcr = false)
     {
         try
         {
@@ -377,9 +407,51 @@ public class DocumentService : IDocumentService
             if (document.Chunks.Any())
                 db.DocumentChunks.RemoveRange(document.Chunks);
 
-            // Extraire le texte avec iText7
-            var (extractedText, lowTextPages) = ExtractTextFromPdf(pdfBytes);
+            // Extraire le texte avec iText7 (par page, pour pouvoir substituer le texte OCR
+            // d'une page précise sans perdre les frontières entre pages).
+            var (pageTexts, lowTextPages) = ExtractTextFromPdf(pdfBytes);
             document.LowTextPageNumbers = lowTextPages;
+
+            if (attemptOcr && lowTextPages.Count > 0)
+            {
+                var stillLowText = new List<int>(lowTextPages);
+                var ocrFailedPages = new List<int>();
+
+                foreach (var pageNumber in lowTextPages)
+                {
+                    string ocrText;
+                    try
+                    {
+                        var pageImage = RasterizePdfPageToPng(pdfBytes, pageNumber);
+                        var ocrResult = await _ocrProvider.ExtractTextFromImageAsync(pageImage);
+                        ocrText = ocrResult.Success ? ocrResult.Data! : string.Empty;
+                        if (!ocrResult.Success)
+                            Console.WriteLine($"[DocumentService] ⚠️ OCR page {pageNumber} échoué : {ocrResult.Error}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[DocumentService] ⚠️ OCR page {pageNumber} exception : {ex.Message}");
+                        ocrText = string.Empty;
+                    }
+
+                    if (ocrText.Trim().Length >= LowTextPageCharThreshold)
+                    {
+                        pageTexts[pageNumber - 1] = ocrText;
+                        stillLowText.Remove(pageNumber);
+                        Console.WriteLine($"[DocumentService] ✅ OCR page {pageNumber} : {ocrText.Trim().Length} caractères récupérés");
+                    }
+                    else
+                    {
+                        ocrFailedPages.Add(pageNumber);
+                        Console.WriteLine($"[DocumentService] ⚠️ OCR page {pageNumber} toujours sous le seuil ({ocrText.Trim().Length} caractères)");
+                    }
+                }
+
+                document.LowTextPageNumbers = stillLowText;
+                document.OcrFailedPageNumbers = ocrFailedPages;
+            }
+
+            var extractedText = ConcatenateAndClean(pageTexts);
 
             if (string.IsNullOrWhiteSpace(extractedText))
             {
@@ -444,11 +516,13 @@ public class DocumentService : IDocumentService
     }
 
     /// <summary>
-    /// Extrait le texte d'un PDF avec iText7. Signale au passage les pages dont le texte brut
+    /// Extrait le texte d'un PDF avec iText7, page par page (plutôt qu'une seule chaîne
+    /// concaténée) — nécessaire pour pouvoir substituer le texte OCR d'une page précise sans
+    /// perdre les frontières entre pages. Signale au passage les pages dont le texte brut
     /// (avant nettoyage global) est anormalement court — signe probable d'un encadré/visuel
     /// exporté en image plutôt qu'en texte réel, invisible à l'extraction sans OCR.
     /// </summary>
-    private static (string Text, List<int> LowTextPages) ExtractTextFromPdf(byte[] pdfBytes)
+    private static (List<string> PageTexts, List<int> LowTextPages) ExtractTextFromPdf(byte[] pdfBytes)
     {
         try
         {
@@ -456,7 +530,7 @@ public class DocumentService : IDocumentService
             using var reader = new PdfReader(ms);
             using var pdf    = new PdfDocument(reader);
 
-            var sb = new System.Text.StringBuilder();
+            var pageTexts = new List<string>();
             var lowTextPages = new List<int>();
 
             for (int page = 1; page <= pdf.GetNumberOfPages(); page++)
@@ -465,21 +539,47 @@ public class DocumentService : IDocumentService
                 var text     = PdfTextExtractor.GetTextFromPage(pdf.GetPage(page), strategy);
                 if (text.Trim().Length < LowTextPageCharThreshold)
                     lowTextPages.Add(page);
-                sb.AppendLine(text);
+                pageTexts.Add(text);
             }
 
-            // Nettoyer le texte extrait
-            var result = sb.ToString();
-            result = System.Text.RegularExpressions.Regex.Replace(result, @"\s{3,}", "  ");
-            result = result.Trim();
-
-            return (result, lowTextPages);
+            return (pageTexts, lowTextPages);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[DocumentService] Erreur extraction PDF : {ex.Message}");
-            return (string.Empty, []);
+            return ([], []);
         }
+    }
+
+    /// <summary>Concatène les textes de page et nettoie les espaces multiples (même règle qu'avant).</summary>
+    private static string ConcatenateAndClean(List<string> pageTexts)
+    {
+        var sb = new System.Text.StringBuilder();
+        foreach (var text in pageTexts)
+            sb.AppendLine(text);
+
+        var result = sb.ToString();
+        result = System.Text.RegularExpressions.Regex.Replace(result, @"\s{3,}", "  ");
+        return result.Trim();
+    }
+
+    /// <summary>
+    /// Rastérise une page PDF (numérotée à partir de 1) en PNG pour l'envoyer à l'OCR —
+    /// Docnet.Core (wrapper PDFium) rend des pixels bruts BGRA, encodés en PNG via ImageSharp.
+    /// </summary>
+    private static byte[] RasterizePdfPageToPng(byte[] pdfBytes, int pageNumber)
+    {
+        using var docReader = DocLib.Instance.GetDocReader(pdfBytes, new PageDimensions(OcrRasterDpi / 72.0));
+        using var pageReader = docReader.GetPageReader(pageNumber - 1);
+
+        var width = pageReader.GetPageWidth();
+        var height = pageReader.GetPageHeight();
+        var rawBytes = pageReader.GetImage();
+
+        using var image = Image.LoadPixelData<Bgra32>(rawBytes, width, height);
+        using var outputStream = new MemoryStream();
+        image.SaveAsPng(outputStream);
+        return outputStream.ToArray();
     }
 
     /// <summary>

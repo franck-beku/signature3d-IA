@@ -5,7 +5,7 @@
 
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star } from 'lucide-react'
 import Link from 'next/link'
@@ -93,6 +93,9 @@ export default function ProjectForm({ projectId }: Props) {
   const [docsLoading, setDocsLoading]           = useState(false)
   const [uploadingDoc, setUploadingDoc]         = useState(false)
   const [uploadIsInternal, setUploadIsInternal] = useState(false)
+  const [ocrPendingIds, setOcrPendingIds]       = useState<Set<string>>(new Set())
+  const isMountedRef = useRef(true)
+  useEffect(() => () => { isMountedRef.current = false }, [])
 
   // Valeurs de données Luxedia — ne pas modifier (couleurs choisies par le client)
   const [luxediaPrimaryColor, setLuxediaPrimaryColor]         = useState('#d4af37')
@@ -212,6 +215,41 @@ export default function ProjectForm({ projectId }: Props) {
     try {
       await documentsApi.delete(id)
       setDocuments((prev) => prev.filter((d) => d.id !== id))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
+    }
+  }
+
+  /** Enfile l'OCR puis poll toutes les 3s (max 20x = 60s) jusqu'à ce que l'état de la page change. */
+  const pollOcrResult = (documentId: string, attempt = 0) => {
+    if (attempt >= 20) {
+      if (isMountedRef.current) setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(documentId); return next })
+      return
+    }
+    setTimeout(async () => {
+      if (!isMountedRef.current || !projectId) return
+      try {
+        const docs = await documentsApi.getByProject(projectId) as DocumentDto[]
+        if (!isMountedRef.current) return
+        setDocuments(docs)
+        const updated = docs.find((d) => d.id === documentId)
+        const stillProcessing = !!updated && updated.lowTextPageNumbers?.length > 0 && updated.ocrFailedPageNumbers?.length === 0
+        if (stillProcessing) {
+          pollOcrResult(documentId, attempt + 1)
+        } else {
+          setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(documentId); return next })
+        }
+      } catch {
+        pollOcrResult(documentId, attempt + 1)
+      }
+    }, 3000)
+  }
+
+  const handleRequestOcr = async (documentId: string) => {
+    try {
+      await documentsApi.requestOcrReindex(documentId)
+      setOcrPendingIds((prev) => new Set(prev).add(documentId))
+      pollOcrResult(documentId)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
@@ -573,6 +611,8 @@ export default function ProjectForm({ projectId }: Props) {
             onUpload={handleUploadDocument}
             onToggleCategory={handleToggleCategory}
             onDelete={handleDeleteDocument}
+            onRequestOcr={handleRequestOcr}
+            ocrPendingIds={ocrPendingIds}
           />
         )}
 

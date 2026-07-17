@@ -104,6 +104,23 @@ public class DocumentsController : ControllerBase
     }
 
     /// <summary>
+    /// Enfile une réindexation avec tentative OCR sur les pages à faible texte (LowTextPageNumbers).
+    /// Asynchrone — traité par DocumentIndexingBackgroundService, pas de traitement synchrone
+    /// bloquant (l'OCR + le re-embedding complet peuvent prendre 15-30s).
+    /// POST /api/documents/{id}/ocr-reindex
+    /// </summary>
+    [HttpPost("{id:guid}/ocr-reindex")]
+    public async Task<IActionResult> OcrReindex(Guid id)
+    {
+        var result = await _documentService.RequestOcrReindexAsync(id);
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(new { message = "OCR enfilé — le traitement peut prendre jusqu'à une minute." });
+    }
+
+    /// <summary>
     /// Bascule un document entre interne (IsInternal=true) et base IA (IsInternal=false).
     /// IA → interne : chunks supprimés, IsIndexed = false.
     /// Interne → IA : ré-indexation lancée depuis StorageUrl.
