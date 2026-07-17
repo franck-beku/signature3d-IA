@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useId } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import { BarChart2, Users, TrendingUp, MessageSquare, QrCode, Clock, HelpCircle } from 'lucide-react'
 import { clientsApi, projectsApi, analyticsApi, type ClientDto, type ProjectDto, type ProjectAnalyticsDto } from '@/lib/api'
@@ -244,6 +244,8 @@ function DailyStatsChart({
   formatDate: (iso: string) => string
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const titleId = useId()
+  const descId = useId()
 
   const width = 760
   const height = 220
@@ -287,9 +289,25 @@ function DailyStatsChart({
     return { left, width: right - left }
   })
 
+  // résumé textuel de la tendance pour les lecteurs d'écran
+  const totalVisits = useMemo(() => data.reduce((sum, d) => sum + d.visits, 0), [data])
+  const totalLeads = useMemo(() => data.reduce((sum, d) => sum + d.leads, 0), [data])
+  const summary = `Graphique des visites et leads du ${formatDate(data[0].date)} au ${formatDate(data[data.length - 1].date)}, total de ${totalVisits} visite${totalVisits > 1 ? 's' : ''} et ${totalLeads} lead${totalLeads > 1 ? 's' : ''}.`
+
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
+        role="img"
+        aria-label={summary}
+        aria-describedby={descId}
+      >
+        <title id={titleId}>{summary}</title>
+        <desc id={descId}>
+          Courbe dorée : nombre de visites par jour. Courbe verte : nombre de leads générés par jour.
+          Naviguez au clavier avec Tab pour connaître le détail de chaque jour.
+        </desc>
         <defs>
           <linearGradient id="visitsGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--dash-gold)" stopOpacity="0.22" />
@@ -328,8 +346,14 @@ function DailyStatsChart({
               x={hoverZones[i].left} y={padding.top}
               width={hoverZones[i].width} height={innerH}
               fill="transparent"
+              tabIndex={0}
+              role="img"
+              aria-label={`${formatDate(d.date)} : ${d.visits} visite${d.visits > 1 ? 's' : ''}, ${d.leads} lead${d.leads > 1 ? 's' : ''}`}
+              style={{ outline: hoverIndex === i ? '2px solid var(--dash-gold)' : 'none', outlineOffset: '-2px' }}
               onMouseEnter={() => setHoverIndex(i)}
               onMouseLeave={() => setHoverIndex((cur) => (cur === i ? null : cur))}
+              onFocus={() => setHoverIndex(i)}
+              onBlur={() => setHoverIndex((cur) => (cur === i ? null : cur))}
             />
             {hoverIndex === i && (
               <line x1={x(i)} x2={x(i)} y1={padding.top} y2={padding.top + innerH} stroke="var(--dash-border-input)" strokeWidth={1} strokeDasharray="3 3" />
