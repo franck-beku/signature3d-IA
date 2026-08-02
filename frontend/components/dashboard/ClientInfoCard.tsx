@@ -22,7 +22,7 @@ export default function ClientInfoCard({
   const contractSt = clientStatusStyle(client.status)
 
   return (
-    <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+    <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
       <h2 className="dash-label" style={{ marginBottom: '20px' }}>Informations du client</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '20px' }} className="info-grid">
         {[

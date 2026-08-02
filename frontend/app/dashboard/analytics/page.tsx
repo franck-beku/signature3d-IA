@@ -10,7 +10,7 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import { BarChart2, Users, TrendingUp, MessageSquare, QrCode, Clock, HelpCircle } from 'lucide-react'
 import { clientsApi, projectsApi, analyticsApi, type ClientDto, type ProjectDto, type ProjectAnalyticsDto } from '@/lib/api'
 
-const cardStyle = { backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px' }
+const cardStyle = { backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px' }
 
 type Period = '30d' | '3m' | 'all'
 
