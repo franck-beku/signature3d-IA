@@ -219,6 +219,7 @@ export interface ProjectDto {
   ambassadorName: string
   welcomeMessage?: string
   welcomeMessageEn?: string
+  notes?: string
   status: string
   clientName: string
   clientId: string
@@ -244,6 +245,7 @@ export interface ProjectDto {
   luxediaAvatarUrl?: string
   luxediaClientLogoUrl?: string
   luxediaLanguage?: string
+  luxediaEnabled: boolean
 }
 
 export interface ProjectCardDto {
@@ -285,8 +287,8 @@ export const projectsApi = {
   /** Crée un nouveau projet */
   create: (data: {
     name: string; matterportId?: string; ambassadorName: string
-    experienceType?: string; experienceUrl?: string  
-    welcomeMessage?: string; welcomeMessageEn?: string; leadEmail?: string; clientId: string
+    experienceType?: string; experienceUrl?: string
+    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string; leadEmail?: string; clientId: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
@@ -300,13 +302,14 @@ export const projectsApi = {
     luxediaAvatarUrl?: string
     luxediaClientLogoUrl?: string
     luxediaLanguage?: string
+    luxediaEnabled?: boolean
   }) => apiFetch<ProjectDto>('/api/projects', { method: 'POST', body: JSON.stringify(data) }),
   
   /** Modifie un projet */
   update: (id: string, data: {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string
-    welcomeMessage?: string; welcomeMessageEn?: string; status: string
+    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string; status: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
@@ -320,6 +323,7 @@ export const projectsApi = {
     luxediaAvatarUrl?: string
     luxediaClientLogoUrl?: string
     luxediaLanguage?: string
+    luxediaEnabled: boolean
   }) => apiFetch<ProjectDto>(`/api/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   /** Supprime un projet */
   delete: (id: string) =>

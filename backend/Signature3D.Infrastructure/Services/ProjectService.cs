@@ -86,6 +86,7 @@ public class ProjectService : IProjectService
             AmbassadorName = dto.AmbassadorName,
             WelcomeMessage = dto.WelcomeMessage ?? AppConstants.DefaultWelcomeMessage,
             WelcomeMessageEn = dto.WelcomeMessageEn ?? AppConstants.DefaultWelcomeMessageEn,
+            Notes = dto.Notes,
             LeadEmail = dto.LeadEmail,
             ClientId = dto.ClientId,
             Status = ProjectStatus.Active,
@@ -170,6 +171,7 @@ public class ProjectService : IProjectService
         project.AmbassadorName = dto.AmbassadorName;
         project.WelcomeMessage = dto.WelcomeMessage;
         project.WelcomeMessageEn = dto.WelcomeMessageEn;
+        project.Notes = dto.Notes;
         project.ShortDescription = dto.ShortDescription;
         project.ShortDescriptionEn = dto.ShortDescriptionEn;
         project.CoverImage = dto.CoverImage;
@@ -449,6 +451,7 @@ public class ProjectService : IProjectService
             AmbassadorName = p.AmbassadorName,
             WelcomeMessage = p.WelcomeMessage,
             WelcomeMessageEn = p.WelcomeMessageEn,
+            Notes = p.Notes,
             Status = p.Status.ToString(),
             ClientName = p.Client?.Name ?? string.Empty,
             ClientId = p.ClientId,

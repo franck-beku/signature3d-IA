@@ -15,6 +15,7 @@ public class ProjectDto
     public string AmbassadorName { get; set; } = string.Empty;
     public string? WelcomeMessage { get; set; }
     public string? WelcomeMessageEn { get; set; }
+    public string? Notes { get; set; }
     public string Status { get; set; } = string.Empty;
     public string ClientName { get; set; } = string.Empty;
     public Guid ClientId { get; set; }
@@ -34,6 +35,7 @@ public class ProjectDto
     public string? OfferingName { get; set; }
 
     /* === Luxedia config === */
+    public bool LuxediaEnabled { get; set; } = true;
     public string? LuxediaAvatarUrl { get; set; }
     public string? LuxediaClientLogoUrl { get; set; }
     public string? LuxediaPrimaryColor { get; set; }
@@ -64,6 +66,7 @@ public class CreateProjectDto
     public string AmbassadorName { get; set; } = "Luxedia";
     public string? WelcomeMessage { get; set; }
     public string? WelcomeMessageEn { get; set; }
+    public string? Notes { get; set; }
     public string? LeadEmail { get; set; }
     public Guid ClientId { get; set; }
 
@@ -78,6 +81,7 @@ public class CreateProjectDto
     public Guid? OfferingId { get; set; }
 
     /* === Luxedia config === */
+    public bool LuxediaEnabled { get; set; } = true;
     public string? LuxediaAvatarUrl { get; set; }
     public string? LuxediaClientLogoUrl { get; set; }
     public string? LuxediaPrimaryColor { get; set; }
@@ -107,6 +111,7 @@ public class UpdateProjectDto
     public string AmbassadorName { get; set; } = string.Empty;
     public string? WelcomeMessage { get; set; }
     public string? WelcomeMessageEn { get; set; }
+    public string? Notes { get; set; }
     public string Status { get; set; } = string.Empty;
 
     /* Champs V2 */
@@ -120,6 +125,7 @@ public class UpdateProjectDto
     public Guid? OfferingId { get; set; }
 
     /* === Luxedia config === */
+    public bool LuxediaEnabled { get; set; }
     public string? LuxediaAvatarUrl { get; set; }
     public string? LuxediaClientLogoUrl { get; set; }
     public string? LuxediaPrimaryColor { get; set; }

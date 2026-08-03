@@ -181,6 +181,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
         luxediaEnabled,
         ambassadorName: form.ambassadorName,
         welcomeMessage: form.welcomeMessage || undefined,
+        notes:          form.notes || undefined,
         leadEmail:      form.leadEmail || undefined,
         clientId:       client.id,
         sectorId:       form.sectorId || undefined,
