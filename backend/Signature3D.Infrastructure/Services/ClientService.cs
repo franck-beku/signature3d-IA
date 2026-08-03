@@ -211,5 +211,6 @@ public class ClientService : IClientService
             .Replace("à", "a").Replace("â", "a")
             .Replace("ô", "o").Replace("î", "i")
             .Replace("ç", "c")
-            .Replace("'", "").Replace("'", "");
+            .Replace("'", "").Replace("'", "")
+            .Replace("/", "-").Replace("..", "");
 }

@@ -98,9 +98,11 @@ public class DocumentService : IDocumentService
         await fileStream.CopyToAsync(ms);
         var fileBytes = ms.ToArray();
 
-        // Upload dans Supabase Storage — nom unique pour éviter les collisions
+        // Upload dans Supabase Storage — nom généré côté serveur (jamais le nom original,
+        // qui pourrait contenir des séparateurs de chemin ou ".." — voir Path.GetFileName).
         // Un document interne est stocké dans le bucket privé (référence, pas d'URL publique).
-        var storageFileName = $"{Guid.NewGuid()}-{fileName}";
+        var safeFileName = Path.GetFileName(fileName);
+        var storageFileName = $"{Guid.NewGuid()}{Path.GetExtension(safeFileName)}";
         using var uploadStream = new MemoryStream(fileBytes);
         var uploadResult = await _storage.UploadAsync(uploadStream, storageFileName, $"documents/{projectId}", isPrivate: isInternal);
         if (!uploadResult.Success)
@@ -109,7 +111,7 @@ public class DocumentService : IDocumentService
         // Sauvegarder en base
         var document = new Document
         {
-            Name                    = fileName,
+            Name                    = safeFileName,
             StorageUrl              = isInternal ? string.Empty : uploadResult.Data!,
             PrivateStorageReference = isInternal ? uploadResult.Data! : null,
             SizeBytes               = fileBytes.Length,
