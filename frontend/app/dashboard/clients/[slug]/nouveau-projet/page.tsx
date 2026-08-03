@@ -10,30 +10,55 @@ import { use } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, Check, Upload, Plus, Trash2 } from 'lucide-react'
-import { clientsApi, projectsApi, sectorsApi, offeringsApi, type ClientDto, type SectorDto, type OfferingDto } from '@/lib/api'
+import { clientsApi, projectsApi, sectorsApi, type ClientDto, type SectorDto } from '@/lib/api'
 
 /* ─── Types ─── */
 interface Bouton { id: string; label: string; url: string; action: 'link' | 'form' | 'call' }
 
+type ProjectType = 'matterport_ia' | 'matterport' | 'tour360_ia' | 'tour360' | 'ia_seule'
+
 interface FormData {
   name:           string
-  type:           'matterport_ia' | 'ia_seule' | 'matterport'
+  type:           ProjectType
   matterportUrl:  string
+  experienceUrl:  string
   ambassadorName: string
   welcomeMessage: string
   leadEmail:      string
   boutons:        Bouton[]
   notes:          string
   sectorId:       string
-  offeringId:     string
 }
 
 /* ─── Config ─── */
 const TYPES_PROJET = [
-  { value: 'matterport_ia', label: 'Matterport + IA',  desc: 'Visite 3D immersive avec chatbot Luxedia' },
-  { value: 'ia_seule',      label: 'IA seule',          desc: 'Chatbot Luxedia sans visite 3D'           },
-  { value: 'matterport',    label: 'Matterport seul',   desc: 'Visite 3D sans chatbot IA'                },
-]
+  { value: 'matterport_ia', label: 'Matterport + IA',  desc: 'Visite 3D immersive avec chatbot Luxedia'  },
+  { value: 'tour360_ia',    label: '360° + IA',        desc: 'Visite 360° immersive avec chatbot Luxedia' },
+  { value: 'ia_seule',      label: 'IA seule',         desc: 'Chatbot Luxedia sans visite 3D'            },
+  { value: 'matterport',    label: 'Matterport seul',  desc: 'Visite 3D sans chatbot IA'                 },
+  { value: 'tour360',       label: '360° seul',        desc: 'Visite 360° sans chatbot IA'               },
+] as const
+
+/** Types dont le média est une visite Matterport (jumeau numérique 3D). */
+function isMatterportType(type: ProjectType) {
+  return type === 'matterport' || type === 'matterport_ia'
+}
+
+/** Types dont le média est une visite 360° générique (Glo3D, Kuula...). */
+function isTour360Type(type: ProjectType) {
+  return type === 'tour360' || type === 'tour360_ia'
+}
+
+/** Traduit le choix de l'étape 1 vers les champs techniques attendus par le backend. */
+function toExperienceConfig(type: ProjectType): { experienceType: 'Matterport' | 'Tour360' | 'IAOnly'; luxediaEnabled: boolean } {
+  switch (type) {
+    case 'matterport':    return { experienceType: 'Matterport', luxediaEnabled: false }
+    case 'matterport_ia': return { experienceType: 'Matterport', luxediaEnabled: true }
+    case 'tour360':       return { experienceType: 'Tour360', luxediaEnabled: false }
+    case 'tour360_ia':    return { experienceType: 'Tour360', luxediaEnabled: true }
+    case 'ia_seule':      return { experienceType: 'IAOnly', luxediaEnabled: true }
+  }
+}
 
 const TYPES_ACTION = [
   { value: 'link',  label: 'Lien URL'   },
@@ -42,11 +67,11 @@ const TYPES_ACTION = [
 ]
 
 const steps = [
-  { id: 1, label: 'Type'       },
-  { id: 2, label: 'Infos'      },
-  { id: 3, label: 'Matterport' },
-  { id: 4, label: 'IA'         },
-  { id: 5, label: 'Résultat'   },
+  { id: 1, label: 'Type'    },
+  { id: 2, label: 'Infos'   },
+  { id: 3, label: 'Visite'  },
+  { id: 4, label: 'IA'      },
+  { id: 5, label: 'Résultat' },
 ]
 
 /* ─── Styles ─── */
@@ -58,7 +83,7 @@ const inputStyle = {
   fontFamily: 'inherit', transition: 'border-color 0.3s ease',
 }
 const cardStyle = {
-  backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)',
+  backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)',
   borderRadius: '14px', padding: '24px',
 }
 const btnGold = {
@@ -96,19 +121,18 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
   const [error, setError]             = useState<string | null>(null)
   const [client, setClient]           = useState<ClientDto | null>(null)
   const [sectors, setSectors]         = useState<SectorDto[]>([])
-  const [offerings, setOfferings]     = useState<OfferingDto[]>([])
 
   const [form, setForm] = useState<FormData>({
     name:           '',
     type:           'matterport_ia',
     matterportUrl:  '',
+    experienceUrl:  '',
     ambassadorName: 'Luxedia',
     welcomeMessage: '',
     leadEmail:      '',
     boutons:        [newBouton()],
     notes:          '',
     sectorId:       '',
-    offeringId:     '',
   })
 
   useEffect(() => {
@@ -119,7 +143,6 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
 
   useEffect(() => {
     sectorsApi.getAll().then((s) => setSectors(s as SectorDto[])).catch(() => {})
-    offeringsApi.getAll().then((o) => setOfferings(o as OfferingDto[])).catch(() => {})
   }, [])
 
   const set = (key: string, value: string) =>
@@ -148,20 +171,23 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
 
     try {
       const matterportId = getMatterportId(form.matterportUrl)
+      const { experienceType, luxediaEnabled } = toExperienceConfig(form.type)
 
       const result = await projectsApi.create({
-        name:          form.name,
-        matterportId:  form.type !== 'ia_seule' ? (matterportId ?? undefined) : undefined,
+        name:           form.name,
+        matterportId:   isMatterportType(form.type) ? (matterportId ?? undefined) : undefined,
+        experienceType,
+        experienceUrl:  isTour360Type(form.type) ? (form.experienceUrl || undefined) : undefined,
+        luxediaEnabled,
         ambassadorName: form.ambassadorName,
         welcomeMessage: form.welcomeMessage || undefined,
-        leadEmail:     form.leadEmail || undefined,
-        clientId:      client.id,
-        sectorId:      form.sectorId || undefined,
-        offeringId:    form.offeringId || undefined,
-        isPublished:   false,
-        isFeatured:    false,
-        displayOrder:  0,
-        buttons:       form.type !== 'matterport'
+        leadEmail:      form.leadEmail || undefined,
+        clientId:       client.id,
+        sectorId:       form.sectorId || undefined,
+        isPublished:    false,
+        isFeatured:     false,
+        displayOrder:   0,
+        buttons:        luxediaEnabled
           ? form.boutons.map((b, i) => ({
               label:  b.label,
               url:    b.url || undefined,
@@ -183,8 +209,10 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
     }
   }
 
-  const needsMatterport = form.type !== 'ia_seule'
-  const matterportId    = getMatterportId(form.matterportUrl)
+  const needsVisit    = form.type !== 'ia_seule'
+  const matterportId  = getMatterportId(form.matterportUrl)
+  const { luxediaEnabled } = toExperienceConfig(form.type)
+  const visitStepValid = isMatterportType(form.type) ? !!matterportId : form.experienceUrl.trim().length > 0
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -283,21 +311,12 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                     <input type="email" value={form.leadEmail} onChange={(e) => set('leadEmail', e.target.value)} placeholder="contact@client.ca" style={inputStyle} className="dash-input" />
                     <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '6px' }}>Les leads seront transmis à cette adresse</p>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div>
-                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Secteur</label>
-                      <select value={form.sectorId} onChange={(e) => set('sectorId', e.target.value)} style={inputStyle} className="dash-input">
-                        <option value="">Aucun</option>
-                        {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Offre / Service</label>
-                      <select value={form.offeringId} onChange={(e) => set('offeringId', e.target.value)} style={inputStyle} className="dash-input">
-                        <option value="">Aucune</option>
-                        {offerings.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Secteur</label>
+                    <select value={form.sectorId} onChange={(e) => set('sectorId', e.target.value)} style={inputStyle} className="dash-input">
+                      <option value="">Aucun</option>
+                      {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
                   </div>
                   <div>
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Notes internes</label>
@@ -307,15 +326,15 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <button onClick={() => setCurrentStep(1)} style={btnOutline} className="btn-outline"><ArrowLeft size={14} /> Retour</button>
-                <button onClick={() => setCurrentStep(needsMatterport ? 3 : 4)} disabled={!form.name} style={{ ...btnGold, opacity: form.name ? 1 : 0.4, cursor: form.name ? 'pointer' : 'not-allowed' }} className="btn-gold">
+                <button onClick={() => setCurrentStep(needsVisit ? 3 : 4)} disabled={!form.name} style={{ ...btnGold, opacity: form.name ? 1 : 0.4, cursor: form.name ? 'pointer' : 'not-allowed' }} className="btn-gold">
                   Suivant <ArrowRight size={14} />
                 </button>
               </div>
             </div>
           )}
 
-          {/* ── ÉTAPE 3 — Matterport ── */}
-          {currentStep === 3 && needsMatterport && (
+          {/* ── ÉTAPE 3 — Visite (Matterport ou 360°) ── */}
+          {currentStep === 3 && needsVisit && isMatterportType(form.type) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={cardStyle}>
                 <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Lien Matterport</h2>
@@ -340,7 +359,28 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <button onClick={() => setCurrentStep(2)} style={btnOutline} className="btn-outline"><ArrowLeft size={14} /> Retour</button>
-                <button onClick={() => setCurrentStep(4)} disabled={!matterportId} style={{ ...btnGold, opacity: matterportId ? 1 : 0.4, cursor: matterportId ? 'pointer' : 'not-allowed' }} className="btn-gold">
+                <button onClick={() => setCurrentStep(4)} disabled={!visitStepValid} style={{ ...btnGold, opacity: visitStepValid ? 1 : 0.4, cursor: visitStepValid ? 'pointer' : 'not-allowed' }} className="btn-gold">
+                  Suivant <ArrowRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && needsVisit && isTour360Type(form.type) && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={cardStyle}>
+                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Lien de l&apos;expérience 360°</h2>
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', marginBottom: '20px' }}>Collez l&apos;URL de la visite 360° (Glo3D, Kuula, Pano2VR...).</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>URL de l&apos;expérience 360° *</label>
+                    <input type="text" value={form.experienceUrl} onChange={(e) => set('experienceUrl', e.target.value)} placeholder="https://glo3d.net/xxxxx" style={inputStyle} className="dash-input" />
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button onClick={() => setCurrentStep(2)} style={btnOutline} className="btn-outline"><ArrowLeft size={14} /> Retour</button>
+                <button onClick={() => setCurrentStep(4)} disabled={!visitStepValid} style={{ ...btnGold, opacity: visitStepValid ? 1 : 0.4, cursor: visitStepValid ? 'pointer' : 'not-allowed' }} className="btn-gold">
                   Suivant <ArrowRight size={14} />
                 </button>
               </div>
@@ -351,7 +391,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
           {currentStep === 4 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-              {form.type !== 'matterport' && (
+              {luxediaEnabled && (
                 <div style={cardStyle}>
                   <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '20px' }}>Configuration Luxedia IA</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -423,7 +463,7 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <button onClick={() => setCurrentStep(needsMatterport ? 3 : 2)} style={btnOutline} className="btn-outline"><ArrowLeft size={14} /> Retour</button>
+                <button onClick={() => setCurrentStep(needsVisit ? 3 : 2)} style={btnOutline} className="btn-outline"><ArrowLeft size={14} /> Retour</button>
                 <button
                   onClick={handleCreate}
                   disabled={isCreating || form.boutons.some((b) => !b.label)}

@@ -31,7 +31,6 @@ public class ProjectService : IProjectService
         var projects = await _db.Projects
             .Include(p => p.Client)
             .Include(p => p.Sector)
-            .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
             .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
@@ -40,7 +39,8 @@ public class ProjectService : IProjectService
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return Result<List<ProjectDto>>.Ok(projects.Select(MapToDto).ToList());
+        var offeringNamesBySlug = await LoadOfferingNamesBySlugAsync();
+        return Result<List<ProjectDto>>.Ok(projects.Select(p => MapToDto(p, offeringNamesBySlug)).ToList());
     }
 
     /// <summary>Retourne un projet par son slug — utilisé par l'embed.</summary>
@@ -49,7 +49,6 @@ public class ProjectService : IProjectService
         var project = await _db.Projects
             .Include(p => p.Client)
             .Include(p => p.Sector)
-            .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
             .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
@@ -59,7 +58,8 @@ public class ProjectService : IProjectService
         if (project is null)
             return Result<ProjectDto>.Fail($"Projet '{slug}' introuvable.");
 
-        return Result<ProjectDto>.Ok(MapToDto(project));
+        var offeringNamesBySlug = await LoadOfferingNamesBySlugAsync();
+        return Result<ProjectDto>.Ok(MapToDto(project, offeringNamesBySlug));
     }
 
     /// <summary>Crée un nouveau projet depuis le dashboard.</summary>
@@ -98,6 +98,7 @@ public class ProjectService : IProjectService
             DisplayOrder = dto.DisplayOrder,
             SectorId = dto.SectorId,
             OfferingId = dto.OfferingId,
+            LuxediaEnabled                 = dto.LuxediaEnabled,
             LuxediaAvatarUrl               = dto.LuxediaAvatarUrl,
             LuxediaClientLogoUrl           = dto.LuxediaClientLogoUrl,
             LuxediaPrimaryColor            = dto.LuxediaPrimaryColor,
@@ -144,10 +145,9 @@ public class ProjectService : IProjectService
 
         if (project.SectorId.HasValue)
             await _db.Entry(project).Reference(p => p.Sector).LoadAsync();
-        if (project.OfferingId.HasValue)
-            await _db.Entry(project).Reference(p => p.Offering).LoadAsync();
 
-        return Result<ProjectDto>.Ok(MapToDto(project));
+        var offeringNamesBySlug = await LoadOfferingNamesBySlugAsync();
+        return Result<ProjectDto>.Ok(MapToDto(project, offeringNamesBySlug));
     }
 
     /// <summary>Modifie un projet existant — nom, Matterport ID, boutons, caractéristiques.</summary>
@@ -180,6 +180,7 @@ public class ProjectService : IProjectService
         project.DisplayOrder = dto.DisplayOrder;
         project.SectorId = dto.SectorId;
         project.OfferingId = dto.OfferingId;
+        project.LuxediaEnabled                 = dto.LuxediaEnabled;
         project.LuxediaAvatarUrl               = dto.LuxediaAvatarUrl;
         project.LuxediaClientLogoUrl           = dto.LuxediaClientLogoUrl;
         project.LuxediaPrimaryColor            = dto.LuxediaPrimaryColor;
@@ -270,10 +271,9 @@ public class ProjectService : IProjectService
         await _db.Entry(project).Collection(p => p.Details).LoadAsync();
         if (project.SectorId.HasValue)
             await _db.Entry(project).Reference(p => p.Sector).LoadAsync();
-        if (project.OfferingId.HasValue)
-            await _db.Entry(project).Reference(p => p.Offering).LoadAsync();
 
-        return Result<ProjectDto>.Ok(MapToDto(project));
+        var offeringNamesBySlug = await LoadOfferingNamesBySlugAsync();
+        return Result<ProjectDto>.Ok(MapToDto(project, offeringNamesBySlug));
     }
 
     /// <summary>Supprime un projet et toutes ses données (cascade).</summary>
@@ -299,13 +299,13 @@ public class ProjectService : IProjectService
     {
         var projects = await _db.Projects
             .Include(p => p.Sector)
-            .Include(p => p.Offering)
             .Include(p => p.Details)
             .Where(p => p.IsPublished && p.IsFeatured)
             .OrderBy(p => p.DisplayOrder).ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return Result<List<ProjectCardDto>>.Ok(projects.Select(MapToCard).ToList());
+        var offeringNamesBySlug = await LoadOfferingNamesBySlugAsync();
+        return Result<List<ProjectCardDto>>.Ok(projects.Select(p => MapToCard(p, offeringNamesBySlug)).ToList());
     }
 
     /// <summary>Retourne TOUS les projets — liste du dashboard.</summary>
@@ -314,7 +314,6 @@ public class ProjectService : IProjectService
         var projects = await _db.Projects
             .Include(p => p.Client)
             .Include(p => p.Sector)
-            .Include(p => p.Offering)
             .Include(p => p.Buttons.OrderBy(b => b.Order))
             .Include(p => p.Suggestions.OrderBy(s => s.Order))
             .Include(p => p.Details)
@@ -322,129 +321,192 @@ public class ProjectService : IProjectService
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return Result<List<ProjectDto>>.Ok(projects.Select(MapToDto).ToList());
+        var offeringNamesBySlug = await LoadOfferingNamesBySlugAsync();
+        return Result<List<ProjectDto>>.Ok(projects.Select(p => MapToDto(p, offeringNamesBySlug)).ToList());
     }
 
     /// <summary>
     /// Projets publiés d'un secteur (page /realisations/{secteur}).
-    /// Filtre optionnel par offre (ex: "matterport-ia").
+    /// Filtre optionnel par offre — dérivée de experienceType/luxediaEnabled (ex: "visite-3d-ia").
     /// </summary>
     public async Task<Result<List<ProjectCardDto>>> GetPublishedBySectorAsync(string sectorSlug, string? offeringSlug = null)
     {
         var query = _db.Projects
             .Include(p => p.Sector)
-            .Include(p => p.Offering)
             .Include(p => p.Details)
             .Where(p => p.IsPublished && p.Sector != null && p.Sector.Slug == sectorSlug);
 
         if (!string.IsNullOrWhiteSpace(offeringSlug))
-            query = query.Where(p => p.Offering != null && p.Offering.Slug == offeringSlug);
+        {
+            var parsed = ParseOfferingSlug(offeringSlug);
+            query = parsed is { } combo
+                ? query.Where(p => p.ExperienceType == combo.Type && p.LuxediaEnabled == combo.Luxedia)
+                : query.Where(_ => false);
+        }
 
         var projects = await query
             .OrderBy(p => p.DisplayOrder).ThenByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return Result<List<ProjectCardDto>>.Ok(projects.Select(MapToCard).ToList());
+        var offeringNamesBySlug = await LoadOfferingNamesBySlugAsync();
+        return Result<List<ProjectCardDto>>.Ok(projects.Select(p => MapToCard(p, offeringNamesBySlug)).ToList());
     }
 
-    /// <summary>Mapping entité → DTO public léger (carte vitrine).</summary>
-    private static ProjectCardDto MapToCard(Project p) => new()
+    /* ════════════════════════════════════════
+       Libellé "offre" dérivé de la config technique
+       (experienceType + luxediaEnabled) — remplace la
+       sélection manuelle d'un Offering par projet.
+       ════════════════════════════════════════ */
+
+    /// <summary>Slug déterministe correspondant à une combinaison technique.</summary>
+    private static string ComputeOfferingSlug(ExperienceType experienceType, bool luxediaEnabled) => experienceType switch
     {
-        Id = p.Id,
-        Name = p.Name,
-        Slug = p.Slug,
-        CoverImage = p.CoverImage,
-        MatterportId = p.MatterportId,
-        ShortDescription = p.ShortDescription,
-        ShortDescriptionEn = p.ShortDescriptionEn,
-        IsFeatured = p.IsFeatured,
-        DisplayOrder = p.DisplayOrder,
-        SectorName = p.Sector?.Name,
-        SectorSlug = p.Sector?.Slug,
-        OfferingName = p.Offering?.Name,
-        OfferingSlug = p.Offering?.Slug,
-        Details = p.Details?
-            .Where(d => d.IsVisible)
-            .OrderBy(d => d.DisplayOrder)
-            .Select(d => new ProjectDetailDto
-            {
-                Id = d.Id,
-                Label = d.Label,
-                Value = d.Value,
-                DisplayOrder = d.DisplayOrder,
-                IsVisible = d.IsVisible
-            }).ToList() ?? []
+        ExperienceType.Matterport => luxediaEnabled ? "visite-3d-ia" : "visite-3d",
+        ExperienceType.Tour360    => luxediaEnabled ? "360-ia" : "360",
+        ExperienceType.IAOnly     => "luxedia-ia", // toujours ce slug, l'IA est le coeur du type
+        _                         => "visite-3d",
     };
 
-    /// <summary>Convertit une entité Project en DTO avec l'URL embed.</summary>
-    private ProjectDto MapToDto(Project p) => new()
+    /// <summary>Inverse de <see cref="ComputeOfferingSlug"/> — utilisé pour le filtre public par offre.</summary>
+    private static (ExperienceType Type, bool Luxedia)? ParseOfferingSlug(string slug) => slug switch
     {
-        Id = p.Id,
-        Name = p.Name,
-        Slug = p.Slug,
-        MatterportId = p.MatterportId,
-        ExperienceType = p.ExperienceType.ToString(),
-        ExperienceUrl = p.ExperienceUrl,
-        ThumbnailUrl = p.ThumbnailUrl,
-        AmbassadorName = p.AmbassadorName,
-        WelcomeMessage = p.WelcomeMessage,
-        WelcomeMessageEn = p.WelcomeMessageEn,
-        Status = p.Status.ToString(),
-        ClientName = p.Client?.Name ?? string.Empty,
-        ClientId = p.ClientId,
-        EmbedUrl = $"{_urls.EmbedBaseUrl}/{p.Slug}",
-        ShortDescription = p.ShortDescription,
-        ShortDescriptionEn = p.ShortDescriptionEn,
-        CoverImage = p.CoverImage,
-        IsPublished  = p.IsPublished,
-        PublishedAt  = p.PublishedAt,
-        IsFeatured   = p.IsFeatured,
-        DisplayOrder = p.DisplayOrder,
-        SectorId = p.SectorId,
-        SectorName = p.Sector?.Name,
-        OfferingId = p.OfferingId,
-        OfferingName = p.Offering?.Name,
-        LuxediaAvatarUrl               = p.LuxediaAvatarUrl,
-        LuxediaClientLogoUrl           = p.LuxediaClientLogoUrl,
-        LuxediaPrimaryColor            = p.LuxediaPrimaryColor,
-        LuxediaWidgetBgColor           = p.LuxediaWidgetBgColor,
-        LuxediaBotMessageColor         = p.LuxediaBotMessageColor,
-        LuxediaUserMessageColor        = p.LuxediaUserMessageColor,
-        LuxediaWidgetPosition          = p.LuxediaWidgetPosition,
-        LuxediaButtonIcon              = p.LuxediaButtonIcon,
-        LuxediaLanguage                = p.LuxediaLanguage,
-        LuxediaTone                    = p.LuxediaTone,
-        LuxediaPersonalityInstructions = p.LuxediaPersonalityInstructions,
-        Buttons = p.Buttons?.OrderBy(b => b.Order).Select(b => new ProjectButtonDto
-        {
-            Id = b.Id,
-            Label = b.Label,
-            LabelEn = b.LabelEn,
-            Url = b.Url,
-            Action = b.Action.ToString().ToLower(),
-            Order = b.Order
-        }).ToList() ?? [],
-        Suggestions = p.Suggestions?.OrderBy(s => s.Order).Select(s => new ProjectSuggestionDto
-        {
-            Id = s.Id,
-            Label = s.Label,
-            LabelEn = s.LabelEn,
-            Answer = s.Answer,
-            AnswerEn = s.AnswerEn,
-            Order = s.Order
-        }).ToList() ?? [],
-        Details = p.Details?
-            .OrderBy(d => d.DisplayOrder)
-            .Select(d => new ProjectDetailDto
-            {
-                Id = d.Id,
-                Label = d.Label,
-                Value = d.Value,
-                DisplayOrder = d.DisplayOrder,
-                IsVisible = d.IsVisible
-            }).ToList() ?? [],
-        CreatedAt = p.CreatedAt
+        "visite-3d"    => (ExperienceType.Matterport, false),
+        "visite-3d-ia" => (ExperienceType.Matterport, true),
+        "360"          => (ExperienceType.Tour360, false),
+        "360-ia"       => (ExperienceType.Tour360, true),
+        "luxedia-ia"   => (ExperienceType.IAOnly, true),
+        _              => null,
     };
+
+    /// <summary>
+    /// Filet de sécurité si le slug calculé ne correspond à aucune entrée de la table Offerings
+    /// (ex: entrée supprimée par erreur du catalogue) — garantit un libellé correct plutôt
+    /// qu'un badge vide ou une erreur.
+    /// </summary>
+    private static readonly Dictionary<string, string> FallbackOfferingLabels = new()
+    {
+        ["visite-3d"]    = "Visite 3D",
+        ["visite-3d-ia"] = "Visite 3D + IA",
+        ["360"]          = "360°",
+        ["360-ia"]       = "360° + IA",
+        ["luxedia-ia"]   = "Luxedia IA",
+    };
+
+    /// <summary>Charge le catalogue Offerings sous forme slug → nom (petite table, un aller-retour par appel).</summary>
+    private async Task<Dictionary<string, string>> LoadOfferingNamesBySlugAsync() =>
+        await _db.Offerings.ToDictionaryAsync(o => o.Slug, o => o.Name);
+
+    /// <summary>Résout le libellé "offre" à partir du slug technique calculé, avec fallback.</summary>
+    private static string ResolveOfferingName(Dictionary<string, string> offeringNamesBySlug, string slug) =>
+        offeringNamesBySlug.TryGetValue(slug, out var name) ? name : FallbackOfferingLabels[slug];
+
+    /// <summary>Mapping entité → DTO public léger (carte vitrine).</summary>
+    private static ProjectCardDto MapToCard(Project p, Dictionary<string, string> offeringNamesBySlug)
+    {
+        var offeringSlug = ComputeOfferingSlug(p.ExperienceType, p.LuxediaEnabled);
+        return new ProjectCardDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Slug = p.Slug,
+            CoverImage = p.CoverImage,
+            MatterportId = p.MatterportId,
+            ShortDescription = p.ShortDescription,
+            ShortDescriptionEn = p.ShortDescriptionEn,
+            IsFeatured = p.IsFeatured,
+            DisplayOrder = p.DisplayOrder,
+            SectorName = p.Sector?.Name,
+            SectorSlug = p.Sector?.Slug,
+            OfferingName = ResolveOfferingName(offeringNamesBySlug, offeringSlug),
+            OfferingSlug = offeringSlug,
+            Details = p.Details?
+                .Where(d => d.IsVisible)
+                .OrderBy(d => d.DisplayOrder)
+                .Select(d => new ProjectDetailDto
+                {
+                    Id = d.Id,
+                    Label = d.Label,
+                    Value = d.Value,
+                    DisplayOrder = d.DisplayOrder,
+                    IsVisible = d.IsVisible
+                }).ToList() ?? []
+        };
+    }
+
+    /// <summary>Convertit une entité Project en DTO avec l'URL embed.</summary>
+    private ProjectDto MapToDto(Project p, Dictionary<string, string> offeringNamesBySlug)
+    {
+        var offeringSlug = ComputeOfferingSlug(p.ExperienceType, p.LuxediaEnabled);
+        return new ProjectDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Slug = p.Slug,
+            MatterportId = p.MatterportId,
+            ExperienceType = p.ExperienceType.ToString(),
+            ExperienceUrl = p.ExperienceUrl,
+            ThumbnailUrl = p.ThumbnailUrl,
+            AmbassadorName = p.AmbassadorName,
+            WelcomeMessage = p.WelcomeMessage,
+            WelcomeMessageEn = p.WelcomeMessageEn,
+            Status = p.Status.ToString(),
+            ClientName = p.Client?.Name ?? string.Empty,
+            ClientId = p.ClientId,
+            EmbedUrl = $"{_urls.EmbedBaseUrl}/{p.Slug}",
+            ShortDescription = p.ShortDescription,
+            ShortDescriptionEn = p.ShortDescriptionEn,
+            CoverImage = p.CoverImage,
+            IsPublished  = p.IsPublished,
+            PublishedAt  = p.PublishedAt,
+            IsFeatured   = p.IsFeatured,
+            DisplayOrder = p.DisplayOrder,
+            SectorId = p.SectorId,
+            SectorName = p.Sector?.Name,
+            OfferingId = p.OfferingId,
+            OfferingName = ResolveOfferingName(offeringNamesBySlug, offeringSlug),
+            LuxediaEnabled                 = p.LuxediaEnabled,
+            LuxediaAvatarUrl               = p.LuxediaAvatarUrl,
+            LuxediaClientLogoUrl           = p.LuxediaClientLogoUrl,
+            LuxediaPrimaryColor            = p.LuxediaPrimaryColor,
+            LuxediaWidgetBgColor           = p.LuxediaWidgetBgColor,
+            LuxediaBotMessageColor         = p.LuxediaBotMessageColor,
+            LuxediaUserMessageColor        = p.LuxediaUserMessageColor,
+            LuxediaWidgetPosition          = p.LuxediaWidgetPosition,
+            LuxediaButtonIcon              = p.LuxediaButtonIcon,
+            LuxediaLanguage                = p.LuxediaLanguage,
+            LuxediaTone                    = p.LuxediaTone,
+            LuxediaPersonalityInstructions = p.LuxediaPersonalityInstructions,
+            Buttons = p.Buttons?.OrderBy(b => b.Order).Select(b => new ProjectButtonDto
+            {
+                Id = b.Id,
+                Label = b.Label,
+                LabelEn = b.LabelEn,
+                Url = b.Url,
+                Action = b.Action.ToString().ToLower(),
+                Order = b.Order
+            }).ToList() ?? [],
+            Suggestions = p.Suggestions?.OrderBy(s => s.Order).Select(s => new ProjectSuggestionDto
+            {
+                Id = s.Id,
+                Label = s.Label,
+                LabelEn = s.LabelEn,
+                Answer = s.Answer,
+                AnswerEn = s.AnswerEn,
+                Order = s.Order
+            }).ToList() ?? [],
+            Details = p.Details?
+                .OrderBy(d => d.DisplayOrder)
+                .Select(d => new ProjectDetailDto
+                {
+                    Id = d.Id,
+                    Label = d.Label,
+                    Value = d.Value,
+                    DisplayOrder = d.DisplayOrder,
+                    IsVisible = d.IsVisible
+                }).ToList() ?? [],
+            CreatedAt = p.CreatedAt
+        };
+    }
 
     /// <summary>Génère un slug URL-friendly à partir d'un nom.</summary>
     private static string GenerateSlug(string name) =>

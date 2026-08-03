@@ -10,9 +10,9 @@ import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Check, ArrowLeft, Eye, EyeOff, Star } from 'lucide-react'
 import Link from 'next/link'
 import {
-  projectsApi, clientsApi, sectorsApi, offeringsApi,
+  projectsApi, clientsApi, sectorsApi,
   documentsApi,
-  type ProjectDto, type ClientDto, type SectorDto, type OfferingDto, type DocumentDto,
+  type ProjectDto, type ClientDto, type SectorDto, type DocumentDto,
 } from '@/lib/api'
 import ProjectDocumentsSection from './ProjectDocumentsSection'
 
@@ -62,7 +62,6 @@ export default function ProjectForm({ projectId }: Props) {
 
   const [clients, setClients]     = useState<ClientDto[]>([])
   const [sectors, setSectors]     = useState<SectorDto[]>([])
-  const [offerings, setOfferings] = useState<OfferingDto[]>([])
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
@@ -71,10 +70,10 @@ export default function ProjectForm({ projectId }: Props) {
   const [name, setName]                       = useState('')
   const [clientId, setClientId]               = useState('')
   const [sectorId, setSectorId]               = useState('')
-  const [offeringId, setOfferingId]           = useState('')
   const [matterportId, setMatterportId]       = useState('')
   const [experienceType, setExperienceType]   = useState('Matterport')
   const [experienceUrl, setExperienceUrl]     = useState('')
+  const [luxediaEnabled, setLuxediaEnabled]   = useState(true)
   const [ambassadorName, setAmbassadorName]   = useState('Luxedia')
   const [welcomeMessage, setWelcomeMessage]   = useState('')
   const [welcomeMessageEn, setWelcomeMessageEn] = useState('')
@@ -109,14 +108,12 @@ export default function ProjectForm({ projectId }: Props) {
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const [clientsRes, sectorsRes, offeringsRes] = await Promise.all([
+        const [clientsRes, sectorsRes] = await Promise.all([
           clientsApi.getAll(1, 100),
           sectorsApi.getAll(),
-          offeringsApi.getAll(),
         ])
         setClients(clientsRes.items as ClientDto[])
         setSectors(sectorsRes as SectorDto[])
-        setOfferings(offeringsRes as OfferingDto[])
 
         if (isEdit && projectId) {
           const all = await projectsApi.getAll()
@@ -125,10 +122,10 @@ export default function ProjectForm({ projectId }: Props) {
             setName(p.name)
             setClientId(p.clientId)
             setSectorId(p.sectorId ?? '')
-            setOfferingId(p.offeringId ?? '')
             setMatterportId(p.matterportId ?? '')
             setExperienceType(p.experienceType ?? 'Matterport')
             setExperienceUrl(p.experienceUrl ?? '')
+            setLuxediaEnabled(p.luxediaEnabled ?? true)
             setAmbassadorName(p.ambassadorName)
             setWelcomeMessage(p.welcomeMessage ?? '')
             setWelcomeMessageEn(p.welcomeMessageEn ?? '')
@@ -277,6 +274,10 @@ export default function ProjectForm({ projectId }: Props) {
         .filter((d) => d.label.trim() && d.value.trim())
         .map((d, i) => ({ label: d.label, value: d.value, displayOrder: i, isVisible: d.isVisible }))
 
+      // En mode IA seule, Luxedia est le coeur de l'expérience — toujours actif,
+      // indépendamment de l'état du toggle (désactivé/grisé dans ce cas).
+      const effectiveLuxediaEnabled = experienceType === 'IAOnly' ? true : luxediaEnabled
+
       if (isEdit && projectId) {
         await projectsApi.update(projectId, {
           name, matterportId: matterportId || undefined, ambassadorName,
@@ -284,7 +285,7 @@ export default function ProjectForm({ projectId }: Props) {
           welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, status,
           shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
-          sectorId: sectorId || undefined, offeringId: offeringId || undefined,
+          sectorId: sectorId || undefined,
           buttons: cleanButtons,
           suggestions: cleanSuggestions,
           details: cleanDetails,
@@ -295,15 +296,17 @@ export default function ProjectForm({ projectId }: Props) {
           luxediaAvatarUrl: luxediaAvatarUrl || undefined,
           luxediaClientLogoUrl: luxediaClientLogoUrl || undefined,
           luxediaLanguage: luxediaLanguage || undefined,
+          luxediaEnabled: effectiveLuxediaEnabled,
         })
       } else {
         await projectsApi.create({
           name, matterportId: matterportId || undefined, ambassadorName,
           experienceType, experienceUrl: experienceUrl || undefined,
+          luxediaEnabled: effectiveLuxediaEnabled,
           welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, clientId,
           shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
-          sectorId: sectorId || undefined, offeringId: offeringId || undefined,
+          sectorId: sectorId || undefined,
           buttons: cleanButtons,
           suggestions: cleanSuggestions,
           details: cleanDetails,
@@ -340,7 +343,7 @@ export default function ProjectForm({ projectId }: Props) {
         )}
 
         {/* SECTION 1 — Informations */}
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <p style={sectionTitle}>Informations</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
@@ -360,13 +363,6 @@ export default function ProjectForm({ projectId }: Props) {
                 <select value={sectorId} onChange={(e) => setSectorId(e.target.value)} style={inputStyle} className="dash-input">
                   <option value="">Aucun</option>
                   {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Offre / Service</label>
-                <select value={offeringId} onChange={(e) => setOfferingId(e.target.value)} style={inputStyle} className="dash-input">
-                  <option value="">Aucune</option>
-                  {offerings.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
                 </select>
               </div>
               <div>
@@ -390,7 +386,7 @@ export default function ProjectForm({ projectId }: Props) {
         </div>
 
         {/* SECTION 2 — Expérience immersive */}
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <p style={sectionTitle}>Expérience immersive</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
@@ -415,6 +411,34 @@ export default function ProjectForm({ projectId }: Props) {
                 <input type="text" value={experienceUrl} onChange={(e) => setExperienceUrl(e.target.value)} placeholder="https://glo3d.net/xxxxx" style={inputStyle} className="dash-input" />
               </div>
             )}
+
+            <div>
+              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Assistant Luxedia</label>
+              <button
+                type="button"
+                onClick={() => setLuxediaEnabled((v) => !v)}
+                disabled={experienceType === 'IAOnly'}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '8px',
+                  border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-input)',
+                  color: (luxediaEnabled || experienceType === 'IAOnly') ? 'var(--dash-success)' : 'var(--dash-text-subtle)',
+                  cursor: experienceType === 'IAOnly' ? 'not-allowed' : 'pointer',
+                  opacity: experienceType === 'IAOnly' ? 0.6 : 1,
+                  fontSize: '13px',
+                }}
+              >
+                {(luxediaEnabled || experienceType === 'IAOnly') ? <Eye size={14} /> : <EyeOff size={14} />}
+                {experienceType === 'IAOnly'
+                  ? 'Toujours actif en mode IA seule'
+                  : (luxediaEnabled ? 'Assistant Luxedia activé' : 'Assistant Luxedia désactivé')}
+              </button>
+              {experienceType !== 'IAOnly' && (
+                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '8px 0 0' }}>
+                  Désactivé : le lien/QR final mène uniquement à la visite, sans widget de chat à côté.
+                </p>
+              )}
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Nom de l'ambassadeur IA</label>
@@ -443,7 +467,7 @@ export default function ProjectForm({ projectId }: Props) {
         </div>
 
         {/* SECTION 3 — Personnalisation Luxedia */}
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <p style={sectionTitle}>Personnalisation Luxedia</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
@@ -497,7 +521,7 @@ export default function ProjectForm({ projectId }: Props) {
         </div>
 
         {/* SECTION 4 — Boutons d'action */}
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <p style={{ ...sectionTitle, margin: 0 }}>Boutons d'action</p>
             <button onClick={addButton} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--dash-gold)', background: 'none', border: '1px solid var(--dash-gold-ring)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
@@ -532,7 +556,7 @@ export default function ProjectForm({ projectId }: Props) {
         </div>
 
         {/* SECTION 4bis — Suggestions rapides */}
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <p style={{ ...sectionTitle, margin: 0 }}>Suggestions rapides</p>
             <button onClick={addSuggestion} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--dash-gold)', background: 'none', border: '1px solid var(--dash-gold-ring)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
@@ -569,7 +593,7 @@ export default function ProjectForm({ projectId }: Props) {
         </div>
 
         {/* SECTION 5 — Caractéristiques */}
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <p style={{ ...sectionTitle, margin: 0 }}>Caractéristiques</p>
             <button onClick={addDetail} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--dash-gold)', background: 'none', border: '1px solid var(--dash-gold-ring)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
@@ -617,7 +641,7 @@ export default function ProjectForm({ projectId }: Props) {
         )}
 
         {/* SECTION — Publication */}
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '24px' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '24px' }}>
           <p style={sectionTitle}>Publication</p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <button onClick={() => setIsPublished(!isPublished)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-input)', color: isPublished ? 'var(--dash-success)' : 'var(--dash-text-subtle)', cursor: 'pointer', fontSize: '13px' }}>
