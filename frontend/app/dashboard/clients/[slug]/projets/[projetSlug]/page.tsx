@@ -15,7 +15,7 @@ import {
   type VisitStatsDto, type ProjectButtonClicksDto, type LeadStatsDto, type ProjectQuestionStatsDto,
 } from '@/lib/api'
 
-const cardStyle = { backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '20px' }
+const cardStyle = { backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '20px' }
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -303,9 +303,9 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', margin: 0 }}>Documents — {documents.length}</h2>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', padding: '6px 12px', borderRadius: '8px', background: 'none', cursor: uploadingDoc ? 'default' : 'pointer', transition: 'all 0.2s ease' }} className="upload-btn">
-                <Upload size={11} /> {uploadingDoc ? 'Upload...' : 'Uploader un PDF'}
+                <Upload size={11} /> {uploadingDoc ? 'Upload...' : 'Uploader un document'}
                 <input
-                  type="file" accept=".pdf" style={{ display: 'none' }}
+                  type="file" accept=".pdf,.docx" style={{ display: 'none' }}
                   disabled={uploadingDoc}
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadDocument(f); e.target.value = '' }}
                 />

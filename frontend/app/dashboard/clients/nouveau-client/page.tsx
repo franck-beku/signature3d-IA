@@ -163,7 +163,7 @@ export default function NouveauClientPage() {
               )}
 
               {/* Infos principales */}
-              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
                 <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Informations du client
                 </h2>
@@ -208,7 +208,7 @@ export default function NouveauClientPage() {
               </div>
 
               {/* Dates & Statut */}
-              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
                 <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Contrat & Priorité
                 </h2>
@@ -255,7 +255,7 @@ export default function NouveauClientPage() {
               </div>
 
               {/* Notes */}
-              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
                 <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Notes internes
                 </h2>
