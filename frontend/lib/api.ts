@@ -220,6 +220,8 @@ export interface ProjectDto {
   welcomeMessage?: string
   welcomeMessageEn?: string
   notes?: string
+  contactPhone?: string
+  contactUrl?: string
   status: string
   clientName: string
   clientId: string
@@ -288,7 +290,8 @@ export const projectsApi = {
   create: (data: {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string
-    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string; leadEmail?: string; clientId: string
+    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string
+    contactPhone?: string; contactUrl?: string; leadEmail?: string; clientId: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
@@ -309,7 +312,8 @@ export const projectsApi = {
   update: (id: string, data: {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string
-    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string; status: string
+    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string
+    contactPhone?: string; contactUrl?: string; status: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
@@ -395,11 +399,13 @@ export interface ChatResponseDto {
 }
 
 export const chatApi = {
-  /** Envoie un message à Luxedia et retourne la réponse */
-  sendMessage: (message: string, projectSlug: string, sessionToken?: string) =>
+  /** Envoie un message à Luxedia et retourne la réponse.
+   *  visitorLanguage : langue explicitement choisie par le visiteur via le sélecteur FR/EN du
+   *  widget — prime sur le réglage par défaut de l'admin (luxediaLanguage) une fois cliquée. */
+  sendMessage: (message: string, projectSlug: string, sessionToken?: string, visitorLanguage?: 'fr' | 'en') =>
     apiFetch<ChatResponseDto>('/api/chat/message', {
       method: 'POST',
-      body: JSON.stringify({ message, projectSlug, sessionToken }),
+      body: JSON.stringify({ message, projectSlug, sessionToken, visitorLanguage }),
     }),
 }
 

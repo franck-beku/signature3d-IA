@@ -16,6 +16,8 @@ public class ProjectDto
     public string? WelcomeMessage { get; set; }
     public string? WelcomeMessageEn { get; set; }
     public string? Notes { get; set; }
+    public string? ContactPhone { get; set; }
+    public string? ContactUrl { get; set; }
     public string Status { get; set; } = string.Empty;
     public string ClientName { get; set; } = string.Empty;
     public Guid ClientId { get; set; }
@@ -67,6 +69,8 @@ public class CreateProjectDto
     public string? WelcomeMessage { get; set; }
     public string? WelcomeMessageEn { get; set; }
     public string? Notes { get; set; }
+    public string? ContactPhone { get; set; }
+    public string? ContactUrl { get; set; }
     public string? LeadEmail { get; set; }
     public Guid ClientId { get; set; }
 
@@ -112,6 +116,8 @@ public class UpdateProjectDto
     public string? WelcomeMessage { get; set; }
     public string? WelcomeMessageEn { get; set; }
     public string? Notes { get; set; }
+    public string? ContactPhone { get; set; }
+    public string? ContactUrl { get; set; }
     public string Status { get; set; } = string.Empty;
 
     /* Champs V2 */

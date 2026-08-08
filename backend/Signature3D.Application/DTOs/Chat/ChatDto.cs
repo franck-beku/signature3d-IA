@@ -8,6 +8,13 @@ public class ChatMessageDto
     public string Message { get; set; } = string.Empty;
     public string ProjectSlug { get; set; } = string.Empty;
     public string? SessionToken { get; set; }
+
+    /// <summary>
+    /// Langue explicitement choisie par le visiteur via le sélecteur FR/EN du widget — prime sur
+    /// LuxediaLanguage (réglage par défaut de l'admin) une fois cliquée. Null tant que le visiteur
+    /// n'a pas interagi avec le sélecteur.
+    /// </summary>
+    public string? VisitorLanguage { get; set; }
 }
 
 /// <summary>

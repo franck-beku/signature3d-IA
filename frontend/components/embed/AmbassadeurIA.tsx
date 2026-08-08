@@ -99,9 +99,12 @@ export default function AmbassadeurIA({
   const [isTyping, setIsTyping]         = useState(false)
   const [sessionToken, setSessionToken] = useState<string | undefined>()
   const [lang, setLang]                 = useState<'fr' | 'en'>(language)
+  // true dès que le visiteur clique explicitement sur le sélecteur FR/EN — ce choix prime alors
+  // sur la langue par défaut (LuxediaLanguage) transmise via la prop `language`.
+  const [langOverridden, setLangOverridden] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { setLang(language) }, [language])
+  useEffect(() => { if (!langOverridden) setLang(language) }, [language, langOverridden])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -118,7 +121,7 @@ export default function AmbassadeurIA({
 
     try {
       if (projectSlug) {
-        const result = await chatApi.sendMessage(text, projectSlug, sessionToken)
+        const result = await chatApi.sendMessage(text, projectSlug, sessionToken, langOverridden ? lang : undefined)
         if (result.sessionToken) setSessionToken(result.sessionToken)
         setMessages((prev) => [...prev, { role: 'assistant', content: result.response }])
       } else {
@@ -194,7 +197,7 @@ export default function AmbassadeurIA({
           {(['fr', 'en'] as const).map((l) => (
             <button
               key={l}
-              onClick={() => setLang(l)}
+              onClick={() => { setLang(l); setLangOverridden(true) }}
               style={{
                 fontSize: '10px', fontWeight: 600, padding: '3px 8px',
                 borderRadius: '4px', border: 'none', cursor: 'pointer',

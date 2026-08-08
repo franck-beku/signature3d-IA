@@ -68,8 +68,9 @@ public class ChatService : IChatService
         // Recherche RAG — chunks pertinents par mots-clés
         var context = await SearchRelevantContextAsync(project.Id, dto.Message);
 
-        // Prompt système personnalisé
-        var systemPrompt = BuildSystemPrompt(project);
+        // Prompt système personnalisé — la langue explicitement choisie par le visiteur dans le
+        // widget (s'il a cliqué FR/EN) prime sur le réglage par défaut LuxediaLanguage de l'admin.
+        var systemPrompt = BuildSystemPrompt(project, dto.VisitorLanguage);
 
         // Historique (max 10 derniers messages)
         var history = (session.Messages ?? [])
@@ -204,7 +205,7 @@ public class ChatService : IChatService
         var scored = chunks.Select(chunk =>
         {
             var normalizedContent = TextNormalizer.Normalize(chunk.Content);
-            var score = queryWords.Count(word => normalizedContent.Contains(word));
+            var score = queryWords.Count(word => ContainsApprox(normalizedContent, word));
             return new { Chunk = chunk, Score = score };
         })
         .OrderByDescending(x => x.Score)
@@ -228,17 +229,53 @@ public class ChatService : IChatService
         return context;
     }
 
-    /// <summary>Construit le prompt système personnalisé pour chaque projet/client.</summary>
-    private static string BuildSystemPrompt(Project project)
+    /// <summary>
+    /// Correspondance tolérante aux petites variations (pluriel/singulier, faute de frappe en fin
+    /// de mot — ex. "douvertures" pour "douverture") : après l'échec d'un Contains strict, on
+    /// retente avec un préfixe du mot plutôt que le mot entier. Reste volontairement simple (pas
+    /// de vraie recherche floue par distance d'édition) — c'est un filet de sécurité pour le repli
+    /// mots-clés, pas le chemin de recherche principal (vectoriel, déjà robuste à ce type d'écart).
+    /// </summary>
+    private static bool ContainsApprox(string content, string word)
+    {
+        if (content.Contains(word)) return true;
+        if (word.Length <= 4) return false; // trop court pour tronquer sans perdre le sens
+
+        var prefixLength = Math.Max(4, word.Length - 2);
+        var prefix = word[..Math.Min(prefixLength, word.Length)];
+        return content.Contains(prefix);
+    }
+
+    /// <summary>
+    /// Construit le prompt système personnalisé pour chaque projet/client.
+    /// <paramref name="visitorLanguage"/> — langue explicitement choisie par le visiteur via le
+    /// sélecteur FR/EN du widget ; prime sur project.LuxediaLanguage (valeur par défaut de l'admin,
+    /// utilisée tant que le visiteur n'a pas cliqué sur le sélecteur).
+    /// </summary>
+    private static string BuildSystemPrompt(Project project, string? visitorLanguage = null)
     {
         var clientName = project.Client?.Name ?? "cette entreprise";
+        var effectiveLanguage = !string.IsNullOrWhiteSpace(visitorLanguage) ? visitorLanguage : project.LuxediaLanguage;
 
-        var languageInstruction = project.LuxediaLanguage switch
+        var languageInstruction = effectiveLanguage switch
         {
             "fr" => "- Tu réponds TOUJOURS en français, de manière professionnelle et chaleureuse, quelle que soit la langue du visiteur.",
             "en" => "- Respond ALWAYS in English, in a professional and warm manner, regardless of the visitor's language.",
             _    => "- Réponds toujours dans la même langue que celle utilisée par le visiteur dans son message (français ou anglais), de manière professionnelle et chaleureuse.",
         };
+
+        // Coordonnée de repli — instruction de comportement, pas un texte figé : Luxedia formule
+        // elle-même la phrase selon le contexte de la conversation.
+        var hasContactPhone = !string.IsNullOrWhiteSpace(project.ContactPhone);
+        var hasContactUrl   = !string.IsNullOrWhiteSpace(project.ContactUrl);
+        var fallbackInstruction = hasContactPhone || hasContactUrl
+            ? "Si le contexte ne contient pas l'information demandée, dis-le honnêtement et invite le visiteur à contacter "
+              + clientName + " directement"
+              + (hasContactPhone ? $" au {project.ContactPhone}" : "")
+              + (hasContactPhone && hasContactUrl ? " ou" : "")
+              + (hasContactUrl ? $" via {project.ContactUrl}" : "")
+              + "."
+            : "Si le contexte ne contient pas l'information, dis-le honnêtement et propose de contacter l'équipe.";
 
         var prompt = $"""
         Tu es {project.AmbassadorName}, l'ambassadeur intelligent de {clientName}.
@@ -246,7 +283,7 @@ public class ChatService : IChatService
         Règles strictes :
         {languageInstruction}
         - Tu utilises les informations du contexte fourni pour répondre avec précision.
-        - Si le contexte ne contient pas l'information, dis-le honnêtement et propose de contacter l'équipe.
+        - {fallbackInstruction}
         - Ne révèle jamais que tu es une IA, un chatbot, ou que tu utilises des documents.
         - Reste concis — maximum 3-4 phrases par réponse.
         - Tu représentes {clientName} avec professionnalisme.

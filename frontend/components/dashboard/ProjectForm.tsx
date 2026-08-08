@@ -78,6 +78,8 @@ export default function ProjectForm({ projectId }: Props) {
   const [welcomeMessage, setWelcomeMessage]   = useState('')
   const [welcomeMessageEn, setWelcomeMessageEn] = useState('')
   const [notes, setNotes]                     = useState('')
+  const [contactPhone, setContactPhone]       = useState('')
+  const [contactUrl, setContactUrl]           = useState('')
   const [shortDescription, setShortDescription] = useState('')
   const [shortDescriptionEn, setShortDescriptionEn] = useState('')
   const [coverImage, setCoverImage]           = useState('')
@@ -131,6 +133,8 @@ export default function ProjectForm({ projectId }: Props) {
             setWelcomeMessage(p.welcomeMessage ?? '')
             setWelcomeMessageEn(p.welcomeMessageEn ?? '')
             setNotes(p.notes ?? '')
+            setContactPhone(p.contactPhone ?? '')
+            setContactUrl(p.contactUrl ?? '')
             setShortDescription(p.shortDescription ?? '')
             setShortDescriptionEn(p.shortDescriptionEn ?? '')
             setCoverImage(p.coverImage ?? '')
@@ -284,7 +288,8 @@ export default function ProjectForm({ projectId }: Props) {
         await projectsApi.update(projectId, {
           name, matterportId: matterportId || undefined, ambassadorName,
           experienceType, experienceUrl: experienceUrl || undefined,
-          welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, notes: notes || undefined, status,
+          welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, notes: notes || undefined,
+          contactPhone: contactPhone || undefined, contactUrl: contactUrl || undefined, status,
           shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined,
@@ -305,7 +310,8 @@ export default function ProjectForm({ projectId }: Props) {
           name, matterportId: matterportId || undefined, ambassadorName,
           experienceType, experienceUrl: experienceUrl || undefined,
           luxediaEnabled: effectiveLuxediaEnabled,
-          welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, notes: notes || undefined, clientId,
+          welcomeMessage: welcomeMessage || undefined, welcomeMessageEn: welcomeMessageEn || undefined, notes: notes || undefined,
+          contactPhone: contactPhone || undefined, contactUrl: contactUrl || undefined, clientId,
           shortDescription: shortDescription || undefined, shortDescriptionEn: shortDescriptionEn || undefined, coverImage: coverImage || undefined,
           isPublished, isFeatured, displayOrder,
           sectorId: sectorId || undefined,
@@ -384,6 +390,17 @@ export default function ProjectForm({ projectId }: Props) {
               <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Image de couverture (URL)</label>
               <input type="text" value={coverImage} onChange={(e) => setCoverImage(e.target.value)} placeholder="https://..." style={inputStyle} className="dash-input" />
             </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Téléphone de contact (repli Luxedia)</label>
+                <input type="text" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="418 555-0123" style={inputStyle} className="dash-input" />
+              </div>
+              <div>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Lien de contact (repli Luxedia)</label>
+                <input type="text" value={contactUrl} onChange={(e) => setContactUrl(e.target.value)} placeholder="https://... (réservation, site du client)" style={inputStyle} className="dash-input" />
+              </div>
+            </div>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '-6px 0 0' }}>Utilisés par Luxedia quand elle ne trouve pas une info dans les documents — au moins un des deux est recommandé.</p>
             <div>
               <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Autre / personnalisation (notes internes)</label>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Demande spécifique du client hors des cas standards..." style={{ ...inputStyle, resize: 'vertical' as const }} className="dash-input" />

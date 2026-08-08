@@ -27,6 +27,8 @@ interface FormData {
   leadEmail:      string
   boutons:        Bouton[]
   notes:          string
+  contactPhone:   string
+  contactUrl:     string
   sectorId:       string
 }
 
@@ -132,6 +134,8 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
     leadEmail:      '',
     boutons:        [newBouton()],
     notes:          '',
+    contactPhone:   '',
+    contactUrl:     '',
     sectorId:       '',
   })
 
@@ -182,6 +186,8 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
         ambassadorName: form.ambassadorName,
         welcomeMessage: form.welcomeMessage || undefined,
         notes:          form.notes || undefined,
+        contactPhone:   form.contactPhone || undefined,
+        contactUrl:     form.contactUrl || undefined,
         leadEmail:      form.leadEmail || undefined,
         clientId:       client.id,
         sectorId:       form.sectorId || undefined,
@@ -319,6 +325,17 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
                       {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
                   </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Téléphone de contact (repli Luxedia)</label>
+                      <input type="text" value={form.contactPhone} onChange={(e) => set('contactPhone', e.target.value)} placeholder="418 555-0123" style={inputStyle} className="dash-input" />
+                    </div>
+                    <div>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Lien de contact (repli Luxedia)</label>
+                      <input type="text" value={form.contactUrl} onChange={(e) => set('contactUrl', e.target.value)} placeholder="https://... (réservation, site du client)" style={inputStyle} className="dash-input" />
+                    </div>
+                  </div>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '-8px' }}>Utilisés par Luxedia quand elle ne trouve pas une info dans les documents — au moins un des deux est recommandé.</p>
                   <div>
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Notes internes</label>
                     <textarea rows={3} value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Spécificités, demandes du client..." style={{ ...inputStyle, resize: 'none' }} className="dash-input" />
@@ -454,12 +471,12 @@ export default function NouveauProjetPage({ params }: { params: Promise<{ slug: 
 
               {/* Upload documents */}
               <div style={cardStyle}>
-                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Documents PDF</h2>
+                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '14px', marginBottom: '6px' }}>Documents</h2>
                 <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px', marginBottom: '16px' }}>Uploadez les fiches techniques, menus ou catalogues. (Optionnel)</p>
                 <div style={{ border: '2px dashed var(--dash-border-input)', borderRadius: '12px', padding: '32px', textAlign: 'center', cursor: 'pointer' }} className="upload-zone">
                   <Upload size={24} style={{ color: 'var(--dash-gold-icon)', margin: '0 auto 10px' }} />
-                  <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>Glissez vos PDFs ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></p>
-                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF uniquement · max 20 MB · disponible après création</p>
+                  <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>Glissez vos documents ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></p>
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF ou Word (.docx) · max 20 MB · disponible après création</p>
                 </div>
               </div>
 
