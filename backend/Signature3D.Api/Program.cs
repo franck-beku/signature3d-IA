@@ -280,6 +280,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+/* ══════════════════════════════════════════
+   8bis. HEADERS DE SÉCURITÉ
+
+   Pas de CSP ici : l'API ne sert que du JSON, la CSP n'a de sens que pour du
+   HTML rendu (gérée côté frontend, next.config.ts). Pas de HSTS/HttpsRedirection
+   non plus pour l'instant — Kestrel écoute en HTTP nu (TLS terminé par Railway) et
+   il n'y a pas de UseForwardedHeaders() en place ; les ajouter sans ça provoquerait
+   une boucle de redirection (Kestrel ne verrait jamais X-Forwarded-Proto: https).
+   ══════════════════════════════════════════ */
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    await next();
+});
+
 app.UseCors("AllowFrontend");
 app.UseRateLimiter();
 app.UseAuthentication();

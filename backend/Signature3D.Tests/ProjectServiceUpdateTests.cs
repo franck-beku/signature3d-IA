@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Pgvector.EntityFrameworkCore;
 using Signature3D.Application.DTOs.Projects;
 using Signature3D.Domain.Entities;
 using Signature3D.Domain.Enums;
@@ -31,16 +32,20 @@ public class ProjectServiceUpdateTests
 {
     private static AppDbContext CreateDbContext()
     {
+        // appsettings.Test.json reste supporté (optional) le temps de la migration ; la source de
+        // vérité est maintenant dotnet user-secrets (dotnet user-secrets set "ConnectionStrings:TestDatabase" "..."
+        // --project Signature3D.Tests), qui prime si les deux sont présents (dernière source ajoutée gagne).
         var config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.Test.json", optional: false)
+            .AddJsonFile("appsettings.Test.json", optional: true)
+            .AddUserSecrets<ProjectServiceUpdateTests>()
             .Build();
 
         var connString = config.GetConnectionString("TestDatabase")
             ?? throw new InvalidOperationException(
-                "Connection string 'TestDatabase' introuvable dans appsettings.Test.json.");
+                "Connection string 'TestDatabase' introuvable. Configure-la via : dotnet user-secrets set \"ConnectionStrings:TestDatabase\" \"...\" --project Signature3D.Tests");
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(connString, npgsql => npgsql.EnableRetryOnFailure(3))
+            .UseNpgsql(connString, npgsql => npgsql.EnableRetryOnFailure(3).UseVector())
             .Options;
 
         return new AppDbContext(options);
