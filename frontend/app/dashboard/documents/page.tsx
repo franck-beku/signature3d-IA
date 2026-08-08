@@ -70,9 +70,9 @@ export default function DocumentsPage() {
           >
             <Upload size={28} style={{ color: 'var(--dash-gold-icon)', margin: '0 auto 12px' }} />
             <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>
-              Glissez vos PDFs ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez vos fichiers</span>
+              Glissez vos documents ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez vos fichiers</span>
             </p>
-            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF uniquement — max 20 MB par fichier</p>
+            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF ou Word (.docx) — max 20 MB par fichier</p>
           </div>
 
           {/* Filtres */}

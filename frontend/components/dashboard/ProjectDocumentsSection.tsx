@@ -32,16 +32,16 @@ export default function ProjectDocumentsSection({
   onRequestOcr, ocrPendingIds,
 }: Props) {
   return (
-    <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+    <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
       <p style={sectionTitle}>Documents</p>
 
       <div style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--dash-gold)', background: 'none', border: '1px solid var(--dash-gold-ring)', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer' }} className="add-btn">
             <Upload size={12} />
-            {uploadingDoc ? 'Upload...' : 'Ajouter un PDF'}
+            {uploadingDoc ? 'Upload...' : 'Ajouter un document'}
             <input
-              type="file" accept=".pdf" style={{ display: 'none' }}
+              type="file" accept=".pdf,.docx" style={{ display: 'none' }}
               disabled={uploadingDoc}
               onChange={(e) => { const f = e.target.files?.[0]; if (f) onUpload(f); e.target.value = '' }}
             />
@@ -51,7 +51,7 @@ export default function ProjectDocumentsSection({
             Document interne (non transmis à Luxedia)
           </label>
         </div>
-        <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '8px', marginBottom: 0 }}>PDF uniquement — max 20 MB</p>
+        <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '8px', marginBottom: 0 }}>PDF ou Word (.docx) — max 20 MB</p>
       </div>
 
       {docsLoading ? (

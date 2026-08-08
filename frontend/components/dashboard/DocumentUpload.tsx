@@ -39,8 +39,8 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
   }, [projectId])
 
   const handleUpload = async (file: File) => {
-    if (!file.name.endsWith('.pdf')) {
-      setError('Seuls les fichiers PDF sont acceptés.')
+    if (!file.name.endsWith('.pdf') && !file.name.endsWith('.docx')) {
+      setError('Seuls les fichiers PDF et Word (.docx) sont acceptés.')
       return
     }
     if (file.size > 50 * 1024 * 1024) {
@@ -165,15 +165,15 @@ export default function DocumentUpload({ projectId, projectName, onClose }: Prop
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf"
+            accept=".pdf,.docx"
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
           <Upload size={28} style={{ color: uploading ? 'rgba(200,164,93,0.3)' : 'rgba(200,164,93,0.6)', margin: '0 auto 12px' }} />
           <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>
-            {uploading ? 'Upload en cours...' : <>Glissez un PDF ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></>}
+            {uploading ? 'Upload en cours...' : <>Glissez un document ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></>}
           </p>
-          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF uniquement — max 50 MB</p>
+          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF ou Word (.docx) — max 50 MB</p>
         </div>
 
         {documents.length === 0 ? (

@@ -1,5 +1,10 @@
 using Docnet.Core;
 using Docnet.Core.Models;
+using DocumentFormat.OpenXml.Packaging;
+// Alias plutôt qu'un `using DocumentFormat.OpenXml.Wordprocessing` global : ce namespace
+// contient son propre type `Document`, qui entrerait en collision avec l'entité du domaine
+// Signature3D.Domain.Entities.Document utilisée partout ailleurs dans ce fichier.
+using OpenXmlWord = DocumentFormat.OpenXml.Wordprocessing;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
@@ -19,8 +24,8 @@ using Signature3D.Infrastructure.Data;
 namespace Signature3D.Infrastructure.Services;
 
 /// <summary>
-/// Service de gestion des documents PDF.
-/// Upload → extraction texte (iText7) → découpage en chunks → indexation RAG.
+/// Service de gestion des documents (PDF et Word .docx).
+/// Upload → extraction texte (iText7 pour PDF, Open XML SDK pour .docx) → découpage en chunks → indexation RAG.
 /// </summary>
 public class DocumentService : IDocumentService
 {
@@ -33,7 +38,8 @@ public class DocumentService : IDocumentService
 
     private const int MaxChunkSize = 800;   // ~600 tokens
     private const int ChunkOverlap = 100;   // chevauchement pour contexte
-    private const int LowTextPageCharThreshold = 30; // en dessous, une page est signalée comme probablement mal extraite (encadré/image)
+    private const int LowTextPageCharThreshold = 30; // en dessous, une page PDF est signalée comme probablement mal extraite (encadré/image)
+    private const int LowTextDocumentCharThreshold = 100; // .docx — pas de notion de page, seuil au niveau du document entier
     private const int OcrRasterDpi = 150;   // résolution de rastérisation pour l'OCR — suffisant pour du texte imprimé
     private static readonly TimeSpan BackfillDelay = TimeSpan.FromMilliseconds(1200); // marge tier gratuit Gemini
 
@@ -103,8 +109,13 @@ public class DocumentService : IDocumentService
         // Un document interne est stocké dans le bucket privé (référence, pas d'URL publique).
         var safeFileName = Path.GetFileName(fileName);
         var storageFileName = $"{Guid.NewGuid()}{Path.GetExtension(safeFileName)}";
+        // Content-Type explicite selon le type de fichier — le défaut de IStorageService.UploadAsync
+        // est "application/pdf", correct uniquement pour les PDF.
+        var contentType = safeFileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase)
+            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : "application/pdf";
         using var uploadStream = new MemoryStream(fileBytes);
-        var uploadResult = await _storage.UploadAsync(uploadStream, storageFileName, $"documents/{projectId}", isPrivate: isInternal);
+        var uploadResult = await _storage.UploadAsync(uploadStream, storageFileName, $"documents/{projectId}", isPrivate: isInternal, contentType: contentType);
         if (!uploadResult.Success)
             return Result<DocumentDto>.Fail(uploadResult.Error!);
 
@@ -175,10 +186,10 @@ public class DocumentService : IDocumentService
         if (document is null)
             return Result.Fail("Document introuvable.");
 
-        byte[] pdfBytes;
+        byte[] fileBytes;
         try
         {
-            pdfBytes = await FetchDocumentBytesAsync(document);
+            fileBytes = await FetchDocumentBytesAsync(document);
         }
         catch (Exception ex)
         {
@@ -186,7 +197,7 @@ public class DocumentService : IDocumentService
         }
 
         // Indexation dans un scope dédié — même chemin que l'upload
-        return await IndexWithBytesInScopeAsync(documentId, pdfBytes);
+        return await IndexWithBytesInScopeAsync(documentId, fileBytes);
     }
 
     /// <summary>
@@ -362,8 +373,8 @@ public class DocumentService : IDocumentService
             if (document is null)
                 throw new InvalidOperationException("Document introuvable.");
 
-            var pdfBytes = await FetchDocumentBytesAsync(document);
-            result = await IndexDocumentCoreAsync(_db, job.DocumentId, pdfBytes, job.AttemptOcr);
+            var fileBytes = await FetchDocumentBytesAsync(document);
+            result = await IndexDocumentCoreAsync(_db, job.DocumentId, fileBytes, job.AttemptOcr);
         }
         catch (Exception ex)
         {
@@ -379,23 +390,26 @@ public class DocumentService : IDocumentService
 
     /* ── Extraction + indexation — toujours dans un scope dédié ── */
 
-    private async Task<Result> IndexWithBytesInScopeAsync(Guid documentId, byte[] pdfBytes)
+    private async Task<Result> IndexWithBytesInScopeAsync(Guid documentId, byte[] fileBytes)
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        return await IndexDocumentCoreAsync(db, documentId, pdfBytes);
+        return await IndexDocumentCoreAsync(db, documentId, fileBytes);
     }
 
     /// <summary>
     /// Cœur de l'indexation — extraction texte, chunking, sauvegarde. Prend un AppDbContext fourni
     /// par l'appelant (qui gère son propre scope), pour être réutilisable depuis un scope de requête,
     /// un scope créé à la volée (IndexWithBytesInScopeAsync), ou le scope du BackgroundService.
-    /// Si <paramref name="attemptOcr"/> est vrai, les pages détectées à faible texte
-    /// (LowTextPageNumbers) sont rastérisées et passées à l'OCR — leur texte est remplacé si
-    /// l'OCR trouve suffisamment de contenu, sinon la page passe dans OcrFailedPageNumbers
-    /// (état terminal — pas de nouvelle tentative automatique).
+    /// Le type de fichier (PDF ou .docx) est déterminé par l'extension de document.Name.
+    /// Si <paramref name="attemptOcr"/> est vrai ET que le document est un PDF, les pages détectées
+    /// à faible texte (LowTextPageNumbers) sont rastérisées et passées à l'OCR — leur texte est
+    /// remplacé si l'OCR trouve suffisamment de contenu, sinon la page passe dans OcrFailedPageNumbers
+    /// (état terminal — pas de nouvelle tentative automatique). Aucun repli OCR pour les .docx —
+    /// il n'existe pas de rendu de page fiable pour ce format sans moteur de mise en page complet
+    /// (limitation connue, documentée ici plutôt que contournée).
     /// </summary>
-    private async Task<Result> IndexDocumentCoreAsync(AppDbContext db, Guid documentId, byte[] pdfBytes, bool attemptOcr = false)
+    private async Task<Result> IndexDocumentCoreAsync(AppDbContext db, Guid documentId, byte[] fileBytes, bool attemptOcr = false)
     {
         try
         {
@@ -405,16 +419,19 @@ public class DocumentService : IDocumentService
 
             if (document is null) return Result.Fail("Document introuvable.");
 
+            var isDocx = document.Name.EndsWith(".docx", StringComparison.OrdinalIgnoreCase);
+
             // Supprimer les anciens chunks
             if (document.Chunks.Any())
                 db.DocumentChunks.RemoveRange(document.Chunks);
 
-            // Extraire le texte avec iText7 (par page, pour pouvoir substituer le texte OCR
-            // d'une page précise sans perdre les frontières entre pages).
-            var (pageTexts, lowTextPages) = ExtractTextFromPdf(pdfBytes);
+            // Extraire le texte — iText7 par page pour un PDF (pour pouvoir substituer le texte OCR
+            // d'une page précise sans perdre les frontières entre pages), Open XML SDK pour un .docx
+            // (pas de notion de page, le "PageTexts" ne contient alors qu'une seule entrée : tout le document).
+            var (pageTexts, lowTextPages) = isDocx ? ExtractTextFromDocx(fileBytes) : ExtractTextFromPdf(fileBytes);
             document.LowTextPageNumbers = lowTextPages;
 
-            if (attemptOcr && lowTextPages.Count > 0)
+            if (attemptOcr && !isDocx && lowTextPages.Count > 0)
             {
                 var stillLowText = new List<int>(lowTextPages);
                 var ocrFailedPages = new List<int>();
@@ -424,7 +441,7 @@ public class DocumentService : IDocumentService
                     string ocrText;
                     try
                     {
-                        var pageImage = RasterizePdfPageToPng(pdfBytes, pageNumber);
+                        var pageImage = RasterizePdfPageToPng(fileBytes, pageNumber);
                         var ocrResult = await _ocrProvider.ExtractTextFromImageAsync(pageImage);
                         ocrText = ocrResult.Success ? ocrResult.Data! : string.Empty;
                         if (!ocrResult.Success)
@@ -459,7 +476,9 @@ public class DocumentService : IDocumentService
             {
                 Console.WriteLine($"[DocumentService] Aucun texte extrait de {document.Name}");
                 document.IsIndexed = false;
-                document.IndexingError = "Aucun texte n'a pu être extrait de ce document (probablement un PDF scanné/image sans OCR).";
+                document.IndexingError = isDocx
+                    ? "Aucun texte n'a pu être extrait de ce document (probablement un contenu scanné/image collé dans le Word — l'OCR n'est pas disponible pour les .docx)."
+                    : "Aucun texte n'a pu être extrait de ce document (probablement un PDF scanné/image sans OCR).";
                 await db.SaveChangesAsync();
                 _cache.Remove(RagCacheKeys.ForProject(document.ProjectId));
                 return Result.Ok();
@@ -474,6 +493,8 @@ public class DocumentService : IDocumentService
             // Créer les chunks — un embedding est généré par chunk (RAG sémantique), mais un échec
             // (timeout, quota Gemini dépassé) n'empêche jamais la sauvegarde du chunk : le RAG par
             // mots-clés reste le filet de sécurité si l'embedding est absent (Embedding = null).
+            // Délai entre chaque appel — même marge que BackfillEmbeddingsAsync — pour rester sous
+            // les limites de taux du tier gratuit Gemini sur les documents à beaucoup de chunks.
             var chunkEntities = new List<DocumentChunk>();
             for (int i = 0; i < chunks.Count; i++)
             {
@@ -498,6 +519,9 @@ public class DocumentService : IDocumentService
                     ChunkIndex = i,
                     Embedding  = embedding
                 });
+
+                if (i < chunks.Count - 1)
+                    await Task.Delay(BackfillDelay);
             }
 
             db.DocumentChunks.AddRange(chunkEntities);
@@ -549,6 +573,55 @@ public class DocumentService : IDocumentService
         catch (Exception ex)
         {
             Console.WriteLine($"[DocumentService] Erreur extraction PDF : {ex.Message}");
+            return ([], []);
+        }
+    }
+
+    /// <summary>
+    /// Extrait le texte d'un .docx avec le SDK Open XML, en distinguant paragraphes et tableaux
+    /// (plutôt qu'un simple .InnerText global) pour préserver la structure ligne/colonne des
+    /// tableaux — chaque ligne de tableau devient une ligne de texte, cellules séparées par " | ".
+    /// Pas de notion de page dans un .docx : le document entier forme une seule "page" logique,
+    /// et le signalement "texte faible" (LowTextPages) s'applique donc au document en entier
+    /// (sentinelle [1]) plutôt qu'à une page précise — voir LowTextDocumentCharThreshold.
+    /// </summary>
+    private static (List<string> PageTexts, List<int> LowTextPages) ExtractTextFromDocx(byte[] docxBytes)
+    {
+        try
+        {
+            using var ms = new MemoryStream(docxBytes);
+            using var wordDoc = WordprocessingDocument.Open(ms, false);
+            var body = wordDoc.MainDocumentPart?.Document?.Body;
+            if (body is null) return ([], []);
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var element in body.Elements())
+            {
+                switch (element)
+                {
+                    case OpenXmlWord.Paragraph paragraph:
+                        var paragraphText = paragraph.InnerText;
+                        if (!string.IsNullOrWhiteSpace(paragraphText))
+                            sb.AppendLine(paragraphText);
+                        break;
+
+                    case OpenXmlWord.Table table:
+                        foreach (var row in table.Elements<OpenXmlWord.TableRow>())
+                        {
+                            var cells = row.Elements<OpenXmlWord.TableCell>().Select(c => c.InnerText.Trim());
+                            sb.AppendLine(string.Join(" | ", cells));
+                        }
+                        break;
+                }
+            }
+
+            var text = sb.ToString();
+            var lowTextPages = text.Trim().Length < LowTextDocumentCharThreshold ? new List<int> { 1 } : [];
+            return ([text], lowTextPages);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DocumentService] Erreur extraction DOCX : {ex.Message}");
             return ([], []);
         }
     }
