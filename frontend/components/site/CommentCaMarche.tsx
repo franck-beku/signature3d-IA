@@ -110,17 +110,24 @@ export default function CommentCaMarche() {
           whileInView="show"
           viewport={{ once: true, amount: 0.25 }}
           variants={container}
-          className="ccm-steps"
+          className="ccm-timeline"
         >
-          <div className="ccm-line" aria-hidden="true" />
+          <motion.div
+            className="ccm-axis"
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.8, delay: 0.15 }}
+          />
 
           {steps.map((s) => {
             const Icon = s.icon;
 
             return (
               <motion.div key={s.num} variants={item} className="ccm-step">
-                <div className="ccm-icon">
-                  <Icon size={26} strokeWidth={1.4} />
+                <div className="ccm-marker">
+                  <Icon size={18} strokeWidth={1.6} />
                 </div>
 
                 <p className="ccm-num">{s.num}</p>
@@ -186,82 +193,70 @@ export default function CommentCaMarche() {
           font-style: italic;
         }
 
-        .ccm-steps {
+        .ccm-timeline {
           position: relative;
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 28px;
+          display: flex;
+          align-items: flex-start;
+          gap: 32px;
         }
 
-        .ccm-line {
+        .ccm-axis {
           position: absolute;
-          top: 69px;
-          left: 12%;
-          right: 12%;
+          top: 22px;
+          left: 0;
+          right: 0;
           height: 1px;
-          background: linear-gradient(
-            to right,
-            transparent,
-            rgba(200,164,93,0.6),
-            transparent
-          );
+          background: linear-gradient(to right, rgba(200,164,93,0.7), rgba(200,164,93,0.3));
         }
 
         .ccm-step {
           position: relative;
-          z-index: 1;
-          text-align: center;
-          background: ${colors.white};
-          border: 1px solid ${BORDER};
-          border-radius: 18px;
-          padding: 34px 24px 32px;
-          box-shadow: 0 18px 60px rgba(0,0,0,0.05);
-          transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+          flex: 1;
+          text-align: left;
+          padding-top: 60px;
         }
 
-        .ccm-step:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 28px 80px rgba(0,0,0,0.09);
-          border-color: rgba(200,164,93,0.5);
-        }
-
-        .ccm-icon {
-          width: 70px;
-          height: 70px;
-          margin: 0 auto 24px;
+        .ccm-marker {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
-          background: #FFFFFF;
-          border: 1px solid rgba(200,164,93,0.55);
+          background: ${colors.white};
+          border: 1px solid rgba(200,164,93,0.6);
           color: ${colors.gold};
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 14px 34px rgba(200,164,93,0.14);
+          box-shadow: 0 10px 24px rgba(200,164,93,0.14);
+          z-index: 1;
         }
 
         .ccm-num {
           font-family: var(--font-cormorant), serif;
-          font-size: 16px;
-          letter-spacing: 0.24em;
+          font-style: italic;
+          font-size: 26px;
+          line-height: 1;
           color: ${colors.gold};
-          margin: 0 0 12px;
+          margin: 0 0 8px;
         }
 
         .ccm-step h3 {
           font-family: var(--font-cormorant), serif;
-          font-size: clamp(1.3rem, 2vw, 1.65rem);
+          font-size: clamp(1.2rem, 1.8vw, 1.5rem);
           font-weight: 400;
           color: ${colors.ink};
           line-height: 1.25;
-          margin: 0 0 14px;
+          margin: 0 0 10px;
         }
 
         .ccm-desc {
-          font-size: 14px;
+          font-size: 13.5px;
           line-height: 1.7;
           color: ${colors.muted};
-          margin: 0 auto;
-          max-width: 230px;
+          margin: 0;
+          max-width: 240px;
         }
 
         .ccm-note {
@@ -294,19 +289,26 @@ export default function CommentCaMarche() {
           flex-shrink: 0;
         }
 
-        @media (max-width: 980px) {
-          .ccm-steps {
-            grid-template-columns: repeat(2, 1fr);
+        @media (max-width: 760px) {
+          .ccm-timeline {
+            flex-direction: column;
+            gap: 36px;
           }
 
-          .ccm-line {
-            display: none;
+          .ccm-axis {
+            top: 0;
+            bottom: 0;
+            left: 22px;
+            right: auto;
+            width: 1px;
+            height: auto;
+            background: linear-gradient(to bottom, rgba(200,164,93,0.7), rgba(200,164,93,0.3));
           }
-        }
 
-        @media (max-width: 560px) {
-          .ccm-steps {
-            grid-template-columns: 1fr;
+          .ccm-step {
+            padding-top: 0;
+            padding-left: 60px;
+            min-height: 44px;
           }
         }
       `}</style>
