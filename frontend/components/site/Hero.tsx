@@ -37,10 +37,29 @@ const HOLD = 6500; // temps d'affichage net d'une image
 const FADE = 2500; // durée du fondu entre deux images
 const CYCLE = HOLD + FADE;
 
+/* Visite Matterport en fond — Mercedes CLE 53 AMG (meilleur point de vue d'ouverture, vérifié
+   manuellement). ui=0/vr=0/help=0/brand=0 masquent les contrôles Matterport, inutiles en fond
+   d'ambiance. */
+const MATTERPORT_ID = 'WJzvgHF44zq';
+const MATTERPORT_SLUG = 'mercedes-voiture-1';
+const MATTERPORT_EMBED_URL = `https://my.matterport.com/show/?m=${MATTERPORT_ID}&play=1&qs=1&ui=0&vr=0&help=0&brand=0`;
+
+/* Le diaporama photo reste affiché au moins ce délai avant le crossfade vers le Matterport, même
+   si l'iframe charge plus vite — évite un flash trop brutal. */
+const MATTERPORT_MIN_DISPLAY_DELAY = 800;
+
 export default function Hero() {
   const { t } = useLanguage();
   const [index, setIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [matterportIframeLoaded, setMatterportIframeLoaded] = useState(false);
+  const [minDelayElapsed, setMinDelayElapsed] = useState(false);
+  const matterportVisible = matterportIframeLoaded && minDelayElapsed;
+
+  useEffect(() => {
+    const id = setTimeout(() => setMinDelayElapsed(true), MATTERPORT_MIN_DISPLAY_DELAY);
+    return () => clearTimeout(id);
+  }, []);
 
   // Respecte la préférence système « animations réduites ».
   useEffect(() => {
@@ -101,22 +120,49 @@ export default function Hero() {
         </AnimatePresence>
       </div>
 
+      {/* ── Visite Matterport en fond — crossfade depuis le diaporama photo une fois chargée.
+           Le diaporama continue de tourner derrière : filet de sécurité si l'iframe échoue. ── */}
+      <div
+        aria-hidden="true"
+        className="hero-matterport"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          opacity: matterportVisible ? 1 : 0,
+          transition: 'opacity 1.2s ease',
+        }}
+      >
+        <iframe
+          src={MATTERPORT_EMBED_URL}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+          allow="xr-spatial-tracking"
+          title={t('Visite Mercedes CLE 53 AMG', 'Mercedes CLE 53 AMG tour')}
+          tabIndex={-1}
+          onLoad={() => setMatterportIframeLoaded(true)}
+        />
+      </div>
+
       {/* ── Voile sombre constant (lisibilité du texte) ── */}
       <div
+        aria-hidden="true"
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 1,
+          pointerEvents: 'none',
           background:
             'linear-gradient(to bottom, rgba(11,11,11,0.55) 0%, rgba(11,11,11,0.35) 40%, rgba(11,11,11,0.75) 100%)',
         }}
       />
       {/* Vignettage latéral subtil pour concentrer le regard au centre. */}
       <div
+        aria-hidden="true"
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 1,
+          pointerEvents: 'none',
           background:
             'radial-gradient(ellipse at center, rgba(11,11,11,0) 35%, rgba(11,11,11,0.45) 100%)',
         }}
@@ -130,6 +176,7 @@ export default function Hero() {
           height: '100%',
           display: 'flex',
           alignItems: 'center',
+          pointerEvents: 'none',
         }}
       >
         <motion.div
@@ -227,6 +274,7 @@ export default function Hero() {
               gap: '16px',
               justifyContent: 'flex-start',
               flexWrap: 'wrap',
+              pointerEvents: 'auto',
             }}
           >
             {/* Primaire — plein doré — l'action de conversion, la plus mise en avant */}
@@ -298,6 +346,7 @@ export default function Hero() {
           flexDirection: 'column',
           alignItems: 'center',
           gap: '8px',
+          pointerEvents: 'auto',
         }}
       >
         <span
@@ -321,6 +370,38 @@ export default function Hero() {
           }}
         />
       </motion.div>
+
+      {/* ── Bouton "Explorer" — mobile uniquement (interaction tactile du Matterport désactivée
+           sur mobile pour ne pas bloquer le scroll de la page ; ce bouton ouvre la visite en
+           plein sur sa propre page). Masqué par défaut, réaffiché par la media query ci-dessous. ── */}
+      <Link
+        href={`/embed/${MATTERPORT_SLUG}`}
+        className="hero-explore-btn"
+        style={{
+          position: 'absolute',
+          bottom: '32px',
+          right: '20px',
+          zIndex: 2,
+          display: 'none',
+          alignItems: 'center',
+          gap: '8px',
+          pointerEvents: 'auto',
+          background: 'rgba(11,11,11,0.6)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid rgba(200,164,93,0.4)',
+          color: '#F7F5F2',
+          borderRadius: '999px',
+          padding: '10px 16px',
+          fontSize: '11px',
+          fontWeight: 600,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          textDecoration: 'none',
+        }}
+      >
+        {t('Explorer', 'Explore')} <span aria-hidden="true">→</span>
+      </Link>
 
       {/* ── Progression du diaporama : 5 traits fins en bas ── */}
       <div
@@ -361,6 +442,9 @@ export default function Hero() {
         @media (max-width: 640px) {
           .hero-progress { display: none !important; }
           .hero-h1 { font-weight: 300 !important; }
+          /* Évite que le drag tactile sur le Matterport capture le scroll de la page. */
+          .hero-matterport { pointer-events: none; }
+          .hero-explore-btn { display: inline-flex !important; }
         }
       `}</style>
     </section>

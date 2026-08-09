@@ -14,6 +14,8 @@ const buildCsp = (frameAncestors: string) =>
     "img-src 'self' data: blob: https://teumxzxubxirivjofxqm.supabase.co https://images.unsplash.com",
     "font-src 'self'",
     `connect-src 'self' ${backendOrigin}`,
+    // Visites Matterport embarquées (Hero + pages /embed/[slug]).
+    "frame-src https://my.matterport.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
