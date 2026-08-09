@@ -219,6 +219,9 @@ export interface ProjectDto {
   ambassadorName: string
   welcomeMessage?: string
   welcomeMessageEn?: string
+  notes?: string
+  contactPhone?: string
+  contactUrl?: string
   status: string
   clientName: string
   clientId: string
@@ -244,6 +247,7 @@ export interface ProjectDto {
   luxediaAvatarUrl?: string
   luxediaClientLogoUrl?: string
   luxediaLanguage?: string
+  luxediaEnabled: boolean
 }
 
 export interface ProjectCardDto {
@@ -285,8 +289,9 @@ export const projectsApi = {
   /** Crée un nouveau projet */
   create: (data: {
     name: string; matterportId?: string; ambassadorName: string
-    experienceType?: string; experienceUrl?: string  
-    welcomeMessage?: string; welcomeMessageEn?: string; leadEmail?: string; clientId: string
+    experienceType?: string; experienceUrl?: string
+    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string
+    contactPhone?: string; contactUrl?: string; leadEmail?: string; clientId: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
@@ -300,13 +305,15 @@ export const projectsApi = {
     luxediaAvatarUrl?: string
     luxediaClientLogoUrl?: string
     luxediaLanguage?: string
+    luxediaEnabled?: boolean
   }) => apiFetch<ProjectDto>('/api/projects', { method: 'POST', body: JSON.stringify(data) }),
   
   /** Modifie un projet */
   update: (id: string, data: {
     name: string; matterportId?: string; ambassadorName: string
     experienceType?: string; experienceUrl?: string
-    welcomeMessage?: string; welcomeMessageEn?: string; status: string
+    welcomeMessage?: string; welcomeMessageEn?: string; notes?: string
+    contactPhone?: string; contactUrl?: string; status: string
     shortDescription?: string; shortDescriptionEn?: string; coverImage?: string
     isPublished: boolean; isFeatured: boolean; displayOrder: number
     sectorId?: string; offeringId?: string
@@ -320,6 +327,7 @@ export const projectsApi = {
     luxediaAvatarUrl?: string
     luxediaClientLogoUrl?: string
     luxediaLanguage?: string
+    luxediaEnabled: boolean
   }) => apiFetch<ProjectDto>(`/api/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   /** Supprime un projet */
   delete: (id: string) =>
@@ -391,11 +399,13 @@ export interface ChatResponseDto {
 }
 
 export const chatApi = {
-  /** Envoie un message à Luxedia et retourne la réponse */
-  sendMessage: (message: string, projectSlug: string, sessionToken?: string) =>
+  /** Envoie un message à Luxedia et retourne la réponse.
+   *  visitorLanguage : langue explicitement choisie par le visiteur via le sélecteur FR/EN du
+   *  widget — prime sur le réglage par défaut de l'admin (luxediaLanguage) une fois cliquée. */
+  sendMessage: (message: string, projectSlug: string, sessionToken?: string, visitorLanguage?: 'fr' | 'en') =>
     apiFetch<ChatResponseDto>('/api/chat/message', {
       method: 'POST',
-      body: JSON.stringify({ message, projectSlug, sessionToken }),
+      body: JSON.stringify({ message, projectSlug, sessionToken, visitorLanguage }),
     }),
 }
 
@@ -403,10 +413,35 @@ export const chatApi = {
    ANALYTICS
    ══════════════════════════════════════ */
 
+export interface DailyStatDto {
+  date: string
+  visits: number
+  leads: number
+}
+
+export interface ProjectAnalyticsDto {
+  projectId: string
+  projectName: string
+  totalVisits: number
+  totalLeads: number
+  totalChatMessages: number
+  totalQrScans: number
+  avgDurationSeconds: number
+  dailyStats: DailyStatDto[]
+}
+
 export const analyticsApi = {
-  /** Retourne les stats d'un projet */
-  getByProject: (projectId: string) =>
-    apiFetch(`/api/analytics/project/${projectId}`),
+  /** Retourne les stats d'un projet.
+   *  - ni from ni to → 30 derniers jours
+   *  - seul to → depuis la création du projet
+   *  - les deux → période explicite */
+  getByProject: (projectId: string, from?: Date, to?: Date) => {
+    const params = new URLSearchParams()
+    if (from) params.set('from', from.toISOString())
+    if (to) params.set('to', to.toISOString())
+    const query = params.toString()
+    return apiFetch<ProjectAnalyticsDto>(`/api/analytics/project/${projectId}${query ? `?${query}` : ''}`)
+  },
 
   /** Enregistre un événement analytics */
   trackEvent: (eventType: string, projectSlug: string, metadata?: string) =>
@@ -563,6 +598,8 @@ export interface DocumentDto {
   isIndexed: boolean
   indexingError?: string
   isInternal: boolean
+  lowTextPageNumbers: number[]
+  ocrFailedPageNumbers: number[]
   chunkCount: number
   createdAt: string
 }
@@ -609,6 +646,10 @@ export const documentsApi = {
   reindex: (documentId: string) =>
     apiFetch(`/api/documents/${documentId}/index`, { method: 'POST' }),
 
+  /** Enfile une réindexation avec tentative OCR sur les pages à faible texte (asynchrone) */
+  requestOcrReindex: (documentId: string) =>
+    apiFetch(`/api/documents/${documentId}/ocr-reindex`, { method: 'POST' }),
+
   /** Bascule un document entre interne et base de connaissances IA */
   setCategory: (documentId: string, isInternal: boolean) =>
     apiFetch(`/api/documents/${documentId}/category`, {
@@ -635,6 +676,7 @@ export interface OfferingDto {
   levelEn?: string
   displayOrder: number
   isActive: boolean
+  isFeatured: boolean
 }
 
 export const offeringsApi = {
@@ -651,14 +693,14 @@ export const offeringsApi = {
   create: (data: {
     name: string; shortDescription?: string; shortDescriptionEn?: string
     longDescription?: string; longDescriptionEn?: string
-    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean
+    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean; isFeatured: boolean
   }) => apiFetch<OfferingDto>('/api/offerings', { method: 'POST', body: JSON.stringify(data) }),
 
   /** DASHBOARD — modifier une offre */
   update: (id: string, data: {
     name: string; shortDescription?: string; shortDescriptionEn?: string
     longDescription?: string; longDescriptionEn?: string
-    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean
+    icon?: string; imageUrl?: string; level?: string; levelEn?: string; displayOrder: number; isActive: boolean; isFeatured: boolean
   }) => apiFetch<OfferingDto>(`/api/offerings/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   /** DASHBOARD — supprimer une offre */
@@ -696,6 +738,71 @@ export const faqApi = {
 
   /** DASHBOARD — supprimer une FAQ */
   delete: (id: string) => apiFetch(`/api/faq/${id}`, { method: 'DELETE' }),
+}
+
+export interface TestimonialDto {
+  id: string
+  name: string
+  company?: string
+  companyEn?: string
+  quote: string
+  quoteEn?: string
+  photoUrl?: string
+  displayOrder: number
+  isPublished: boolean
+}
+
+export const testimonialsApi = {
+  /** PUBLIC — témoignages publiés (site vitrine) */
+  getPublished: () => apiFetch<TestimonialDto[]>('/api/testimonials/published'),
+
+  /** DASHBOARD — tous les témoignages */
+  getAll: () => apiFetch<TestimonialDto[]>('/api/testimonials/all'),
+
+  /** DASHBOARD — un témoignage par Id */
+  getById: (id: string) => apiFetch<TestimonialDto>(`/api/testimonials/by-id/${id}`),
+
+  /** DASHBOARD — créer un témoignage */
+  create: (data: { name: string; company?: string; companyEn?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+    apiFetch<TestimonialDto>('/api/testimonials', { method: 'POST', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — modifier un témoignage */
+  update: (id: string, data: { name: string; company?: string; companyEn?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
+    apiFetch<TestimonialDto>(`/api/testimonials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  /** DASHBOARD — supprimer un témoignage */
+  delete: (id: string) => apiFetch(`/api/testimonials/${id}`, { method: 'DELETE' }),
+}
+
+export const uploadApi = {
+  /** DASHBOARD — upload générique d'une image (JPEG/PNG), retourne son URL publique */
+  image: async (file: File, folder?: string): Promise<{ url: string }> => {
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem('token')
+      : null
+
+    const formData = new FormData()
+    formData.append('file', file)
+    if (folder) formData.append('folder', folder)
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/upload/image`,
+      {
+        method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Erreur upload' }))
+      throw new Error(error.message ?? `Erreur ${response.status}`)
+    }
+
+    return response.json()
+  },
 }
 
 /* ══════════════════════════════════════

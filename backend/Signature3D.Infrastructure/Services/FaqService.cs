@@ -35,19 +35,9 @@ public class FaqService : IFaqService
         var faqs = await _db.Faqs
             .Where(f => f.IsPublished)
             .OrderBy(f => f.DisplayOrder)
-            .Select(f => new FaqDto
-            {
-                Id = f.Id,
-                Question = f.Question,
-                QuestionEn = f.QuestionEn,
-                Answer = f.Answer,
-                AnswerEn = f.AnswerEn,
-                DisplayOrder = f.DisplayOrder,
-                IsPublished = f.IsPublished
-            })
             .ToListAsync();
 
-        return Result<List<FaqDto>>.Ok(faqs);
+        return Result<List<FaqDto>>.Ok(faqs.Select(ToDto).ToList());
     }
 
     /// <summary>DASHBOARD — toutes les FAQ, même non publiées.</summary>
@@ -55,19 +45,9 @@ public class FaqService : IFaqService
     {
         var faqs = await _db.Faqs
             .OrderBy(f => f.DisplayOrder)
-            .Select(f => new FaqDto
-            {
-                Id = f.Id,
-                Question = f.Question,
-                QuestionEn = f.QuestionEn,
-                Answer = f.Answer,
-                AnswerEn = f.AnswerEn,
-                DisplayOrder = f.DisplayOrder,
-                IsPublished = f.IsPublished
-            })
             .ToListAsync();
 
-        return Result<List<FaqDto>>.Ok(faqs);
+        return Result<List<FaqDto>>.Ok(faqs.Select(ToDto).ToList());
     }
 
     /// <summary>FAQ par son Id (dashboard).</summary>

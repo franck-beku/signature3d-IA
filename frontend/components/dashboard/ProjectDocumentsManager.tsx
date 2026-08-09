@@ -8,7 +8,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, Trash2, X, RefreshCw } from 'lucide-react'
+import { Upload, FileText, Trash2, X, RefreshCw, AlertTriangle } from 'lucide-react'
 import { documentsApi, type DocumentDto } from '@/lib/api'
 
 interface Props {
@@ -36,7 +36,9 @@ export default function ProjectDocumentsManager({ projectId, projectName, varian
   const [uploadIsInternal, setUploadIsInternal] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError]           = useState<string | null>(null)
+  const [ocrPendingIds, setOcrPendingIds] = useState<Set<string>>(new Set())
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
     setDocsLoading(true)
@@ -44,11 +46,13 @@ export default function ProjectDocumentsManager({ projectId, projectName, varian
       .then((docs) => setDocuments(docs as DocumentDto[]))
       .catch((err) => setError(err instanceof Error ? err.message : 'Erreur lors du chargement des documents.'))
       .finally(() => setDocsLoading(false))
+
+    return () => { isMountedRef.current = false }
   }, [projectId])
 
   const handleUpload = async (file: File) => {
-    if (!file.name.endsWith('.pdf')) {
-      setError('Seuls les fichiers PDF sont acceptés.')
+    if (!file.name.endsWith('.pdf') && !file.name.endsWith('.docx')) {
+      setError('Seuls les fichiers PDF et Word (.docx) sont acceptés.')
       return
     }
     if (file.size > 20 * 1024 * 1024) {
@@ -113,6 +117,41 @@ export default function ProjectDocumentsManager({ projectId, projectName, varian
     }
   }
 
+  /** Enfile l'OCR puis poll toutes les 3s (max 20x = 60s) jusqu'à ce que l'état du document change. */
+  const pollOcrResult = (docId: string, attempt = 0) => {
+    if (attempt >= 20) {
+      if (isMountedRef.current) setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(docId); return next })
+      return
+    }
+    setTimeout(async () => {
+      if (!isMountedRef.current) return
+      try {
+        const docs = await documentsApi.getByProject(projectId) as DocumentDto[]
+        if (!isMountedRef.current) return
+        setDocuments(docs)
+        const updated = docs.find((d) => d.id === docId)
+        const stillProcessing = !!updated && updated.lowTextPageNumbers?.length > 0 && updated.ocrFailedPageNumbers?.length === 0
+        if (stillProcessing) {
+          pollOcrResult(docId, attempt + 1)
+        } else {
+          setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(docId); return next })
+        }
+      } catch {
+        pollOcrResult(docId, attempt + 1)
+      }
+    }, 3000)
+  }
+
+  const handleRequestOcr = async (docId: string) => {
+    try {
+      await documentsApi.requestOcrReindex(docId)
+      setOcrPendingIds((prev) => new Set(prev).add(docId))
+      pollOcrResult(docId)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
+    }
+  }
+
   const content = (
     <>
       {variant === 'modal' ? (
@@ -154,16 +193,16 @@ export default function ProjectDocumentsManager({ projectId, projectName, varian
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf"
+            accept=".pdf,.docx"
             disabled={uploading}
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
           <Upload size={24} style={{ color: 'var(--dash-gold-icon)', margin: '0 auto 10px' }} />
           <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', marginBottom: '4px' }}>
-            {uploading ? 'Upload en cours...' : <>Glissez un PDF ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></>}
+            {uploading ? 'Upload en cours...' : <>Glissez un document ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span></>}
           </p>
-          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF uniquement — max 20 MB</p>
+          <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px' }}>PDF ou Word (.docx) — max 20 MB</p>
         </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--dash-text-subtle)', cursor: 'pointer', marginTop: '10px' }}>
           <input type="checkbox" checked={uploadIsInternal} onChange={(e) => setUploadIsInternal(e.target.checked)} style={{ accentColor: 'var(--dash-gold)' }} />
@@ -197,10 +236,36 @@ export default function ProjectDocumentsManager({ projectId, projectName, varian
                 }}>
                 {doc.isInternal ? 'Interne' : doc.isIndexed ? 'Indexé' : 'En attente'}
               </span>
+              {doc.isIndexed && doc.ocrFailedPageNumbers?.length > 0 ? (
+                <span
+                  title={`Page${doc.ocrFailedPageNumbers.length > 1 ? 's' : ''} ${doc.ocrFailedPageNumbers.join(', ')} — OCR tenté sans succès, probablement illisible (image de mauvaise qualité ou sans texte réel).`}
+                  style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                >
+                  <AlertTriangle size={13} style={{ color: 'var(--dash-error)' }} />
+                </span>
+              ) : doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+                <span
+                  title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
+                  style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                >
+                  <AlertTriangle size={13} style={{ color: 'var(--dash-gold)' }} />
+                </span>
+              )}
               <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                 {!doc.isIndexed && !doc.isInternal && (
                   <button onClick={() => handleReindex(doc.id)} style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-gold)' }} className="pdm-reindex-btn" title="Réindexer">
                     <RefreshCw size={12} />
+                  </button>
+                )}
+                {doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && doc.ocrFailedPageNumbers?.length === 0 && (
+                  <button
+                    onClick={() => handleRequestOcr(doc.id)}
+                    disabled={ocrPendingIds.has(doc.id)}
+                    style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', cursor: ocrPendingIds.has(doc.id) ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-gold)', opacity: ocrPendingIds.has(doc.id) ? 0.5 : 1 }}
+                    className="pdm-reindex-btn"
+                    title={ocrPendingIds.has(doc.id) ? 'OCR en cours...' : 'Relancer l\'OCR sur les pages faibles'}
+                  >
+                    <RefreshCw size={12} className={ocrPendingIds.has(doc.id) ? 'pdm-spin' : undefined} />
                   </button>
                 )}
                 <button
@@ -226,6 +291,8 @@ export default function ProjectDocumentsManager({ projectId, projectName, varian
         .pdm-del-btn:hover     { background-color: var(--dash-error-bg) !important; }
         .pdm-reindex-btn:hover { background-color: var(--dash-gold-muted) !important; }
         .pdm-toggle-btn:hover  { background-color: var(--dash-gold-muted) !important; }
+        .pdm-spin { animation: pdm-spin 1s linear infinite; }
+        @keyframes pdm-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </>
   )

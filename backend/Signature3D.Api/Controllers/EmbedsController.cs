@@ -47,6 +47,7 @@ public class EmbedsController : ControllerBase
             matterportId   = project.MatterportId ?? string.Empty,
             experienceType = project.ExperienceType,
             experienceUrl  = project.ExperienceUrl,
+            luxediaEnabled = project.LuxediaEnabled,
             ambassadorName = project.AmbassadorName,
             welcomeMessage = project.WelcomeMessage,
             welcomeMessageEn = project.WelcomeMessageEn,

@@ -14,11 +14,7 @@ import { useLanguage } from '@/context/LanguageContext'
 import { offeringsApi, type OfferingDto } from '@/lib/api'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
-
-/* ── Charte V2 ── */
-const GOLD = '#C8A45D'
-const CREAM = '#F7F5F2'
-const INK = '#101010'
+import { colors } from '@/config/theme'
 
 export default function ServicesPage() {
   const { t, lang } = useLanguage()
@@ -45,7 +41,7 @@ export default function ServicesPage() {
       key={lang}
       style={{
         minHeight: '100vh',
-        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)`,
+        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${colors.cream} 60%, #F1EEE8 100%)`,
       }}
     >
       <Navbar />
@@ -63,7 +59,7 @@ export default function ServicesPage() {
         <div className="container-main" style={{ position: 'relative', zIndex: 1, maxWidth: '900px' }}>
           <motion.span
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
-            className="section-eyebrow" style={{ color: GOLD }}
+            className="section-eyebrow" style={{ color: colors.gold }}
           >
             {t('Nos solutions', 'Our solutions')}
           </motion.span>
@@ -74,7 +70,7 @@ export default function ServicesPage() {
               fontSize: 'clamp(2.6rem, 5.5vw, 4.6rem)',
               fontWeight: 500,
               lineHeight: 1.06,
-              color: INK,
+              color: colors.ink,
               letterSpacing: '-0.01em',
               maxWidth: '720px',
             }}
@@ -150,7 +146,7 @@ export default function ServicesPage() {
                       fontWeight: 500,
                       lineHeight: 0.9,
                       color: 'transparent',
-                      WebkitTextStroke: `1px ${GOLD}`,
+                      WebkitTextStroke: `1px ${colors.gold}`,
                       display: 'block',
                       opacity: 0.55,
                     }}>
@@ -164,7 +160,7 @@ export default function ServicesPage() {
                         fontWeight: 700,
                         letterSpacing: '0.28em',
                         textTransform: 'uppercase',
-                        color: GOLD,
+                        color: colors.gold,
                         border: `1px solid rgba(200,164,93,0.35)`,
                         borderRadius: '40px',
                         padding: '7px 16px',
@@ -181,7 +177,7 @@ export default function ServicesPage() {
                       fontSize: 'clamp(2rem, 3.5vw, 3rem)',
                       fontWeight: 500,
                       lineHeight: 1.1,
-                      color: INK,
+                      color: colors.ink,
                       marginBottom: '0.6rem',
                       letterSpacing: '-0.01em',
                     }}>
@@ -190,7 +186,7 @@ export default function ServicesPage() {
                     {displayShortDescription && (
                       <p style={{
                         fontSize: '1.1rem',
-                        color: GOLD,
+                        color: colors.gold,
                         fontWeight: 400,
                         marginBottom: '1.25rem',
                         fontStyle: 'italic',
@@ -227,12 +223,12 @@ export default function ServicesPage() {
               fontFamily: 'var(--font-cormorant), serif',
               fontSize: 'clamp(2rem, 3.5vw, 3rem)',
               fontWeight: 500,
-              color: CREAM,
+              color: colors.cream,
               lineHeight: 1.2,
               marginBottom: '1rem',
             }}
           >
-            {t('Trouvons la solution faite pour vous.', 'Let\u2019s find the right fit for you.')}
+            {t('Le tarif dépend de la taille et de la complexité de votre espace.', 'Pricing depends on the size and complexity of your space.')}
           </motion.h2>
           <p style={{
             fontSize: '1rem',
@@ -243,8 +239,8 @@ export default function ServicesPage() {
             lineHeight: 1.7,
           }}>
             {t(
-              'Présentez-nous votre espace : nous concevons l\u2019expérience immersive qui lui correspond.',
-              'Tell us about your space: we\u2019ll design the immersive experience that fits it.'
+              'Présentez-nous votre espace : nous vous répondons avec une proposition adaptée.',
+              'Tell us about your space: we’ll get back to you with a tailored proposal.'
             )}
           </p>
           <Link
@@ -253,7 +249,7 @@ export default function ServicesPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
-              backgroundColor: GOLD,
+              backgroundColor: colors.gold,
               color: '#FFFFFF',
               borderRadius: '999px',
               padding: '15px 34px',
@@ -266,7 +262,7 @@ export default function ServicesPage() {
             }}
             className="services-cta"
           >
-            {t('Demander une démonstration', 'Request a demonstration')}
+            {t('Demander une soumission', 'Request a quote')}
             <span>→</span>
           </Link>
         </div>

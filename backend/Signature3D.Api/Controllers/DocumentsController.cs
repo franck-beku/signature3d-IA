@@ -5,7 +5,7 @@ using Signature3D.Application.Interfaces;
 namespace Signature3D.Api.Controllers;
 
 /// <summary>
-/// Controller de gestion des documents PDF.
+/// Controller de gestion des documents (PDF et Word .docx).
 /// Les documents alimentent Luxedia IA via le système RAG.
 /// Route : /api/documents
 /// </summary>
@@ -33,7 +33,7 @@ public class DocumentsController : ControllerBase
     }
 
     /// <summary>
-    /// Upload un PDF pour un projet.
+    /// Upload un PDF ou un document Word (.docx) pour un projet.
     /// POST /api/documents/upload/{projectId}
     /// Content-Type: multipart/form-data
     /// Lance l'indexation RAG automatiquement après upload.
@@ -48,17 +48,32 @@ public class DocumentsController : ControllerBase
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "Fichier manquant." });
 
-        if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
-            return BadRequest(new { message = "Seuls les fichiers PDF sont acceptés." });
+        var isPdf  = file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
+        var isDocx = file.FileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase);
 
-        // Vérifie la signature réelle du fichier (%PDF-) — pas seulement l'extension du nom.
+        if (!isPdf && !isDocx)
+            return BadRequest(new { message = "Seuls les fichiers PDF et Word (.docx) sont acceptés." });
+
+        // Vérifie la signature réelle du fichier — pas seulement l'extension du nom.
         // Flux dédié, distinct de celui utilisé plus bas pour l'upload — aucune interférence.
         using (var headerStream = file.OpenReadStream())
         {
-            var header = new byte[5];
-            var bytesRead = await headerStream.ReadAsync(header.AsMemory(0, 5));
-            if (bytesRead < 5 || System.Text.Encoding.ASCII.GetString(header) != "%PDF-")
-                return BadRequest(new { message = "Le fichier n'est pas un PDF valide." });
+            if (isPdf)
+            {
+                var header = new byte[5];
+                var bytesRead = await headerStream.ReadAsync(header.AsMemory(0, 5));
+                if (bytesRead < 5 || System.Text.Encoding.ASCII.GetString(header) != "%PDF-")
+                    return BadRequest(new { message = "Le fichier n'est pas un PDF valide." });
+            }
+            else
+            {
+                // Un .docx est une archive ZIP (signature PK\x03\x04) — la structure interne
+                // exacte (word/document.xml) est validée à l'étape d'extraction, pas ici.
+                var header = new byte[4];
+                var bytesRead = await headerStream.ReadAsync(header.AsMemory(0, 4));
+                if (bytesRead < 4 || header[0] != 0x50 || header[1] != 0x4B || header[2] != 0x03 || header[3] != 0x04)
+                    return BadRequest(new { message = "Le fichier n'est pas un document Word (.docx) valide." });
+            }
         }
 
         if (file.Length > 20 * 1024 * 1024) // 20 MB max
@@ -104,6 +119,23 @@ public class DocumentsController : ControllerBase
     }
 
     /// <summary>
+    /// Enfile une réindexation avec tentative OCR sur les pages à faible texte (LowTextPageNumbers).
+    /// Asynchrone — traité par DocumentIndexingBackgroundService, pas de traitement synchrone
+    /// bloquant (l'OCR + le re-embedding complet peuvent prendre 15-30s).
+    /// POST /api/documents/{id}/ocr-reindex
+    /// </summary>
+    [HttpPost("{id:guid}/ocr-reindex")]
+    public async Task<IActionResult> OcrReindex(Guid id)
+    {
+        var result = await _documentService.RequestOcrReindexAsync(id);
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(new { message = "OCR enfilé — le traitement peut prendre jusqu'à une minute." });
+    }
+
+    /// <summary>
     /// Bascule un document entre interne (IsInternal=true) et base IA (IsInternal=false).
     /// IA → interne : chunks supprimés, IsIndexed = false.
     /// Interne → IA : ré-indexation lancée depuis StorageUrl.
@@ -129,6 +161,20 @@ public class DocumentsController : ControllerBase
         if (!result.Success)
             return BadRequest(new { message = result.Error });
         return Ok(new { url = result.Data });
+    }
+
+    /// <summary>
+    /// Rattrapage : génère l'embedding des chunks existants qui n'en ont pas encore.
+    /// Traitement séquentiel, throttlé — peut prendre du temps selon le nombre de chunks à traiter.
+    /// POST /api/documents/backfill-embeddings
+    /// </summary>
+    [HttpPost("backfill-embeddings")]
+    public async Task<IActionResult> BackfillEmbeddings()
+    {
+        var result = await _documentService.BackfillEmbeddingsAsync();
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+        return Ok(result.Data);
     }
 }
 

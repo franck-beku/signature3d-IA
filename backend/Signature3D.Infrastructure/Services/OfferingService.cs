@@ -42,7 +42,8 @@ public class OfferingService : IOfferingService
         Level = o.Level,
         LevelEn = o.LevelEn,
         DisplayOrder = o.DisplayOrder,
-        IsActive = o.IsActive
+        IsActive = o.IsActive,
+        IsFeatured = o.IsFeatured
     };
 
     /// <summary>PUBLIC — offres actives uniquement, triées par ordre d'affichage.</summary>
@@ -51,25 +52,9 @@ public class OfferingService : IOfferingService
         var offerings = await _db.Offerings
             .Where(o => o.IsActive)
             .OrderBy(o => o.DisplayOrder).ThenBy(o => o.Name)
-            .Select(o => new OfferingDto
-            {
-                Id = o.Id,
-                Name = o.Name,
-                Slug = o.Slug,
-                ShortDescription = o.ShortDescription,
-                ShortDescriptionEn = o.ShortDescriptionEn,
-                LongDescription = o.LongDescription,
-                LongDescriptionEn = o.LongDescriptionEn,
-                Icon = o.Icon,
-                ImageUrl = o.ImageUrl,
-                Level = o.Level,
-                LevelEn = o.LevelEn,
-                DisplayOrder = o.DisplayOrder,
-                IsActive = o.IsActive
-            })
             .ToListAsync();
 
-        return Result<List<OfferingDto>>.Ok(offerings);
+        return Result<List<OfferingDto>>.Ok(offerings.Select(ToDto).ToList());
     }
 
     /// <summary>DASHBOARD — toutes les offres, même inactives.</summary>
@@ -77,25 +62,9 @@ public class OfferingService : IOfferingService
     {
         var offerings = await _db.Offerings
             .OrderBy(o => o.DisplayOrder).ThenBy(o => o.Name)
-            .Select(o => new OfferingDto
-            {
-                Id = o.Id,
-                Name = o.Name,
-                Slug = o.Slug,
-                ShortDescription = o.ShortDescription,
-                ShortDescriptionEn = o.ShortDescriptionEn,
-                LongDescription = o.LongDescription,
-                LongDescriptionEn = o.LongDescriptionEn,
-                Icon = o.Icon,
-                ImageUrl = o.ImageUrl,
-                Level = o.Level,
-                LevelEn = o.LevelEn,
-                DisplayOrder = o.DisplayOrder,
-                IsActive = o.IsActive
-            })
             .ToListAsync();
 
-        return Result<List<OfferingDto>>.Ok(offerings);
+        return Result<List<OfferingDto>>.Ok(offerings.Select(ToDto).ToList());
     }
 
     /// <summary>Offre par son slug (ex: "matterport-ia").</summary>
@@ -141,7 +110,8 @@ public class OfferingService : IOfferingService
             Level = dto.Level,
             LevelEn = dto.LevelEn,
             DisplayOrder = dto.DisplayOrder,
-            IsActive = dto.IsActive
+            IsActive = dto.IsActive,
+            IsFeatured = dto.IsFeatured
         };
 
         _db.Offerings.Add(offering);
@@ -173,6 +143,7 @@ public class OfferingService : IOfferingService
         offering.LevelEn = dto.LevelEn;
         offering.DisplayOrder = dto.DisplayOrder;
         offering.IsActive = dto.IsActive;
+        offering.IsFeatured = dto.IsFeatured;
 
         await _db.SaveChangesAsync();
 

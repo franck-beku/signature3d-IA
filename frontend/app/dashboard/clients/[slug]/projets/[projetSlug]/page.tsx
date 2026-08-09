@@ -1,20 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { use } from 'react'
 import { pdf } from '@react-pdf/renderer'
 import Sidebar from '@/components/dashboard/Sidebar'
 import KPICard from '@/components/dashboard/KPICard'
 import ReportDocument from '@/components/dashboard/ProjectReportPDF'
+import QRCodeLogo from '@/components/dashboard/QRCodeLogo'
 import Link from 'next/link'
-import { ArrowLeft, Copy, Download, Upload, FileText, Mail, Phone, Check, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Copy, Download, Upload, FileText, Mail, Phone, Check, TrendingUp, AlertTriangle, RefreshCw } from 'lucide-react'
 import {
   projectsApi, documentsApi, leadsApi, statsApi,
   type ProjectDto, type DocumentDto, type LeadDto,
   type VisitStatsDto, type ProjectButtonClicksDto, type LeadStatsDto, type ProjectQuestionStatsDto,
 } from '@/lib/api'
 
-const cardStyle = { backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '20px' }
+const cardStyle = { backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '20px' }
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -48,6 +49,11 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
   const [statsError, setStatsError]     = useState(false)
   const [generatingPdf, setGeneratingPdf] = useState(false)
   const [error, setError]               = useState<string | null>(null)
+  const [uploadingDoc, setUploadingDoc]   = useState(false)
+  const [showQr, setShowQr]               = useState(false)
+  const [ocrPendingIds, setOcrPendingIds] = useState<Set<string>>(new Set())
+  const isMountedRef = useRef(true)
+  useEffect(() => () => { isMountedRef.current = false }, [])
 
   useEffect(() => {
     projectsApi.getBySlug(projetSlug)
@@ -81,6 +87,55 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
       .catch(() => setStatsError(true))
       .finally(() => setStatsLoading(false))
   }, [project])
+
+  const handleUploadDocument = async (file: File) => {
+    if (!project) return
+    setUploadingDoc(true)
+    try {
+      const doc = await documentsApi.upload(project.id, file, false)
+      setDocuments((prev) => [doc as DocumentDto, ...prev])
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'upload du document.")
+    } finally {
+      setUploadingDoc(false)
+    }
+  }
+
+  /** Enfile l'OCR puis poll toutes les 3s (max 20x = 60s) jusqu'à ce que l'état de la page change. */
+  const pollOcrResult = (documentId: string, projectId: string, attempt = 0) => {
+    if (attempt >= 20) {
+      if (isMountedRef.current) setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(documentId); return next })
+      return
+    }
+    setTimeout(async () => {
+      if (!isMountedRef.current) return
+      try {
+        const docs = await documentsApi.getByProject(projectId) as DocumentDto[]
+        if (!isMountedRef.current) return
+        setDocuments(docs)
+        const updated = docs.find((d) => d.id === documentId)
+        const stillProcessing = !!updated && updated.lowTextPageNumbers?.length > 0 && updated.ocrFailedPageNumbers?.length === 0
+        if (stillProcessing) {
+          pollOcrResult(documentId, projectId, attempt + 1)
+        } else {
+          setOcrPendingIds((prev) => { const next = new Set(prev); next.delete(documentId); return next })
+        }
+      } catch {
+        pollOcrResult(documentId, projectId, attempt + 1)
+      }
+    }, 3000)
+  }
+
+  const handleRequestOcr = async (documentId: string) => {
+    if (!project) return
+    try {
+      await documentsApi.requestOcrReindex(documentId)
+      setOcrPendingIds((prev) => new Set(prev).add(documentId))
+      pollOcrResult(documentId, project.id)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
+    }
+  }
 
   const embedUrl = project?.embedUrl ?? ''
   const handleCopy = () => {
@@ -221,7 +276,11 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
                     <p style={{ color: '#999', fontSize: '10px', textAlign: 'center' }}>QR Code bientôt</p>
                   </div>
                 </div>
-                <button style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', fontSize: '11px', padding: '8px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="dl-btn">
+                <button
+                  onClick={() => setShowQr(true)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', fontSize: '11px', padding: '8px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                  className="dl-btn"
+                >
                   <Download size={12} /> Télécharger PNG
                 </button>
               </div>
@@ -243,9 +302,14 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', margin: 0 }}>Documents — {documents.length}</h2>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', padding: '6px 12px', borderRadius: '8px', background: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }} className="upload-btn">
-                <Upload size={11} /> Uploader un PDF
-              </button>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-muted)', padding: '6px 12px', borderRadius: '8px', background: 'none', cursor: uploadingDoc ? 'default' : 'pointer', transition: 'all 0.2s ease' }} className="upload-btn">
+                <Upload size={11} /> {uploadingDoc ? 'Upload...' : 'Uploader un document'}
+                <input
+                  type="file" accept=".pdf,.docx" style={{ display: 'none' }}
+                  disabled={uploadingDoc}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUploadDocument(f); e.target.value = '' }}
+                />
+              </label>
             </div>
             {documents.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px', border: '1px dashed var(--dash-border-input)', borderRadius: '10px' }}>
@@ -265,6 +329,31 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
                     <span title={doc.indexingError} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', flexShrink: 0, backgroundColor: doc.isIndexed ? 'var(--dash-success-bg)' : 'var(--dash-gold-muted)', color: doc.isIndexed ? 'var(--dash-success)' : 'var(--dash-gold)', cursor: doc.indexingError ? 'help' : 'default' }}>
                       {doc.isIndexed ? 'Indexé' : 'En attente'}
                     </span>
+                    {doc.isIndexed && doc.ocrFailedPageNumbers?.length > 0 ? (
+                      <span
+                        title={`Page${doc.ocrFailedPageNumbers.length > 1 ? 's' : ''} ${doc.ocrFailedPageNumbers.join(', ')} — OCR tenté sans succès, probablement illisible (image de mauvaise qualité ou sans texte réel).`}
+                        style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                      >
+                        <AlertTriangle size={13} style={{ color: 'var(--dash-error)' }} />
+                      </span>
+                    ) : doc.isIndexed && doc.lowTextPageNumbers?.length > 0 && (
+                      <>
+                        <span
+                          title={`Extraction possiblement incomplète — page${doc.lowTextPageNumbers.length > 1 ? 's' : ''} ${doc.lowTextPageNumbers.join(', ')} contiennent très peu de texte (probablement des encadrés en image). Le contenu de ces pages peut être absent des réponses de l'IA.`}
+                          style={{ display: 'flex', flexShrink: 0, cursor: 'help' }}
+                        >
+                          <AlertTriangle size={13} style={{ color: 'var(--dash-gold)' }} />
+                        </span>
+                        <button
+                          onClick={() => handleRequestOcr(doc.id)}
+                          disabled={ocrPendingIds.has(doc.id)}
+                          style={{ width: '24px', height: '24px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', background: 'none', cursor: ocrPendingIds.has(doc.id) ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dash-gold)', flexShrink: 0, opacity: ocrPendingIds.has(doc.id) ? 0.5 : 1 }}
+                          title={ocrPendingIds.has(doc.id) ? 'OCR en cours...' : "Relancer l'OCR sur les pages faibles"}
+                        >
+                          <RefreshCw size={11} className={ocrPendingIds.has(doc.id) ? 'spin' : undefined} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -435,6 +524,7 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
         .back-arrow:hover  { color: var(--dash-gold) !important; }
         .client-link:hover { color: var(--dash-gold) !important; }
         .new-btn:hover     { background-color: #b8943d !important; }
@@ -450,6 +540,10 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
           .perf-charts-grid  { grid-template-columns: 1fr !important; }
         }
       `}</style>
+
+      {showQr && project && (
+        <QRCodeLogo url={embedUrl} projectName={project.name} onClose={() => setShowQr(false)} />
+      )}
     </div>
   )
 }

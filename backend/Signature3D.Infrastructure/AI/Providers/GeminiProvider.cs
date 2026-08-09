@@ -16,6 +16,10 @@ public class GeminiProvider : IAIProvider, IEmbeddingProvider
     private readonly GeminiSettings _settings;
     private readonly HttpClient _http;
 
+    // Nouvelles tentatives sur 429 (quota tier gratuit dépassé) — délai croissant entre chaque essai.
+    private static readonly TimeSpan[] EmbeddingRetryDelays =
+        [TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8)];
+
     public string ProviderName => "Gemini";
 
     public GeminiProvider(GeminiSettings settings)
@@ -104,42 +108,59 @@ public class GeminiProvider : IAIProvider, IEmbeddingProvider
     }
 
     /// <summary>
-    /// Génère un vecteur d'embedding via Gemini text-embedding-004.
+    /// Génère un vecteur d'embedding via Gemini gemini-embedding-001 (tronqué à 768 dimensions
+    /// via outputDimensionality — text-embedding-004 n'est plus disponible pour cette clé API,
+    /// confirmé par sondage direct de l'API le 2026-07-12).
     /// </summary>
     public async Task<Result<float[]>> GenerateEmbeddingAsync(string text)
     {
-        try
+        var requestBody = new
         {
-            var requestBody = new
+            content = new
             {
-                content = new
-                {
-                    parts = new[] { new { text } }
-                }
-            };
+                parts = new[] { new { text } }
+            },
+            outputDimensionality = 768,
+        };
+        var json = JsonSerializer.Serialize(requestBody);
+        var url  = $"models/gemini-embedding-001:embedContent?key={_settings.ApiKey}";
 
-            var json     = JsonSerializer.Serialize(requestBody);
-            var content  = new StringContent(json, Encoding.UTF8, "application/json");
-            var url      = $"models/text-embedding-004:embedContent?key={_settings.ApiKey}";
-            var response = await _http.PostAsync(url, content);
-            var responseJson = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-                return Result<float[]>.Fail($"Erreur embedding Gemini : {response.StatusCode}");
-
-            var doc       = JsonDocument.Parse(responseJson);
-            var embedding = doc.RootElement
-                .GetProperty("embedding")
-                .GetProperty("values")
-                .EnumerateArray()
-                .Select(e => e.GetSingle())
-                .ToArray();
-
-            return Result<float[]>.Ok(embedding);
-        }
-        catch (Exception ex)
+        for (var attempt = 0; ; attempt++)
         {
-            return Result<float[]>.Fail($"Erreur embedding Gemini : {ex.Message}");
+            try
+            {
+                using var content  = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync(url, content);
+
+                // 429 = quota tier gratuit dépassé — nouvelle tentative après un délai croissant
+                // plutôt que d'abandonner immédiatement (voir EmbeddingRetryDelays).
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests && attempt < EmbeddingRetryDelays.Length)
+                {
+                    var delay = EmbeddingRetryDelays[attempt];
+                    Console.WriteLine($"[GeminiProvider] ⚠️ 429 embedding — nouvelle tentative dans {delay.TotalSeconds}s (essai {attempt + 1}/{EmbeddingRetryDelays.Length})");
+                    await Task.Delay(delay);
+                    continue;
+                }
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                    return Result<float[]>.Fail($"Erreur embedding Gemini : {response.StatusCode}");
+
+                var doc       = JsonDocument.Parse(responseJson);
+                var embedding = doc.RootElement
+                    .GetProperty("embedding")
+                    .GetProperty("values")
+                    .EnumerateArray()
+                    .Select(e => e.GetSingle())
+                    .ToArray();
+
+                return Result<float[]>.Ok(embedding);
+            }
+            catch (Exception ex)
+            {
+                return Result<float[]>.Fail($"Erreur embedding Gemini : {ex.Message}");
+            }
         }
     }
 }

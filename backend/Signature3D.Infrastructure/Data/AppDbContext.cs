@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Sector> Sectors => Set<Sector>();
     public DbSet<Offering> Offerings => Set<Offering>();
     public DbSet<Faq> Faqs => Set<Faq>();
+    public DbSet<Testimonial> Testimonials => Set<Testimonial>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ProjectButton> ProjectButtons => Set<ProjectButton>();
@@ -130,6 +131,11 @@ public class AppDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).HasMaxLength(512);
 
+            // Défaut requis pour une colonne non-nullable ajoutée à une table déjà peuplée —
+            // sans ça, la migration échoue sur les documents existants (NULL interdit).
+            e.Property(x => x.LowTextPageNumbers).HasDefaultValueSql("'{}'");
+            e.Property(x => x.OcrFailedPageNumbers).HasDefaultValueSql("'{}'");
+
             e.HasOne(x => x.Project)
              .WithMany(x => x.Documents)
              .HasForeignKey(x => x.ProjectId)
@@ -141,9 +147,9 @@ public class AppDbContext : DbContext
         {
             e.HasKey(x => x.Id);
 
-            // Ignorer l'embedding float[] — pgvector sera activé via migration SQL manuelle
-            // après que l'extension vector soit activée dans Supabase
-            e.Ignore(x => x.Embedding);
+            // Embedding stocké en colonne pgvector (768 dimensions — text-embedding-004).
+            e.Property(x => x.Embedding)
+             .HasColumnType("vector(768)");
 
             e.HasOne(x => x.Document)
              .WithMany(x => x.Chunks)

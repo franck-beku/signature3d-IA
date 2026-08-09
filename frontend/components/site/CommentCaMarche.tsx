@@ -1,14 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Aperture, Layers, Sparkles, QrCode } from 'lucide-react';
+import { Aperture, Layers, Sparkles, QrCode, MapPin } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { colors } from '@/config/theme';
 
-const GOLD = '#C8A45D';
-const CREAM = '#F7F5F2';
-const CARD = '#FCFBF8';
-const INK = '#101010';
-const MUTED = '#6B6458';
 const BORDER = '#E2D8C8';
 
 export default function CommentCaMarche() {
@@ -47,8 +43,8 @@ export default function CommentCaMarche() {
       num: '04',
       title: t('Livraison en ligne', 'Online delivery'),
       desc: t(
-        'Un lien unique et un QR code prêts à partager avec vos clients.',
-        'A unique link and QR code ready to share with your clients.'
+        'Un lien unique, un QR code, et une diffusion partout où vos clients vous cherchent.',
+        'A unique link, a QR code, and distribution everywhere your clients look for you.'
       ),
     },
   ];
@@ -69,12 +65,14 @@ export default function CommentCaMarche() {
 
   return (
     <section
+      id="comment-ca-marche"
       aria-label={t('Comment ça marche', 'How it works')}
       style={{
-        backgroundColor: CREAM,
-        color: INK,
+        backgroundColor: colors.cream,
+        color: colors.ink,
         position: 'relative',
         overflow: 'hidden',
+        scrollMarginTop: '80px',
         borderTop: `1px solid ${BORDER}`,
         borderBottom: `1px solid ${BORDER}`,
       }}
@@ -147,6 +145,20 @@ export default function CommentCaMarche() {
             'Full support, from the first conversation to launch.'
           )}
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.35 }}
+          className="ccm-streetview"
+        >
+          <MapPin size={15} strokeWidth={1.8} />
+          {t(
+            'Publication native sur Google Street View, directement depuis Matterport.',
+            'Native publishing to Google Street View, directly from Matterport.'
+          )}
+        </motion.div>
       </div>
 
       <style>{`
@@ -155,7 +167,7 @@ export default function CommentCaMarche() {
           font-weight: 700;
           letter-spacing: 0.32em;
           text-transform: uppercase;
-          color: ${GOLD};
+          color: ${colors.gold};
           margin-bottom: 20px;
         }
 
@@ -163,14 +175,14 @@ export default function CommentCaMarche() {
           font-family: var(--font-cormorant), serif;
           font-size: clamp(2.3rem, 4vw, 4.2rem);
           font-weight: 400;
-          color: ${INK};
+          color: ${colors.ink};
           line-height: 1.05;
           letter-spacing: -0.02em;
           margin: 0;
         }
 
         .ccm-title span {
-          color: ${GOLD};
+          color: ${colors.gold};
           font-style: italic;
         }
 
@@ -199,7 +211,7 @@ export default function CommentCaMarche() {
           position: relative;
           z-index: 1;
           text-align: center;
-          background: ${CARD};
+          background: ${colors.white};
           border: 1px solid ${BORDER};
           border-radius: 18px;
           padding: 34px 24px 32px;
@@ -220,7 +232,7 @@ export default function CommentCaMarche() {
           border-radius: 50%;
           background: #FFFFFF;
           border: 1px solid rgba(200,164,93,0.55);
-          color: ${GOLD};
+          color: ${colors.gold};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -231,7 +243,7 @@ export default function CommentCaMarche() {
           font-family: var(--font-cormorant), serif;
           font-size: 16px;
           letter-spacing: 0.24em;
-          color: ${GOLD};
+          color: ${colors.gold};
           margin: 0 0 12px;
         }
 
@@ -239,7 +251,7 @@ export default function CommentCaMarche() {
           font-family: var(--font-cormorant), serif;
           font-size: clamp(1.3rem, 2vw, 1.65rem);
           font-weight: 400;
-          color: ${INK};
+          color: ${colors.ink};
           line-height: 1.25;
           margin: 0 0 14px;
         }
@@ -247,18 +259,39 @@ export default function CommentCaMarche() {
         .ccm-desc {
           font-size: 14px;
           line-height: 1.7;
-          color: ${MUTED};
+          color: ${colors.muted};
           margin: 0 auto;
           max-width: 230px;
         }
 
         .ccm-note {
           text-align: center;
-          color: ${MUTED};
+          color: ${colors.muted};
           font-size: 15px;
           line-height: 1.8;
           margin: 54px auto 0;
           max-width: 560px;
+        }
+
+        .ccm-streetview {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+          width: fit-content;
+          margin: 22px auto 0;
+          padding: 9px 18px;
+          border-radius: 999px;
+          background: rgba(200,164,93,0.08);
+          border: 1px solid rgba(200,164,93,0.28);
+          color: ${colors.ink};
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .ccm-streetview svg {
+          color: ${colors.gold};
+          flex-shrink: 0;
         }
 
         @media (max-width: 980px) {

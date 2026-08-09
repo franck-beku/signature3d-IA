@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Plus, BarChart3, ExternalLink, QrCode, FileText, Pencil, Trash2, AlertTriangle } from 'lucide-react'
+import { Plus, BarChart3, ExternalLink, QrCode, FileText, Pencil, Trash2, AlertTriangle, Tag } from 'lucide-react'
 import type { ProjectDto } from '@/lib/api'
 
 const statusStyle = (s: string) => {
@@ -19,16 +19,18 @@ const thStyle = {
 
 /* ── Tableau Projets (+ confirmation suppression inline) ── */
 export default function ClientProjectsTable({
-  projects, slug, deleteConfirm,
-  onToggleDeleteConfirm, onDeleteProject, onLinkProject, onQrProject, onDocProject, onEditProject,
+  projects, slug, deleteConfirm, generatingStickerId,
+  onToggleDeleteConfirm, onDeleteProject, onLinkProject, onQrProject, onStickerProject, onDocProject, onEditProject,
 }: {
   projects: ProjectDto[]
   slug: string
   deleteConfirm: string | null
+  generatingStickerId?: string | null
   onToggleDeleteConfirm: (id: string) => void
   onDeleteProject: (id: string) => void
   onLinkProject: (project: ProjectDto) => void
   onQrProject: (project: ProjectDto) => void
+  onStickerProject: (project: ProjectDto) => void
   onDocProject: (project: ProjectDto) => void
   onEditProject: (project: ProjectDto) => void
 }) {
@@ -43,7 +45,7 @@ export default function ClientProjectsTable({
           </Link>
         </div>
       ) : (
-        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', overflow: 'hidden' }}>
+        <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
@@ -74,6 +76,7 @@ export default function ClientProjectsTable({
                           <Link href={`/dashboard/clients/${slug}/projets/${project.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', textDecoration: 'none' }} className="action-btn"><BarChart3 size={11} /> Voir</Link>
                           <button onClick={() => onLinkProject(project)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><ExternalLink size={11} /> Lien</button>
                           <button onClick={() => onQrProject(project)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><QrCode size={11} /> QR</button>
+                          <button onClick={() => onStickerProject(project)} disabled={generatingStickerId === project.id} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: generatingStickerId === project.id ? 'not-allowed' : 'pointer', opacity: generatingStickerId === project.id ? 0.6 : 1 }} className="action-btn"><Tag size={11} /> {generatingStickerId === project.id ? 'Génération...' : 'Autocollant'}</button>
                           <button onClick={() => onDocProject(project)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="action-btn"><FileText size={11} /> PDF</button>
                           <button onClick={() => onEditProject(project)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-gold-ring)', color: 'var(--dash-gold)', background: 'none', cursor: 'pointer' }} className="edit-btn"><Pencil size={11} /> Modifier</button>
                           <button onClick={() => onToggleDeleteConfirm(project.id)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="delete-btn"><Trash2 size={11} /> Supprimer</button>

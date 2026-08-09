@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Npgsql;
+using Pgvector.EntityFrameworkCore;
 using Signature3D.Application.Interfaces;
 using Signature3D.Infrastructure.AI.Providers;
 using Signature3D.Infrastructure.Configurations;
@@ -32,6 +34,7 @@ var groqSettings     = builder.Configuration.GetSection("GroqSettings").Get<Groq
 var openAiSettings   = builder.Configuration.GetSection("OpenAISettings").Get<OpenAISettings>()!;
 var claudeSettings   = builder.Configuration.GetSection("ClaudeSettings").Get<ClaudeSettings>()!;
 var geminiSettings   = builder.Configuration.GetSection("GeminiSettings").Get<GeminiSettings>()!;
+var googleVisionSettings = builder.Configuration.GetSection("GoogleVisionSettings").Get<GoogleVisionSettings>() ?? new GoogleVisionSettings();
 var copilotSettings  = builder.Configuration.GetSection("CopilotSettings").Get<CopilotSettings>()!;
 var resendSettings   = builder.Configuration.GetSection("ResendSettings").Get<ResendSettings>()!;
 var appUrlsSettings  = builder.Configuration.GetSection("AppUrlsSettings").Get<AppUrlsSettings>()!;
@@ -40,10 +43,14 @@ var appUrlsSettings  = builder.Configuration.GetSection("AppUrlsSettings").Get<A
    2. BASE DE DONNÉES — PostgreSQL + Supabase
    ══════════════════════════════════════════ */
 
+var npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(supabaseSettings.ConnectionString);
+npgsqlDataSourceBuilder.UseVector();
+var npgsqlDataSource = npgsqlDataSourceBuilder.Build();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
-        supabaseSettings.ConnectionString,
-        npgsql => npgsql.EnableRetryOnFailure(3)
+        npgsqlDataSource,
+        npgsql => npgsql.EnableRetryOnFailure(3).UseVector()
     )
 );
 
@@ -174,6 +181,7 @@ builder.Services.AddSingleton(groqSettings);
 builder.Services.AddSingleton(openAiSettings);
 builder.Services.AddSingleton(claudeSettings);
 builder.Services.AddSingleton(geminiSettings);
+builder.Services.AddSingleton(googleVisionSettings);
 builder.Services.AddSingleton(copilotSettings);
 builder.Services.AddSingleton(resendSettings);
 builder.Services.AddSingleton(appUrlsSettings);
@@ -198,8 +206,11 @@ builder.Services.AddScoped<IAgendaService,    AgendaService>();
 builder.Services.AddScoped<ITimelineService,  TimelineService>();
 builder.Services.AddScoped<IOfferingService,  OfferingService>();
 builder.Services.AddScoped<IFaqService, FaqService>();
+builder.Services.AddScoped<ITestimonialService, TestimonialService>();
 
 builder.Services.AddScoped<IAIProvider, GroqProvider>();
+builder.Services.AddScoped<IEmbeddingProvider, GeminiProvider>();
+builder.Services.AddScoped<IOcrProvider, GoogleVisionOcrProvider>();
 
 builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 
@@ -268,6 +279,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+/* ══════════════════════════════════════════
+   8bis. HEADERS DE SÉCURITÉ
+
+   Pas de CSP ici : l'API ne sert que du JSON, la CSP n'a de sens que pour du
+   HTML rendu (gérée côté frontend, next.config.ts). Pas de HSTS/HttpsRedirection
+   non plus pour l'instant — Kestrel écoute en HTTP nu (TLS terminé par Railway) et
+   il n'y a pas de UseForwardedHeaders() en place ; les ajouter sans ça provoquerait
+   une boucle de redirection (Kestrel ne verrait jamais X-Forwarded-Proto: https).
+   ══════════════════════════════════════════ */
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    await next();
+});
 
 app.UseCors("AllowFrontend");
 app.UseRateLimiter();

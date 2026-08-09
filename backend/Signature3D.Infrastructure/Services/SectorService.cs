@@ -49,23 +49,9 @@ public class SectorService : ISectorService
             .Where(s => s.IsActive)
             .Include(s => s.Clients)
             .OrderBy(s => s.DisplayOrder).ThenBy(s => s.Name)
-            .Select(s => new SectorDto
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Slug = s.Slug,
-                ImageUrl = s.ImageUrl,
-                Description = s.Description,
-                DescriptionEn = s.DescriptionEn,
-                CoverImage = s.CoverImage,
-                Icon = s.Icon,
-                DisplayOrder = s.DisplayOrder,
-                IsActive = s.IsActive,
-                ClientCount = s.Clients.Count
-            })
             .ToListAsync();
 
-        return Result<List<SectorDto>>.Ok(sectors);
+        return Result<List<SectorDto>>.Ok(sectors.Select(s => ToDto(s, s.Clients.Count)).ToList());
     }
 
     /// <summary>DASHBOARD — tous les secteurs, même inactifs.</summary>
@@ -74,23 +60,9 @@ public class SectorService : ISectorService
         var sectors = await _db.Sectors
             .Include(s => s.Clients)
             .OrderBy(s => s.DisplayOrder).ThenBy(s => s.Name)
-            .Select(s => new SectorDto
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Slug = s.Slug,
-                ImageUrl = s.ImageUrl,
-                Description = s.Description,
-                DescriptionEn = s.DescriptionEn,
-                CoverImage = s.CoverImage,
-                Icon = s.Icon,
-                DisplayOrder = s.DisplayOrder,
-                IsActive = s.IsActive,
-                ClientCount = s.Clients.Count
-            })
             .ToListAsync();
 
-        return Result<List<SectorDto>>.Ok(sectors);
+        return Result<List<SectorDto>>.Ok(sectors.Select(s => ToDto(s, s.Clients.Count)).ToList());
     }
 
     /// <summary>Retourne un secteur par son slug (ex: "automobile").</summary>

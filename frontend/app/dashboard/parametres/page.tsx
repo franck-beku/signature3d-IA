@@ -157,7 +157,7 @@ export default function ParametresPage() {
               </div>
               <div>
                 <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Entreprise</label>
-                <input type="text" value="Signature 3D IA" disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
+                <input type="text" value="Signature Immersion" disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
               </div>
             </div>
 
@@ -278,14 +278,9 @@ export default function ParametresPage() {
           {/* ── Danger zone ── */}
           <div style={{ ...sectionStyle, border: '1px solid var(--dash-error-ring)' }}>
             <h2 style={{ color: 'var(--dash-error)', fontWeight: 500, fontSize: '13px', marginBottom: '16px' }}>Zone dangereuse</h2>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>Supprimer le compte</p>
-                <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '2px' }}>Cette action est irréversible — contactez Alain pour confirmer</p>
-              </div>
-              <button style={{ fontSize: '12px', padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--dash-error-ring)', color: 'var(--dash-error)', background: 'none', cursor: 'pointer' }} className="delete-btn">
-                Supprimer
-              </button>
+            <div>
+              <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>Supprimer le compte</p>
+              <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '2px' }}>Cette action est irréversible — contactez Alain pour confirmer</p>
             </div>
           </div>
 
@@ -294,7 +289,6 @@ export default function ParametresPage() {
 
       <style>{`
         .save-btn:hover:not(:disabled) { background-color: #b8943d !important; }
-        .delete-btn:hover { background-color: var(--dash-error-bg) !important; }
         .dash-input:focus { border-color: var(--dash-gold) !important; }
         @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr !important; } }
       `}</style>

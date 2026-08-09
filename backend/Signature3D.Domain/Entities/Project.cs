@@ -17,7 +17,12 @@ public class Project : BaseEntity
     public ProjectStatus Status { get; set; } = ProjectStatus.Draft;
     public string? Notes { get; set; }
 
+    /* Coordonnée de repli proposée par Luxedia quand une info manque (voir ChatService.BuildSystemPrompt) */
+    public string? ContactPhone { get; set; }
+    public string? ContactUrl { get; set; }
+
     /* === Luxedia config === */
+    public bool LuxediaEnabled { get; set; } = true;   // false = widget désactivé (visite seule, sans IA)
     public string? LuxediaAvatarUrl { get; set; }
     public string? LuxediaClientLogoUrl { get; set; }
     public string? LuxediaPrimaryColor { get; set; }

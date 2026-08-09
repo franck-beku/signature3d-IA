@@ -18,12 +18,26 @@ public class AnalyticsService : IAnalyticsService
 
     public AnalyticsService(AppDbContext db) => _db = db;
 
-    /// <summary>Retourne les statistiques complètes d'un projet.</summary>
-    public async Task<Result<ProjectAnalyticsDto>> GetByProjectAsync(Guid projectId)
+    /// <summary>
+    /// Retourne les statistiques complètes d'un projet. Les totaux couvrent tout
+    /// l'historique ; <c>DailyStats</c> est borné à la période [from, to] :
+    /// ni l'un ni l'autre fourni ⇒ 30 derniers jours (comportement par défaut inchangé) ;
+    /// seul "to" fourni ⇒ depuis la création du projet jusqu'à "to".
+    /// </summary>
+    public async Task<Result<ProjectAnalyticsDto>> GetByProjectAsync(Guid projectId, DateTime? from = null, DateTime? to = null)
     {
         var project = await _db.Projects.FindAsync(projectId);
         if (project is null)
             return Result<ProjectAnalyticsDto>.Fail("Projet introuvable.");
+
+        var effectiveTo = DateTime.SpecifyKind(to ?? DateTime.UtcNow, DateTimeKind.Utc);
+        DateTime effectiveFrom;
+        if (from.HasValue)
+            effectiveFrom = DateTime.SpecifyKind(from.Value, DateTimeKind.Utc);
+        else if (to.HasValue)
+            effectiveFrom = project.CreatedAt;
+        else
+            effectiveFrom = effectiveTo.AddDays(-30);
 
         var visits = await _db.Visits
             .Where(v => v.ProjectId == projectId)
@@ -46,16 +60,24 @@ public class AnalyticsService : IAnalyticsService
             ? visits.Average(v => v.DurationSeconds)
             : 0;
 
-        // Statistiques journalières des 30 derniers jours
-        var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
-        var dailyStats = visits
-            .Where(v => v.CreatedAt >= thirtyDaysAgo)
+        // Statistiques journalières bornées à la période demandée — requête dédiée
+        // (pas la liste `visits` ci-dessus) pour rester performant même sur une longue
+        // période, indépendamment de la taille totale de l'historique du projet.
+        var visitsInRange = await _db.Visits
+            .Where(v => v.ProjectId == projectId && v.CreatedAt >= effectiveFrom && v.CreatedAt <= effectiveTo)
+            .ToListAsync();
+
+        var leadsInRange = await _db.Leads
+            .Where(l => l.ProjectId == projectId && l.CreatedAt >= effectiveFrom && l.CreatedAt <= effectiveTo)
+            .ToListAsync();
+
+        var dailyStats = visitsInRange
             .GroupBy(v => v.CreatedAt.Date)
             .Select(g => new DailyStatDto
             {
                 Date = g.Key,
                 Visits = g.Count(),
-                Leads = leads.Count(l => l.CreatedAt.Date == g.Key)
+                Leads = leadsInRange.Count(l => l.CreatedAt.Date == g.Key)
             })
             .OrderBy(d => d.Date)
             .ToList();

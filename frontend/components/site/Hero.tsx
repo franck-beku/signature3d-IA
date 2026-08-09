@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { colors } from '@/config/theme';
 
 /**
  * Hero cinématique — Acte 1 du film.
@@ -20,15 +22,13 @@ import { useLanguage } from '@/context/LanguageContext';
  * le mouvement est ambiant, pas interactif.
  */
 
-const GOLD = '#C8A45D';
-const CHARBON = '#0B0B0B';
 
 /* Mêmes assets que la section Nos univers — cohérence du film. */
 const SLIDES = [
   '/assets/univers/auto.jpg',
   '/assets/univers/immobilier.jpg',
   '/assets/univers/resto.jpg',
-  '/assets/univers/hotel.jpg',
+  '/assets/univers/hotellerie-nouveau.jpeg',
   '/assets/univers/commerce.jpg',
 ];
 
@@ -68,11 +68,11 @@ export default function Hero() {
         height: '100vh',
         minHeight: '640px',
         overflow: 'hidden',
-        backgroundColor: CHARBON,
+        backgroundColor: colors.charcoal,
       }}
     >
       {/* ── Diaporama d'images en fondu + Ken Burns ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <AnimatePresence>
           <motion.div
             key={index}
@@ -86,15 +86,17 @@ export default function Hero() {
               initial={{ scale: 1 }}
               animate={{ scale: reduceMotion ? 1 : 1.08 }}
               transition={{ duration: CYCLE / 1000, ease: 'linear' }}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url("${SLIDES[index]}")`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
-            />
+              style={{ position: 'absolute', inset: 0 }}
+            >
+              <Image
+                src={SLIDES[index]}
+                alt=""
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
+              />
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -143,9 +145,9 @@ export default function Hero() {
             textAlign: 'left',
           }}
         >
-          {/* Bloc texte limité à ~55% pour laisser respirer l'image à droite */}
-          <div style={{ maxWidth: '640px' }}>
-          {/* Eyebrow */}
+          {/* Bloc texte élargi à 720px pour porter la phrase produit sur 3 niveaux */}
+          <div style={{ maxWidth: '720px' }}>
+          {/* Eyebrow — nom de marque */}
           <p
             style={{
               fontSize: '11px',
@@ -156,7 +158,7 @@ export default function Hero() {
               marginBottom: '28px',
             }}
           >
-            {t('Expériences immersives · Québec', 'Immersive experiences · Québec')}
+            {t('SIGNATURE IMMERSION', 'SIGNATURE IMMERSION')}
           </p>
 
           {/* Titre */}
@@ -175,23 +177,46 @@ export default function Hero() {
           >
             {t('Chaque espace possède une histoire.', 'Every space holds a story.')}
             <br />
-            <span style={{ color: GOLD, fontStyle: 'italic' }}>
+            <span style={{ color: colors.gold, fontStyle: 'italic' }}>
               {t('Nous la rendons immersive.', 'We make it immersive.')}
             </span>
           </h1>
 
-          {/* Sous-titre 3D • 360° • IA */}
+          {/* Phrase produit — remplace l'ancien sous-titre "3D · 360° · IA",
+              traitement en rupture volontaire (casse normale, pas de espacement compact)
+              pour rester lisible malgré sa longueur. */}
           <p
             style={{
-              marginTop: '26px',
-              fontSize: 'clamp(12px, 1.4vw, 14px)',
-              fontWeight: 500,
-              letterSpacing: '0.4em',
-              textTransform: 'uppercase',
-              color: 'rgba(247,245,242,0.75)',
+              marginTop: '22px',
+              fontSize: 'clamp(14.5px, 1.7vw, 17px)',
+              fontWeight: 400,
+              lineHeight: 1.65,
+              letterSpacing: 'normal',
+              textTransform: 'none',
+              color: 'rgba(247,245,242,0.82)',
             }}
           >
-            {t('3D · 360° · IA', '3D · 360° · AI')}
+            {t(
+              "Visites immersives 3D et 360° enrichies par l'intelligence artificielle, pour les concessionnaires, l'immobilier, l'hôtellerie, les commerces et tous les espaces que vous souhaitez faire découvrir.",
+              'Immersive 3D and 360° tours enhanced by artificial intelligence — for car dealerships, real estate, hospitality, retail, and every space you want to showcase.'
+            )}
+          </p>
+
+          {/* Bande de mots-clés — discrète, ne doit pas concurrencer la phrase produit */}
+          <p
+            style={{
+              marginTop: '20px',
+              fontSize: '11px',
+              fontWeight: 500,
+              letterSpacing: '0.28em',
+              textTransform: 'uppercase',
+              color: 'rgba(247,245,242,0.42)',
+            }}
+          >
+            {t(
+              'Immersion • Innovation • Intelligence artificielle • Expérience • Visibilité',
+              'Immersion • Innovation • Artificial Intelligence • Experience • Visibility'
+            )}
           </p>
 
           {/* CTA */}
@@ -204,7 +229,7 @@ export default function Hero() {
               flexWrap: 'wrap',
             }}
           >
-            {/* Primaire — plein doré */}
+            {/* Primaire — plein doré — l'action de conversion, la plus mise en avant */}
             <Link
               href="/contact"
               className="hero-cta-primary"
@@ -212,9 +237,9 @@ export default function Hero() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '10px',
-                backgroundColor: GOLD,
-                color: CHARBON,
-                borderRadius: '4px',
+                backgroundColor: colors.gold,
+                color: colors.charcoal,
+                borderRadius: '10px',
                 padding: '15px 30px',
                 fontSize: '12px',
                 fontWeight: 700,
@@ -224,7 +249,7 @@ export default function Hero() {
                 transition: 'all 0.3s ease',
               }}
             >
-              {t("Découvrir l'expérience", 'Discover the experience')}
+              {t('Demander une démonstration', 'Request a demonstration')}
               <span aria-hidden="true">→</span>
             </Link>
 
@@ -241,7 +266,7 @@ export default function Hero() {
                 WebkitBackdropFilter: 'blur(8px)',
                 border: '1px solid rgba(255,255,255,0.22)',
                 color: '#F7F5F2',
-                borderRadius: '4px',
+                borderRadius: '10px',
                 padding: '15px 30px',
                 fontSize: '12px',
                 fontWeight: 500,
@@ -251,7 +276,7 @@ export default function Hero() {
                 transition: 'all 0.3s ease',
               }}
             >
-              {t('Voir nos réalisations', 'View our work')}
+              {t('Découvrir nos réalisations', 'Discover our work')}
             </Link>
           </div>
           </div>
@@ -317,7 +342,7 @@ export default function Hero() {
               height: '2px',
               borderRadius: '2px',
               backgroundColor:
-                i === index ? GOLD : 'rgba(247,245,242,0.25)',
+                i === index ? colors.gold : 'rgba(247,245,242,0.25)',
               transition: 'all 0.5s ease',
             }}
           />

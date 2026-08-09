@@ -224,13 +224,13 @@ section {
 }
 
 .dash {
-  --dash-bg:           #FFFFFF;
-  --dash-surface:      #FAFAFA;
+  --dash-bg:           #F4F2ED;
+  --dash-surface:      #FFFFFF;
   --dash-input:        #F5F5F5;
   --dash-text:         #1A1400;
   --dash-text-muted:   rgba(26,20,0,0.70);
   --dash-text-subtle:  rgba(26,20,0,0.60);
-  --dash-border:       rgba(0,0,0,0.06);
+  --dash-border:       rgba(0,0,0,0.10);
   --dash-border-input: rgba(0,0,0,0.08);
   --dash-gold:         #C8A45D;
   --dash-gold-muted:   rgba(200,164,93,0.08);
@@ -246,4 +246,5 @@ section {
   --dash-success-ring: rgba(22,163,74,0.25);
   --dash-gold-bar:     rgba(200,164,93,0.3);
   --dash-success-bar:  rgba(22,163,74,0.2);
+  --dash-shadow:       0 1px 3px rgba(0,0,0,0.06);
 }

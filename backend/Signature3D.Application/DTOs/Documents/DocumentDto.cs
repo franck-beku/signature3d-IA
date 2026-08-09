@@ -12,6 +12,8 @@ public class DocumentDto
     public bool IsIndexed { get; set; }
     public string? IndexingError { get; set; }
     public bool IsInternal { get; set; }
+    public List<int> LowTextPageNumbers { get; set; } = [];
+    public List<int> OcrFailedPageNumbers { get; set; } = [];
     public int ChunkCount { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -46,6 +46,7 @@ interface EmbedInterfaceProps {
   luxediaBotMessageColor?: string
   luxediaUserMessageColor?: string
   luxediaLanguage?:        string
+  luxediaEnabled?:         boolean // false = widget désactivé (défaut true, rétro-compatible)
 }
 
 /**
@@ -71,7 +72,7 @@ export default function EmbedInterface({
   luxediaAvatarUrl, luxediaClientLogoUrl,
   luxediaPrimaryColor, luxediaWidgetBgColor,
   luxediaBotMessageColor, luxediaUserMessageColor,
-  luxediaLanguage,
+  luxediaLanguage, luxediaEnabled,
 }: EmbedInterfaceProps) {
   const [isMobileAIOpen, setIsMobileAIOpen] = useState(false)
 
@@ -135,6 +136,11 @@ export default function EmbedInterface({
   const hasMatterport = !!matterportId && matterportId.trim() !== ''
   const isIAOnly      = !hasTour360 && !hasMatterport
   const onlineLabel   = luxediaLanguage === 'en' ? 'Online' : 'En ligne'
+
+  /* ── Widget Luxedia visible aux côtés de la visite ──
+     Piloté par le flag explicite du projet, indépendamment de la présence d'une
+     visite. undefined → true (rétro-compatible tant que le backend ne l'envoie pas). */
+  const showLuxediaWidget = luxediaEnabled !== false
 
   /* ── IA seule — pas de visite immersive → chatbot plein écran ── */
   if (isIAOnly) {
@@ -200,41 +206,45 @@ export default function EmbedInterface({
       </div>
 
       {/* Ambassadeur IA — 340px desktop */}
-      <div style={{ width: '340px', flexShrink: 0, borderLeft: '1px solid rgba(255,255,255,0.05)', display: 'flex' }} className="embed-sidebar">
-        <AmbassadeurIA
-          ambassadorName={ambassadorName}
-          welcomeMessage={welcomeMessage}
-          welcomeMessageEn={welcomeMessageEn}
-          buttons={buttons}
-          suggestions={suggestions}
-          projectSlug={projectSlug}
-          luxediaAvatarUrl={luxediaAvatarUrl}
-          luxediaClientLogoUrl={luxediaClientLogoUrl}
-          luxediaPrimaryColor={luxediaPrimaryColor}
-          luxediaWidgetBgColor={luxediaWidgetBgColor}
-          luxediaBotMessageColor={luxediaBotMessageColor}
-          luxediaUserMessageColor={luxediaUserMessageColor}
-          language={luxediaLanguage as 'fr' | 'en' | undefined}
-        />
-      </div>
+      {showLuxediaWidget && (
+        <div style={{ width: '340px', flexShrink: 0, borderLeft: '1px solid rgba(255,255,255,0.05)', display: 'flex' }} className="embed-sidebar">
+          <AmbassadeurIA
+            ambassadorName={ambassadorName}
+            welcomeMessage={welcomeMessage}
+            welcomeMessageEn={welcomeMessageEn}
+            buttons={buttons}
+            suggestions={suggestions}
+            projectSlug={projectSlug}
+            luxediaAvatarUrl={luxediaAvatarUrl}
+            luxediaClientLogoUrl={luxediaClientLogoUrl}
+            luxediaPrimaryColor={luxediaPrimaryColor}
+            luxediaWidgetBgColor={luxediaWidgetBgColor}
+            luxediaBotMessageColor={luxediaBotMessageColor}
+            luxediaUserMessageColor={luxediaUserMessageColor}
+            language={luxediaLanguage as 'fr' | 'en' | undefined}
+          />
+        </div>
+      )}
 
       {/* Mobile — bouton flottant */}
-      <button
-        onClick={() => setIsMobileAIOpen(true)}
-        style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 50, width: '56px', height: '56px', borderRadius: '50%', backgroundColor: luxediaPrimaryColor ?? '#d4af37', border: `1px solid ${luxediaPrimaryColor ?? '#d4af37'}80`, display: 'none', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 30px ${luxediaPrimaryColor ?? '#d4af37'}66`, cursor: 'pointer' }}
-        className="embed-mobile-btn"
-        aria-label="Ouvrir l'assistant IA"
-      >
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" stroke="#0a0a0a" strokeWidth="1.5" fill="none"/>
-          <line x1="11" y1="2" x2="11" y2="11" stroke="#0a0a0a" strokeWidth="0.8"/>
-          <line x1="2" y1="7" x2="11" y2="11" stroke="#0a0a0a" strokeWidth="0.8"/>
-          <line x1="20" y1="7" x2="11" y2="11" stroke="#0a0a0a" strokeWidth="0.8"/>
-        </svg>
-      </button>
+      {showLuxediaWidget && (
+        <button
+          onClick={() => setIsMobileAIOpen(true)}
+          style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 50, width: '56px', height: '56px', borderRadius: '50%', backgroundColor: luxediaPrimaryColor ?? '#d4af37', border: `1px solid ${luxediaPrimaryColor ?? '#d4af37'}80`, display: 'none', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 30px ${luxediaPrimaryColor ?? '#d4af37'}66`, cursor: 'pointer' }}
+          className="embed-mobile-btn"
+          aria-label="Ouvrir l'assistant IA"
+        >
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" stroke="#0a0a0a" strokeWidth="1.5" fill="none"/>
+            <line x1="11" y1="2" x2="11" y2="11" stroke="#0a0a0a" strokeWidth="0.8"/>
+            <line x1="2" y1="7" x2="11" y2="11" stroke="#0a0a0a" strokeWidth="0.8"/>
+            <line x1="20" y1="7" x2="11" y2="11" stroke="#0a0a0a" strokeWidth="0.8"/>
+          </svg>
+        </button>
+      )}
 
       {/* Mobile — panel IA plein écran */}
-      {isMobileAIOpen && (
+      {showLuxediaWidget && isMobileAIOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, backgroundColor: '#111', display: 'flex', flexDirection: 'column' }} className="embed-mobile-panel">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <span style={{ color: luxediaPrimaryColor ?? '#d4af37', fontSize: '14px', fontWeight: 500 }}>{ambassadorName}</span>

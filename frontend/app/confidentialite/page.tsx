@@ -31,7 +31,7 @@ export default function ConfidentialitePage() {
         Signature Immersion, situé à Trois-Rivières (Québec), est responsable des renseignements
         personnels collectés via ce site. Pour toute question relative à cette politique, vous
         pouvez contacter notre responsable de la protection des renseignements personnels à
-        l'adresse <a href="mailto:info@signatureimmersion.ca">info@signatureimmersion.ca</a>.
+        l&apos;adresse <a href="mailto:info@signatureimmersion.ca">info@signatureimmersion.ca</a>.
       </p>
       <p>
         <span className="todo">[À COMPLÉTER]</span> Nom de la personne responsable de la protection
@@ -47,7 +47,7 @@ export default function ConfidentialitePage() {
         <li>votre nom complet ;</li>
         <li>votre adresse courriel ;</li>
         <li>votre numéro de téléphone ;</li>
-        <li>le secteur d'activité concerné ;</li>
+        <li>le secteur d&apos;activité concerné ;</li>
         <li>le contenu du message que vous nous transmettez.</li>
       </ul>
       <p>
@@ -61,29 +61,29 @@ export default function ConfidentialitePage() {
         <li>répondre à vos demandes et vous recontacter ;</li>
         <li>préparer une proposition adaptée à votre projet ;</li>
         <li>assurer le suivi de la relation commerciale ;</li>
-        <li>améliorer nos services et l'expérience proposée.</li>
+        <li>améliorer nos services et l&apos;expérience proposée.</li>
       </ul>
       <p>
-        Nous ne vendons, ne louons et n'échangeons jamais vos renseignements personnels avec des
+        Nous ne vendons, ne louons et n&apos;échangeons jamais vos renseignements personnels avec des
         tiers à des fins commerciales.
       </p>
 
       <h2>4. Hébergement et localisation des données</h2>
       <p>
-        Notre site et nos services s'appuient sur des fournisseurs d'infrastructure infonuagique. À ce
+        Notre site et nos services s&apos;appuient sur des fournisseurs d&apos;infrastructure infonuagique. À ce
         titre, vos renseignements peuvent être hébergés ou traités sur des serveurs situés{' '}
-        <strong>à l'extérieur du Québec et du Canada</strong>, notamment aux États-Unis.
+        <strong>à l&apos;extérieur du Québec et du Canada</strong>, notamment aux États-Unis.
       </p>
       <p>
-        Nous recourons en particulier à des plateformes d'hébergement et de base de données telles
+        Nous recourons en particulier à des plateformes d&apos;hébergement et de base de données telles
         que <strong>Vercel</strong> (site), <strong>Railway</strong> (services applicatifs) et{' '}
         <strong>Supabase</strong> (base de données). Lorsque des renseignements sont communiqués à
-        l'extérieur du Québec, nous veillons à ce qu'ils bénéficient d'une protection adéquate,
+        l&apos;extérieur du Québec, nous veillons à ce qu&apos;ils bénéficient d&apos;une protection adéquate,
         conformément à la Loi 25.
       </p>
       <p>
         <span className="todo">[À COMPLÉTER]</span> Confirmer la liste exacte des hébergeurs et la
-        région d'hébergement de chacun.
+        région d&apos;hébergement de chacun.
       </p>
 
       <h2>5. Communication à des fournisseurs</h2>
@@ -93,10 +93,10 @@ export default function ConfidentialitePage() {
         prestation :
       </p>
       <ul>
-        <li><strong>Service d'envoi de courriels</strong> (Resend) — pour vous notifier et traiter les demandes de contact ;</li>
+        <li><strong>Service d&apos;envoi de courriels</strong> (Resend) — pour vous notifier et traiter les demandes de contact ;</li>
         <li><strong>Hébergement et base de données</strong> (Vercel, Railway, Supabase) ;</li>
-        <li><strong>Génération de codes QR</strong> — pour produire les liens d'accès aux expériences ;</li>
-        <li><strong>Assistant conversationnel</strong> (Luxedia, propulsé par un fournisseur d'intelligence artificielle) — pour répondre aux questions des visiteurs.</li>
+        <li><strong>Génération de codes QR</strong> — pour produire les liens d&apos;accès aux expériences ;</li>
+        <li><strong>Assistant conversationnel</strong> (Luxedia, propulsé par un fournisseur d&apos;intelligence artificielle) — pour répondre aux questions des visiteurs.</li>
       </ul>
       <p>
         Ces fournisseurs sont tenus de protéger les renseignements et de ne les utiliser que pour
@@ -104,12 +104,12 @@ export default function ConfidentialitePage() {
       </p>
       <p>
         <span className="todo">[À COMPLÉTER]</span> Confirmer la liste exacte des fournisseurs et,
-        le cas échéant, le fournisseur d'IA utilisé par Luxedia.
+        le cas échéant, le fournisseur d&apos;IA utilisé par Luxedia.
       </p>
 
       <h2>6. Consentement</h2>
       <p>
-        En soumettant un formulaire sur notre site, vous consentez à la collecte et à l'utilisation
+        En soumettant un formulaire sur notre site, vous consentez à la collecte et à l&apos;utilisation
         de vos renseignements selon les finalités décrites ci-dessus. Vous pouvez retirer votre
         consentement à tout moment en nous écrivant.
       </p>
@@ -134,7 +134,7 @@ export default function ConfidentialitePage() {
         <li><strong>Portabilité</strong> : recevoir vos renseignements dans un format structuré.</li>
       </ul>
       <p>
-        Pour exercer l'un de ces droits, écrivez-nous à{' '}
+        Pour exercer l&apos;un de ces droits, écrivez-nous à{' '}
         <a href="mailto:info@signatureimmersion.ca">info@signatureimmersion.ca</a>. Nous répondrons
         dans les délais prévus par la loi.
       </p>
@@ -142,20 +142,20 @@ export default function ConfidentialitePage() {
       <h2>9. Sécurité</h2>
       <p>
         Nous mettons en œuvre des mesures techniques et organisationnelles raisonnables pour
-        protéger vos renseignements contre la perte, l'accès non autorisé ou la divulgation. Les
-        données sont hébergées sur des serveurs sécurisés et l'accès est restreint aux personnes
+        protéger vos renseignements contre la perte, l&apos;accès non autorisé ou la divulgation. Les
+        données sont hébergées sur des serveurs sécurisés et l&apos;accès est restreint aux personnes
         autorisées.
       </p>
 
       <h2>10. Incidents de confidentialité</h2>
       <p>
-        En cas d'incident de confidentialité (perte, accès non autorisé, divulgation ou utilisation
+        En cas d&apos;incident de confidentialité (perte, accès non autorisé, divulgation ou utilisation
         non permise de renseignements personnels), nous prenons les mesures raisonnables pour en
-        diminuer les conséquences et éviter qu'un nouvel incident de même nature ne survienne.
+        diminuer les conséquences et éviter qu&apos;un nouvel incident de même nature ne survienne.
       </p>
       <p>
-        Lorsqu'un incident présente un <strong>risque de préjudice sérieux</strong>, nous avisons la
-        Commission d'accès à l'information (CAI) ainsi que les personnes concernées, et nous tenons
+        Lorsqu&apos;un incident présente un <strong>risque de préjudice sérieux</strong>, nous avisons la
+        Commission d&apos;accès à l&apos;information (CAI) ainsi que les personnes concernées, et nous tenons
         un registre des incidents, conformément à la Loi 25.
       </p>
 

@@ -12,6 +12,9 @@ public interface IDocumentService
     Task<Result<DocumentDto>> UploadAsync(Guid projectId, Stream fileStream, string fileName, bool isInternal = false);
     Task<Result> DeleteAsync(Guid documentId);
     Task<Result> IndexAsync(Guid documentId);
+
+    /// <summary>Enfile un job de réindexation avec tentative OCR sur les pages à faible texte.</summary>
+    Task<Result> RequestOcrReindexAsync(Guid documentId);
     Task<Result> SetCategoryAsync(Guid documentId, bool isInternal);
 
     /// <summary>Génère une URL signée à durée limitée pour consulter un document interne.</summary>
@@ -19,4 +22,7 @@ public interface IDocumentService
 
     /// <summary>Traite un job d'indexation en file d'attente — appelé par DocumentIndexingBackgroundService.</summary>
     Task ProcessIndexingJobAsync(Guid jobId);
+
+    /// <summary>Génère l'embedding manquant des chunks existants qui n'en ont pas encore (rattrapage).</summary>
+    Task<Result<EmbeddingBackfillResultDto>> BackfillEmbeddingsAsync();
 }

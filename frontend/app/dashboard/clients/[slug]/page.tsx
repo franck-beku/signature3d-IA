@@ -6,6 +6,8 @@
 'use client'
 import QRCodeLogo from '@/components/dashboard/QRCodeLogo'
 import ProjectDocumentsManager from '@/components/dashboard/ProjectDocumentsManager'
+import StickerPDF, { generateStickerQrDataUrl } from '@/components/dashboard/StickerPDF'
+import { pdf } from '@react-pdf/renderer'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
@@ -52,6 +54,7 @@ export default function ClientDetailPage() {
   const [deleteConfirm, setDeleteConfirm]     = useState<string | null>(null)
   const [editProject, setEditProject]         = useState<EditProject | null>(null)
   const [qrProject, setQrProject]             = useState<{ slug: string; name: string } | null>(null)
+  const [generatingStickerId, setGeneratingStickerId] = useState<string | null>(null)
   const [linkProject, setLinkProject]         = useState<ProjectDto | null>(null)
   const [docProject, setDocProject]           = useState<{ id: string; name: string } | null>(null)
   const [showContractModal, setShowContractModal] = useState(false)
@@ -117,6 +120,24 @@ export default function ClientDetailPage() {
       setProjects((prev) => prev.filter((p) => p.id !== projectId))
       setDeleteConfirm(null)
     } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Une erreur est survenue.') }
+  }
+
+  const handleDownloadSticker = async (project: ProjectDto) => {
+    setGeneratingStickerId(project.id)
+    try {
+      const qrDataUrl = await generateStickerQrDataUrl(project.embedUrl)
+      const blob = await pdf(<StickerPDF qrDataUrl={qrDataUrl} />).toBlob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `autocollant-${project.slug}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
+    } finally {
+      setGeneratingStickerId(null)
+    }
   }
 
   const handleSaveProject = async () => {
@@ -263,6 +284,8 @@ export default function ClientDetailPage() {
             onDeleteProject={handleDeleteProject}
             onLinkProject={(project) => setLinkProject(project)}
             onQrProject={(project) => setQrProject({ slug: project.slug, name: project.name })}
+            onStickerProject={handleDownloadSticker}
+            generatingStickerId={generatingStickerId}
             onDocProject={(project) => setDocProject({ id: project.id, name: project.name })}
             onEditProject={(project) => setEditProject({
               id: project.id, name: project.name, matterportId: project.matterportId ?? '', status: project.status,

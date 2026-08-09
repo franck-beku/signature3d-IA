@@ -13,7 +13,9 @@ import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { clientsApi, sectorsApi, type SectorDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
 
-const PRIORITES = [1, 2, 3].map((v) => ({ value: v, ...getPriority(v) }))
+const PRIORITES = [3, 2, 1].map((v) => ({ value: v, ...getPriority(v) }))
+
+const AUTRE_SECTEUR = '__autre__'
 
 const inputStyle = {
   width: '100%',
@@ -42,6 +44,7 @@ export default function NouveauClientPage() {
     sectorCustom: '',
     email:        '',
     phone:        '',
+    phoneExt:     '',
     contractDate: '',
     deliveryDate: '',
     status:       'Prospect',
@@ -72,10 +75,29 @@ export default function NouveauClientPage() {
         return
       }
 
+      if (sectorId === AUTRE_SECTEUR) {
+        if (!form.sectorCustom.trim()) {
+          setError('Veuillez préciser le secteur.')
+          return
+        }
+        // Crée un secteur à la volée pour ce nom personnalisé — inactif par défaut
+        // (n'apparaît pas sur le site public tant qu'il n'est pas activé manuellement).
+        const newSector = await sectorsApi.create({
+          name:         form.sectorCustom.trim(),
+          displayOrder: sectors.length,
+          isActive:     false,
+        })
+        sectorId = newSector.id
+      }
+
+      const phone = form.phone
+        ? (form.phoneExt.trim() ? `${form.phone} poste ${form.phoneExt.trim()}` : form.phone)
+        : undefined
+
       await clientsApi.create({
         name:         form.name,
         email:        form.email,
-        phone:        form.phone || undefined,
+        phone,
         notes:        form.notes || undefined,
         contractDate: form.contractDate,
         deliveryDate: form.deliveryDate,
@@ -96,6 +118,7 @@ export default function NouveauClientPage() {
   const isValid =
     form.name &&
     form.sectorId &&
+    (form.sectorId !== AUTRE_SECTEUR || form.sectorCustom.trim()) &&
     form.email &&
     form.contractDate &&
     form.deliveryDate
@@ -140,7 +163,7 @@ export default function NouveauClientPage() {
               )}
 
               {/* Infos principales */}
-              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
                 <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Informations du client
                 </h2>
@@ -156,7 +179,19 @@ export default function NouveauClientPage() {
                       {sectors.map((s) => (
                         <option key={s.id} value={s.id}>{s.name}</option>
                       ))}
+                      <option value={AUTRE_SECTEUR}>Autre</option>
                     </select>
+                    {form.sectorId === AUTRE_SECTEUR && (
+                      <input
+                        type="text"
+                        required
+                        value={form.sectorCustom}
+                        onChange={(e) => set('sectorCustom', e.target.value)}
+                        placeholder="Précisez le secteur"
+                        style={{ ...inputStyle, marginTop: '8px' }}
+                        className="dash-input"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Email *</label>
@@ -164,13 +199,16 @@ export default function NouveauClientPage() {
                   </div>
                   <div>
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Téléphone</label>
-                    <input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+1 (418) 000-0000" style={inputStyle} className="dash-input" />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+1 (418) 000-0000" style={{ ...inputStyle, flex: 1 }} className="dash-input" />
+                      <input type="text" value={form.phoneExt} onChange={(e) => set('phoneExt', e.target.value)} placeholder="Poste" style={{ ...inputStyle, flex: '0 0 90px' }} className="dash-input" />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Dates & Statut */}
-              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
                 <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Contrat & Priorité
                 </h2>
@@ -217,7 +255,7 @@ export default function NouveauClientPage() {
               </div>
 
               {/* Notes */}
-              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
                 <h2 className="dash-label" style={{ marginBottom: '20px' }}>
                   Notes internes
                 </h2>

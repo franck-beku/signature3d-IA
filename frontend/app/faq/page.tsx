@@ -14,11 +14,7 @@ import { useLanguage } from '@/context/LanguageContext'
 import { faqApi, type FaqDto } from '@/lib/api'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
-
-/* ── Charte V2 ── */
-const GOLD = '#C8A45D'
-const CREAM = '#F7F5F2'
-const INK = '#101010'
+import { colors } from '@/config/theme'
 
 export default function FaqPage() {
   const { t, lang } = useLanguage()
@@ -48,7 +44,7 @@ export default function FaqPage() {
       key={lang}
       style={{
         minHeight: '100vh',
-        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)`,
+        background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${colors.cream} 60%, #F1EEE8 100%)`,
       }}
     >
       <Navbar />
@@ -66,7 +62,7 @@ export default function FaqPage() {
         <div className="container-main" style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
           <motion.span
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
-            className="section-eyebrow" style={{ color: GOLD }}
+            className="section-eyebrow" style={{ color: colors.gold }}
           >
             {t('Foire aux questions', 'Frequently asked questions')}
           </motion.span>
@@ -77,7 +73,7 @@ export default function FaqPage() {
               fontSize: 'clamp(2.6rem, 5vw, 4.2rem)',
               fontWeight: 500,
               lineHeight: 1.08,
-              color: INK,
+              color: colors.ink,
               letterSpacing: '-0.01em',
             }}
           >
@@ -159,7 +155,7 @@ export default function FaqPage() {
                       <span style={{
                         fontSize: '1.05rem',
                         fontWeight: 500,
-                        color: INK,
+                        color: colors.ink,
                         lineHeight: 1.45,
                       }}>
                         {lang === 'en' ? (faq.questionEn || faq.question) : faq.question}
@@ -171,7 +167,7 @@ export default function FaqPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: isOpen ? GOLD : '#8A7A5A',
+                        color: isOpen ? colors.gold : '#8A7A5A',
                         transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease, color 0.3s ease',
                         fontSize: '1.4rem',
@@ -217,7 +213,7 @@ export default function FaqPage() {
               fontFamily: 'var(--font-cormorant), serif',
               fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)',
               fontWeight: 500,
-              color: CREAM,
+              color: colors.cream,
               lineHeight: 1.2,
               marginBottom: '1rem',
             }}
@@ -243,7 +239,7 @@ export default function FaqPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
-              backgroundColor: GOLD,
+              backgroundColor: colors.gold,
               color: '#FFFFFF',
               borderRadius: '999px',
               padding: '15px 34px',

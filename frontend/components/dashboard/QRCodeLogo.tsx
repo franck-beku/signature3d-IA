@@ -134,7 +134,7 @@ export default function QRCodeLogo({ url, projectName, onClose }: Props) {
         </div>
 
         <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', marginTop: '16px' }}>
-          Le logo Signature 3D IA est intégré au centre du QR code.
+          Le logo Signature Immersion est intégré au centre du QR code.
         </p>
       </div>
 

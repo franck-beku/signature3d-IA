@@ -12,8 +12,7 @@ import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
 import { projectsApi, type ProjectCardDto } from '@/lib/api'
-
-const GOLD = '#C8A45D'
+import { colors } from '@/config/theme'
 
 const content = {
   fr: {
@@ -29,7 +28,7 @@ const content = {
     exploreLinks: [
       { href: '/services',          label: 'Services'          },
       { href: '/realisations',      label: 'Réalisations'      },
-      { href: '/comment-ca-marche', label: 'Comment ça marche' },
+      { href: '/#comment-ca-marche',label: 'Comment ça marche' },
       { href: '/faq',               label: 'FAQ'               },
       { href: '/contact',           label: 'Contact'           },
     ],
@@ -53,7 +52,7 @@ const content = {
     exploreLinks: [
       { href: '/services',          label: 'Services'    },
       { href: '/realisations',      label: 'Portfolio'   },
-      { href: '/comment-ca-marche', label: 'How it works'},
+      { href: '/#comment-ca-marche',label: 'How it works'},
       { href: '/faq',               label: 'FAQ'         },
       { href: '/contact',           label: 'Contact'     },
     ],
@@ -96,7 +95,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: 'inline-block', marginBottom: '20px' }}>
-              <Image src="/logo-signature-footer.png" alt="Signature Immersion" width={240} height={80} style={{ height: '56px', width: 'auto', display: 'block' }} />
+              <Image src="/logo-signature-footer.png" alt="Signature Immersion" width={240} height={80} style={{ height: '104px', width: 'auto', display: 'block' }} />
             </Link>
             <p style={{ fontSize: '12px', lineHeight: 1.8, color: 'rgba(255,255,255,0.35)', fontWeight: 300, maxWidth: '260px', marginBottom: '20px' }}>{c.desc}</p>
             <p style={{ fontSize: '9px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.4em', color: 'rgba(200,164,93,0.5)' }}>{c.tagline}</p>
@@ -147,7 +146,7 @@ export default function Footer() {
             </div>
             <Link href="/contact" style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', borderRadius: '6px', padding: '9px 16px', fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.25s ease' }} className="footer-cta">
               {c.demo}
-              <span style={{ color: GOLD }}>→</span>
+              <span style={{ color: colors.gold }}>→</span>
             </Link>
           </div>
         </div>
@@ -166,8 +165,8 @@ export default function Footer() {
       </div>
 
       <style>{`
-        .footer-link:hover { color: ${GOLD} !important; }
-        .footer-cta:hover  { background-color: ${GOLD} !important; border-color: ${GOLD} !important; color: #000 !important; }
+        .footer-link:hover { color: ${colors.gold} !important; }
+        .footer-cta:hover  { background-color: ${colors.gold} !important; border-color: ${colors.gold} !important; color: #000 !important; }
         @media (max-width: 1024px) { .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; } }
         @media (max-width: 640px)  { .footer-grid { grid-template-columns: 1fr !important; } .footer-bottom { flex-direction: column !important; text-align: center !important; } }
       `}</style>

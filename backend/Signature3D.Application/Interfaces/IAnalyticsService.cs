@@ -8,6 +8,6 @@ namespace Signature3D.Application.Interfaces;
 /// </summary>
 public interface IAnalyticsService
 {
-    Task<Result<ProjectAnalyticsDto>> GetByProjectAsync(Guid projectId);
+    Task<Result<ProjectAnalyticsDto>> GetByProjectAsync(Guid projectId, DateTime? from = null, DateTime? to = null);
     Task<Result> TrackEventAsync(TrackEventDto dto);
 }

@@ -370,7 +370,7 @@ export default function AgendaPage() {
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--dash-gold-ring)', borderTopColor: 'var(--dash-gold)', animation: 'spin 0.8s linear infinite' }} />
             </div>
           ) : (
-            <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '20px' }} className="rbc-wrapper">
+            <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '20px' }} className="rbc-wrapper">
               <Calendar
                 localizer={localizer}
                 events={events}

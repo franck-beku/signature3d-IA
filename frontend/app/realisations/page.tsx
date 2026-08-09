@@ -14,11 +14,7 @@ import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 import { useLanguage } from '@/context/LanguageContext'
 import { sectorsApi, type SectorDto } from '@/lib/api'
-
-/* ── Charte V2 (identique à l'accueil / Final / Contact) ── */
-const GOLD = '#C8A45D'
-const CREAM = '#F7F5F2'
-const INK = '#101010'
+import { colors } from '@/config/theme'
 
 /* Images de secours par nom de secteur (si coverImage vide en base) */
 const SECTEUR_IMAGES: Record<string, string> = {
@@ -44,7 +40,7 @@ export default function RealisationsPage() {
   }, [])
 
   return (
-    <main style={{ minHeight: '100vh', background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)` }}>
+    <main style={{ minHeight: '100vh', background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${colors.cream} 60%, #F1EEE8 100%)` }}>
       <Navbar />
 
       <div style={{ paddingTop: '76px', position: 'relative', overflow: 'hidden' }}>
@@ -65,7 +61,7 @@ export default function RealisationsPage() {
               style={{
                 display: 'inline-block', fontSize: '11px', fontWeight: 700,
                 textTransform: 'uppercase', letterSpacing: '0.32em',
-                color: GOLD, marginBottom: '18px',
+                color: colors.gold, marginBottom: '18px',
               }}
             >
               {t('Nos réalisations', 'Our work')}
@@ -75,7 +71,7 @@ export default function RealisationsPage() {
               style={{
                 fontFamily: 'var(--font-cormorant), serif',
                 fontSize: 'clamp(2.6rem, 5vw, 4rem)',
-                fontWeight: 500, color: INK,
+                fontWeight: 500, color: colors.ink,
                 letterSpacing: '-0.01em', lineHeight: 1.06, marginBottom: '22px',
               }}
             >
@@ -137,7 +133,7 @@ export default function RealisationsPage() {
                               ? (secteur.descriptionEn || secteur.description || t('Découvrir les expériences', 'Discover experiences'))
                               : (secteur.description || t('Découvrir les expériences', 'Discover experiences'))}
                           </span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: GOLD, flexShrink: 0 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: colors.gold, flexShrink: 0 }}>
                             {t('Voir tout', 'View all')} <ArrowRight size={13} />
                           </span>
                         </div>

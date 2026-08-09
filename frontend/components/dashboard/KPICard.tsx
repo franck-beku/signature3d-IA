@@ -8,7 +8,7 @@ interface KPICardProps {
 export default function KPICard({ value, label, delta, deltaPositive = true }: KPICardProps) {
   return (
     <div
-      style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', borderRadius: '14px', padding: '24px', textAlign: 'center', transition: 'border-color 0.3s ease' }}
+      style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', textAlign: 'center', transition: 'border-color 0.3s ease' }}
       className="kpi-card"
     >
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 300, color: 'var(--dash-text)', marginBottom: '6px', lineHeight: 1 }}>

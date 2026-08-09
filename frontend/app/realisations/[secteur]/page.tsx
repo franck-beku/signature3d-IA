@@ -16,12 +16,7 @@ import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 import { useLanguage } from '@/context/LanguageContext'
 import { projectsApi, sectorsApi, type ProjectCardDto, type SectorDto } from '@/lib/api'
-
-/* ── Charte V2 ── */
-const GOLD = '#C8A45D'
-const CREAM = '#F7F5F2'
-const INK = '#101010'
-const CHARCOAL = '#0B0B0B'
+import { colors } from '@/config/theme'
 
 /** Génère l'URL de la vignette d'un espace Matterport. */
 function getMatterportThumb(matterportId?: string): string | null {
@@ -64,7 +59,7 @@ export default function SecteurPage() {
   const totalExp = projects.length
 
   return (
-    <main style={{ minHeight: '100vh', background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${CREAM} 60%, #F1EEE8 100%)` }}>
+    <main style={{ minHeight: '100vh', background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, ${colors.cream} 60%, #F1EEE8 100%)` }}>
       <Navbar />
 
       <div style={{ paddingTop: '76px', position: 'relative', overflow: 'hidden' }}>
@@ -88,20 +83,20 @@ export default function SecteurPage() {
                 <ArrowLeft size={14} /> {t('Réalisations', 'Our work')}
               </Link>
               <span style={{ color: '#D8CEBE' }}>/</span>
-              <span style={{ fontSize: '13px', color: GOLD, fontWeight: 600 }}>{secteurNom}</span>
+              <span style={{ fontSize: '13px', color: colors.gold, fontWeight: 600 }}>{secteurNom}</span>
             </motion.div>
 
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
               <div>
                 <motion.span
                   initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.05 }}
-                  style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.32em', color: GOLD, marginBottom: '14px' }}
+                  style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.32em', color: colors.gold, marginBottom: '14px' }}
                 >
                   {secteurNom}
                 </motion.span>
                 <motion.h1
                   initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)', fontWeight: 500, color: INK, letterSpacing: '-0.01em', lineHeight: 1.08, margin: 0 }}
+                  style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)', fontWeight: 500, color: colors.ink, letterSpacing: '-0.01em', lineHeight: 1.08, margin: 0 }}
                 >
                   {t('Expériences', 'Experiences')} {secteurNom.toLowerCase()}
                 </motion.h1>
@@ -129,7 +124,7 @@ export default function SecteurPage() {
             ) : projects.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78' }}>
                 <p style={{ fontSize: '16px' }}>{t('Expériences bientôt disponibles.', 'Experiences coming soon.')}</p>
-                <Link href="/realisations" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', color: GOLD, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+                <Link href="/realisations" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', color: colors.gold, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
                   <ArrowLeft size={14} /> {t('Retour aux réalisations', 'Back to our work')}
                 </Link>
               </div>
@@ -144,11 +139,11 @@ export default function SecteurPage() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, margin: '-40px' }}
                       transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: CHARCOAL, boxShadow: '0 18px 50px -26px rgba(0,0,0,0.4)', transition: 'all 0.35s ease' }}
+                      style={{ borderRadius: '20px', overflow: 'hidden', backgroundColor: colors.charcoal, boxShadow: '0 18px 50px -26px rgba(0,0,0,0.4)', transition: 'all 0.35s ease' }}
                       className="exp-card"
                     >
                       {/* Image */}
-                      <div style={{ position: 'relative', height: '220px', overflow: 'hidden', backgroundColor: CHARCOAL }}>
+                      <div style={{ position: 'relative', height: '220px', overflow: 'hidden', backgroundColor: colors.charcoal }}>
                         <img src={image} alt={exp.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.6s ease' }} className="exp-img" />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11,11,11,0.7) 0%, rgba(11,11,11,0.1) 60%, transparent 100%)' }} />
 
@@ -171,14 +166,14 @@ export default function SecteurPage() {
 
                         {/* Hover overlay */}
                         <Link href={`/embed/${exp.slug}`} style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s ease', backgroundColor: 'rgba(0,0,0,0.3)', textDecoration: 'none' }} className="exp-overlay">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '999px', backgroundColor: GOLD, padding: '11px 22px', fontSize: '12px', fontWeight: 700, color: '#FFFFFF' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '999px', backgroundColor: colors.gold, padding: '11px 22px', fontSize: '12px', fontWeight: 700, color: '#FFFFFF' }}>
                             <Play size={12} style={{ fill: '#fff' }} /> {t("Voir l'expérience", 'View experience')}
                           </div>
                         </Link>
                       </div>
 
                       {/* Body */}
-                      <div style={{ padding: '18px 20px', backgroundColor: CHARCOAL }}>
+                      <div style={{ padding: '18px 20px', backgroundColor: colors.charcoal }}>
                         <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.4rem', fontWeight: 500, color: '#FFFFFF', marginBottom: '4px', letterSpacing: '0' }}>
                           {exp.name}
                         </h3>
@@ -194,14 +189,14 @@ export default function SecteurPage() {
                                 <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)' }}>
                                   {d.label}
                                 </span>
-                                <span style={{ fontSize: '14px', fontWeight: 700, color: GOLD, lineHeight: 1.3 }}>
+                                <span style={{ fontSize: '14px', fontWeight: 700, color: colors.gold, lineHeight: 1.3 }}>
                                   {d.value}
                                 </span>
                               </div>
                             ))}
                           </div>
                         )}
-                        <Link href={`/embed/${exp.slug}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: GOLD, textDecoration: 'none', transition: 'gap 0.2s ease' }} className="voir-link">
+                        <Link href={`/embed/${exp.slug}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: colors.gold, textDecoration: 'none', transition: 'gap 0.2s ease' }} className="voir-link">
                           {t("Voir l'expérience", 'View experience')} <ArrowRight size={12} />
                         </Link>
                       </div>
@@ -217,7 +212,7 @@ export default function SecteurPage() {
       <Footer />
 
       <style>{`
-        .breadcrumb-link:hover { color: ${GOLD} !important; }
+        .breadcrumb-link:hover { color: ${colors.gold} !important; }
         .exp-card:hover { box-shadow: 0 28px 70px -22px rgba(0,0,0,0.5) !important; transform: translateY(-4px); }
         .exp-card:hover .exp-img { transform: scale(1.04); }
         .exp-card:hover .exp-overlay { opacity: 1 !important; }

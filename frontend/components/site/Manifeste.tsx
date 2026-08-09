@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { colors } from '@/config/theme';
 
 /**
  * Manifeste — Acte 2 du film (VERSION CLAIRE V2).
@@ -18,19 +19,17 @@ import { useLanguage } from '@/context/LanguageContext';
  *               padding vertical réduit à 110px.
  */
 
-const GOLD = '#C8A45D';     // or champagne — accents uniquement
-const CREAM = '#F7F5F2';    // fond de la section (niveau "crème")
-const INK = '#101010';      // texte principal sombre sur fond clair
-const MUTED = '#5E5A52';    // texte secondaire (mission)
-const BORDER = '#E7DED0';   // filets haut/bas très discrets
+const MUTED = '#5E5A52';    // texte secondaire (mission) — valeur distincte de colors.muted, non centralisée
 
 export default function Manifeste() {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const h2Ref = useRef<HTMLHeadingElement>(null);
   const h2InView = useInView(h2Ref, { once: true, margin: '-80px' });
 
   // Légère parallaxe : le bloc texte monte doucement au scroll.
+  // (le hook doit toujours être appelé — on neutralise seulement son usage plus bas si reduceMotion)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
@@ -41,28 +40,28 @@ export default function Manifeste() {
   // Apparition séquencée des éléments au scroll.
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: 0.18, delayChildren: 0.1 } },
+    show: { transition: { staggerChildren: reduceMotion ? 0 : 0.18, delayChildren: reduceMotion ? 0 : 0.1 } },
   };
   const item = {
-    hidden: { opacity: 0, y: 24 },
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 24 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: reduceMotion ? 0.25 : 0.9, ease: [0.22, 1, 0.36, 1] as const },
     },
   };
 
   return (
     <section
       ref={sectionRef}
-      aria-label={t('Notre vision', 'Our vision')}
+      aria-label={t('Notre manifeste', 'Our manifesto')}
       style={{
         position: 'relative',
-        backgroundColor: CREAM,        // ← FOND CRÈME
-        color: INK,
+        backgroundColor: colors.cream,        // ← FOND CRÈME
+        color: colors.ink,
         overflow: 'hidden',
-        borderTop: `1px solid ${BORDER}`,
-        borderBottom: `1px solid ${BORDER}`,
+        borderTop: `1px solid ${colors.border}`,
+        borderBottom: `1px solid ${colors.border}`,
       }}
     >
       {/* Halo doré très léger en fond, pour ne pas avoir un crème totalement plat. */}
@@ -94,25 +93,25 @@ export default function Manifeste() {
           viewport={{ once: true, amount: 0.45 }}
           style={{
             display: 'grid',
-            gridTemplateColumns: '1.25fr 1px 0.9fr', // gauche / séparateur / droite
+            gridTemplateColumns: '1.5fr 1px 0.9fr', // gauche / séparateur / droite — élargie pour le H2 3-lignes
             gap: '72px',
             alignItems: 'center',
           }}
           className="manifeste-grid"
         >
           {/* ── Colonne gauche : la vision (grand titre Cormorant) ── */}
-          <motion.div variants={item} style={{ y: yLeft }}>
+          <motion.div variants={item} style={reduceMotion ? undefined : { y: yLeft }}>
             <p
               style={{
                 fontSize: '11px',
                 fontWeight: 700,
                 letterSpacing: '0.34em',
                 textTransform: 'uppercase',
-                color: GOLD,            // eyebrow doré (accent)
+                color: colors.gold,            // eyebrow doré (accent)
                 marginBottom: '28px',
               }}
             >
-              {t('Notre vision', 'Our vision')}
+              {t('Notre manifeste', 'Our manifesto')}
             </p>
 
             <h2
@@ -120,10 +119,10 @@ export default function Manifeste() {
               style={{
                 fontFamily: 'var(--font-cormorant), serif',
                 fontWeight: 400,
-                color: INK,
+                color: colors.ink,
                 lineHeight: 1.08,
                 letterSpacing: '-0.02em',
-                fontSize: 'clamp(2.4rem, 4.2vw, 4.2rem)',
+                fontSize: 'clamp(1.4rem, 1.8vw, 1.6rem)',
                 margin: 0,
                 maxWidth: '720px',
               }}
@@ -131,9 +130,9 @@ export default function Manifeste() {
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <motion.span
                   style={{ display: 'block' }}
-                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  initial={reduceMotion ? { clipPath: 'inset(0% 0 0 0)' } : { clipPath: 'inset(100% 0 0 0)' }}
                   animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0 }}
                 >
                   {t('Nous ne créons pas simplement des visites.', 'We do not simply create tours.')}
                 </motion.span>
@@ -141,12 +140,12 @@ export default function Manifeste() {
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <motion.span
                   style={{ display: 'block' }}
-                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  initial={reduceMotion ? { clipPath: 'inset(0% 0 0 0)' } : { clipPath: 'inset(100% 0 0 0)' }}
                   animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.14 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0.14 }}
                 >
                   {t('Nous ', 'We ')}
-                  <span style={{ color: GOLD }}>
+                  <span style={{ color: colors.gold }}>
                     {t('transformons des espaces', 'transform spaces')}
                   </span>
                 </motion.span>
@@ -154,9 +153,9 @@ export default function Manifeste() {
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <motion.span
                   style={{ display: 'block' }}
-                  initial={{ clipPath: 'inset(100% 0 0 0)' }}
+                  initial={reduceMotion ? { clipPath: 'inset(0% 0 0 0)' } : { clipPath: 'inset(100% 0 0 0)' }}
                   animate={h2InView ? { clipPath: 'inset(0% 0 0 0)' } : undefined}
-                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.28 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0.28 }}
                 >
                   {t(
                     'en expériences immersives qui captivent, informent et convertissent.',
@@ -181,7 +180,7 @@ export default function Manifeste() {
           />
 
           {/* ── Colonne droite : la mission + signature ── */}
-          <motion.div variants={item} style={{ maxWidth: '390px', y: yRight }}>
+          <motion.div variants={item} style={reduceMotion ? { maxWidth: '390px' } : { maxWidth: '390px', y: yRight }}>
             <p
               style={{
                 fontSize: '16px',
@@ -214,7 +213,7 @@ export default function Manifeste() {
             <div
               style={{
                 marginTop: '42px',
-                color: GOLD,
+                color: colors.gold,
                 fontFamily: 'var(--font-cormorant), serif',
                 fontStyle: 'italic',
                 fontSize: '2.5rem',
@@ -228,7 +227,7 @@ export default function Manifeste() {
               style={{
                 marginTop: '14px',
                 fontSize: '13px',
-                color: INK,
+                color: colors.ink,
               }}
             >
               {t("L’équipe Signature Immersion", 'The Signature Immersion team')}

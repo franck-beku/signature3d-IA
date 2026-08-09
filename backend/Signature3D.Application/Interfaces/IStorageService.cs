@@ -12,7 +12,7 @@ public interface IStorageService
     /// au format "bucket/chemin" (isPrivate = true) — jamais une URL directement exploitable
     /// dans ce second cas.
     /// </summary>
-    Task<Result<string>> UploadAsync(Stream fileStream, string fileName, string folder, bool isPrivate = false);
+    Task<Result<string>> UploadAsync(Stream fileStream, string fileName, string folder, bool isPrivate = false, string contentType = "application/pdf");
 
     /// <summary>Génère une URL signée à durée limitée pour une référence privée "bucket/chemin".</summary>
     Task<Result<string>> GetSignedUrlAsync(string privateReference, int expiresInSeconds = 300);

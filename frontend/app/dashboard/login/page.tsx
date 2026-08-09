@@ -66,7 +66,7 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ marginBottom: '8px' }}>
             <span style={{ fontFamily: 'var(--font-display)', color: 'var(--dash-text)', fontSize: '36px', fontWeight: 300 }}>
-              Signature <span style={{ color: 'var(--dash-gold)' }}>3D IA</span>
+              Signature <span style={{ color: 'var(--dash-gold)' }}>Immersion</span>
             </span>
           </div>
           <p className="dash-page-eyebrow" style={{ textAlign: 'center' }}>
@@ -154,7 +154,7 @@ export default function LoginPage() {
         </div>
 
         <p style={{ textAlign: 'center', color: 'var(--dash-text-muted)', fontSize: '11px', marginTop: '24px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-          © {new Date().getFullYear()} Signature 3D IA
+          © {new Date().getFullYear()} Signature Immersion
         </p>
       </div>
 

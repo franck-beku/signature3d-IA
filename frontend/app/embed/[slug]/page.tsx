@@ -13,6 +13,7 @@ interface EmbedData {
   matterportId:   string
   experienceType: string          // 'Matterport' | 'Tour360' | 'IAOnly'
   experienceUrl:  string | null    // URL iframe pour Tour360 (Glo3D, etc.)
+  luxediaEnabled: boolean          // false = widget Luxedia désactivé (visite seule)
   ambassadorName: string
   welcomeMessage: string
   welcomeMessageEn?: string | null
@@ -93,6 +94,7 @@ export default async function EmbedSlugPage({
       matterportId={project.matterportId ?? ''}
       experienceType={project.experienceType}
       experienceUrl={project.experienceUrl}
+      luxediaEnabled={project.luxediaEnabled}
       projectName={project.projectName}
       ambassadorName={project.ambassadorName}
       welcomeMessage={project.welcomeMessage || `Bienvenue ! Je suis ${project.ambassadorName}, votre assistant intelligent.`}
