@@ -28,7 +28,7 @@ const SLIDES = [
   '/assets/univers/auto.jpg',
   '/assets/univers/immobilier.jpg',
   '/assets/univers/resto.jpg',
-  '/assets/univers/hotel.jpg',
+  '/assets/univers/hotellerie-nouveau.jpeg',
   '/assets/univers/commerce.jpg',
 ];
 
