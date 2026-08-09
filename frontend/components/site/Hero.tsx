@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,16 +48,35 @@ const MATTERPORT_EMBED_URL = `https://my.matterport.com/show/?m=${MATTERPORT_ID}
    si l'iframe charge plus vite — évite un flash trop brutal. */
 const MATTERPORT_MIN_DISPLAY_DELAY = 800;
 
+/* Filet de sécurité — `onLoad` d'un iframe tiers cross-origin n'est pas fiable à 100% (CDN lent,
+   bloqueur de pub, requête qui ne se résout jamais). Si le Matterport n'a pas signalé son
+   chargement après ce délai, on renonce pour cette visite plutôt que de risquer de révéler un
+   Matterport à moitié chargé — le diaporama photo reste affiché normalement. */
+const MATTERPORT_LOAD_TIMEOUT = 7000;
+
 export default function Hero() {
   const { t } = useLanguage();
   const [index, setIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [matterportIframeLoaded, setMatterportIframeLoaded] = useState(false);
   const [minDelayElapsed, setMinDelayElapsed] = useState(false);
-  const matterportVisible = matterportIframeLoaded && minDelayElapsed;
+  const [matterportGaveUp, setMatterportGaveUp] = useState(false);
+  const matterportIframeLoadedRef = useRef(false);
+  const matterportVisible = matterportIframeLoaded && minDelayElapsed && !matterportGaveUp;
 
   useEffect(() => {
     const id = setTimeout(() => setMinDelayElapsed(true), MATTERPORT_MIN_DISPLAY_DELAY);
+    return () => clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    matterportIframeLoadedRef.current = matterportIframeLoaded;
+  }, [matterportIframeLoaded]);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (!matterportIframeLoadedRef.current) setMatterportGaveUp(true);
+    }, MATTERPORT_LOAD_TIMEOUT);
     return () => clearTimeout(id);
   }, []);
 
