@@ -194,7 +194,16 @@ export default function Hero() {
           zIndex: 2,
           height: '100%',
           display: 'flex',
-          alignItems: 'center',
+          /* "safe center" : centre verticalement quand la place le permet, mais bascule
+             sur un alignement haut dès que le contenu déborde de l'espace disponible —
+             évite qu'un centrage classique ne déborde symétriquement au-dessus ET en
+             dessous de la zone réservée (paddingTop) sur les écrans très courts. */
+          alignItems: 'safe center',
+          /* Réserve un espace minimum sous la navbar fixe (68px, cf. Navbar.tsx) avant
+             le centrage vertical. Sans ça, sur un écran large mais peu haut, le H1 (dont
+             la taille suit le vw, pas le vh) peut chevaucher la navbar une fois centré
+             dans les 100vh du Hero. */
+          paddingTop: 'calc(68px + 40px)',
           pointerEvents: 'none',
         }}
       >
