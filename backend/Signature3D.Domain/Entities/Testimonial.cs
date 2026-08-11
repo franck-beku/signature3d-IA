@@ -1,3 +1,5 @@
+using Signature3D.Domain.Enums;
+
 namespace Signature3D.Domain.Entities;
 
 /// <summary>
@@ -12,6 +14,7 @@ public class Testimonial : BaseEntity
     public string Quote { get; set; } = string.Empty;
     public string? QuoteEn { get; set; }                // traduction anglaise (nullable)
     public string? PhotoUrl { get; set; }
+    public TestimonialGender? Gender { get; set; }      // interne — jamais exposé publiquement (voir TestimonialDto)
     public int DisplayOrder { get; set; }              // ordre d'affichage
     public bool IsPublished { get; set; } = false;      // visible sur le site public
 }

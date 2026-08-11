@@ -77,6 +77,13 @@ public class AppDbContext : DbContext
              .OnDelete(DeleteBehavior.Restrict);
         });
 
+        /* ── Testimonial ── */
+        modelBuilder.Entity<Testimonial>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Gender).HasConversion<string>();
+        });
+
         /* ── Project ── */
         modelBuilder.Entity<Project>(e =>
         {

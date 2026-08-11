@@ -740,6 +740,12 @@ export const faqApi = {
   delete: (id: string) => apiFetch(`/api/faq/${id}`, { method: 'DELETE' }),
 }
 
+/**
+ * PUBLIC — tel que retourné par GET /api/testimonials/published.
+ * avatarUrl est déjà résolu côté serveur (vraie photo, ou illustration de secours selon
+ * le genre, ou undefined) : ce type n'a volontairement AUCUN champ gender — l'info reste
+ * interne au dashboard, jamais transmise à la route publique.
+ */
 export interface TestimonialDto {
   id: string
   name: string
@@ -747,7 +753,33 @@ export interface TestimonialDto {
   companyEn?: string
   quote: string
   quoteEn?: string
+  avatarUrl?: string
+  displayOrder: number
+  isPublished: boolean
+}
+
+/** DASHBOARD uniquement — inclut le photoUrl brut (édition) et le genre interne. */
+export interface TestimonialAdminDto {
+  id: string
+  name: string
+  company?: string
+  companyEn?: string
+  quote: string
+  quoteEn?: string
   photoUrl?: string
+  gender?: 'Homme' | 'Femme'
+  displayOrder: number
+  isPublished: boolean
+}
+
+type TestimonialWriteData = {
+  name: string
+  company?: string
+  companyEn?: string
+  quote: string
+  quoteEn?: string
+  photoUrl?: string
+  gender?: 'Homme' | 'Femme'
   displayOrder: number
   isPublished: boolean
 }
@@ -757,18 +789,18 @@ export const testimonialsApi = {
   getPublished: () => apiFetch<TestimonialDto[]>('/api/testimonials/published'),
 
   /** DASHBOARD — tous les témoignages */
-  getAll: () => apiFetch<TestimonialDto[]>('/api/testimonials/all'),
+  getAll: () => apiFetch<TestimonialAdminDto[]>('/api/testimonials/all'),
 
   /** DASHBOARD — un témoignage par Id */
-  getById: (id: string) => apiFetch<TestimonialDto>(`/api/testimonials/by-id/${id}`),
+  getById: (id: string) => apiFetch<TestimonialAdminDto>(`/api/testimonials/by-id/${id}`),
 
   /** DASHBOARD — créer un témoignage */
-  create: (data: { name: string; company?: string; companyEn?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
-    apiFetch<TestimonialDto>('/api/testimonials', { method: 'POST', body: JSON.stringify(data) }),
+  create: (data: TestimonialWriteData) =>
+    apiFetch<TestimonialAdminDto>('/api/testimonials', { method: 'POST', body: JSON.stringify(data) }),
 
   /** DASHBOARD — modifier un témoignage */
-  update: (id: string, data: { name: string; company?: string; companyEn?: string; quote: string; quoteEn?: string; photoUrl?: string; displayOrder: number; isPublished: boolean }) =>
-    apiFetch<TestimonialDto>(`/api/testimonials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  update: (id: string, data: TestimonialWriteData) =>
+    apiFetch<TestimonialAdminDto>(`/api/testimonials/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   /** DASHBOARD — supprimer un témoignage */
   delete: (id: string) => apiFetch(`/api/testimonials/${id}`, { method: 'DELETE' }),

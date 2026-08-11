@@ -9,6 +9,15 @@ import { colors } from '@/config/theme';
 
 const AUTOPLAY_MS = 7000;
 
+/** Initiales (prénom + nom) pour le filet de sécurité final quand ni photo ni
+ * illustration de genre ne sont disponibles — ex. "Jean-François B." → "JB". */
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
 export default function Temoignages() {
   const { t, lang } = useLanguage();
   const [testimonials, setTestimonials] = useState<TestimonialDto[]>([]);
@@ -107,10 +116,10 @@ export default function Temoignages() {
                   transition={{ duration: reduceMotion ? 0.15 : 0.5, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <div className="tm-avatar">
-                    {current.photoUrl ? (
-                      <img src={current.photoUrl} alt={current.name} className="tm-avatar-img" />
+                    {current.avatarUrl ? (
+                      <img src={current.avatarUrl} alt="" className="tm-avatar-img" />
                     ) : (
-                      <span className="tm-avatar-fallback">{current.name.charAt(0)}</span>
+                      <span className="tm-avatar-fallback">{initials(current.name)}</span>
                     )}
                   </div>
 
@@ -201,9 +210,16 @@ export default function Temoignages() {
         }
 
         .tm-avatar-fallback {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           font-family: var(--font-cormorant), serif;
-          font-size: 26px;
-          color: ${colors.gold};
+          font-size: 22px;
+          font-weight: 500;
+          color: ${colors.cream};
+          background: linear-gradient(135deg, ${colors.gold}, ${colors.goldDark});
         }
 
         .tm-quote {

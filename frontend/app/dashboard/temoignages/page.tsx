@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import { Plus, Search, Trash2, Pencil, AlertTriangle, X, Check, Eye, EyeOff, Upload } from 'lucide-react'
-import { testimonialsApi, uploadApi, type TestimonialDto } from '@/lib/api'
+import { testimonialsApi, uploadApi, type TestimonialAdminDto } from '@/lib/api'
 
 const thStyle = {
   textAlign: 'left' as const, padding: '14px 16px',
@@ -40,16 +40,17 @@ interface TestimonialForm {
   quote: string
   quoteEn: string
   photoUrl: string
+  gender: 'Homme' | 'Femme' | ''
   displayOrder: number
   isPublished: boolean
 }
 
 const emptyForm: TestimonialForm = {
-  id: null, name: '', company: '', companyEn: '', quote: '', quoteEn: '', photoUrl: '', displayOrder: 0, isPublished: false,
+  id: null, name: '', company: '', companyEn: '', quote: '', quoteEn: '', photoUrl: '', gender: '', displayOrder: 0, isPublished: false,
 }
 
 export default function TemoignagesPage() {
-  const [testimonials, setTestimonials]   = useState<TestimonialDto[]>([])
+  const [testimonials, setTestimonials]   = useState<TestimonialAdminDto[]>([])
   const [loading, setLoading]             = useState(true)
   const [search, setSearch]               = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
@@ -64,7 +65,7 @@ export default function TemoignagesPage() {
   const load = () => {
     setLoading(true)
     testimonialsApi.getAll()
-      .then((res) => setTestimonials(res as TestimonialDto[]))
+      .then((res) => setTestimonials(res as TestimonialAdminDto[]))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }
@@ -73,7 +74,7 @@ export default function TemoignagesPage() {
 
   const openCreate = () => { setError(null); setForm({ ...emptyForm, displayOrder: testimonials.length + 1 }) }
 
-  const openEdit = (t: TestimonialDto) => {
+  const openEdit = (t: TestimonialAdminDto) => {
     setError(null)
     setForm({
       id: t.id,
@@ -83,6 +84,7 @@ export default function TemoignagesPage() {
       quote: t.quote,
       quoteEn: t.quoteEn ?? '',
       photoUrl: t.photoUrl ?? '',
+      gender: t.gender ?? '',
       displayOrder: t.displayOrder,
       isPublished: t.isPublished,
     })
@@ -101,6 +103,7 @@ export default function TemoignagesPage() {
         quote: form.quote,
         quoteEn: form.quoteEn || undefined,
         photoUrl: form.photoUrl || undefined,
+        gender: form.gender || undefined,
         displayOrder: form.displayOrder,
         isPublished: form.isPublished,
       }
@@ -320,6 +323,30 @@ export default function TemoignagesPage() {
                   <p style={{ color: 'var(--dash-text-subtle)', fontSize: '12px', margin: 0 }}>
                     {uploading ? 'Upload en cours...' : <>Glissez une image ici ou <span style={{ color: 'var(--dash-gold)' }}>parcourez</span> — JPEG/PNG, max 5 MB</>}
                   </p>
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Genre</label>
+                <p style={{ fontSize: '11px', color: 'var(--dash-text-muted)', margin: '0 0 8px' }}>
+                  Information interne, jamais visible sur le site public — sert uniquement à choisir l'illustration de secours si aucune photo n'est fournie.
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {(['', 'Homme', 'Femme'] as const).map((g) => (
+                    <button
+                      key={g || 'none'}
+                      type="button"
+                      onClick={() => setForm({ ...form, gender: g })}
+                      style={{
+                        flex: 1, padding: '9px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 500,
+                        border: `1px solid ${form.gender === g ? 'var(--dash-gold)' : 'var(--dash-border-input)'}`,
+                        backgroundColor: form.gender === g ? 'var(--dash-gold-muted)' : 'var(--dash-input)',
+                        color: form.gender === g ? 'var(--dash-gold)' : 'var(--dash-text-subtle)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {g === '' ? 'Non renseigné' : g}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div>
