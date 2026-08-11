@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useInView } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { projectsApi, type ProjectCardDto } from '@/lib/api';
@@ -22,6 +22,8 @@ export default function RealisationsVedettes() {
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const reduceMotion = useReducedMotion();
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleInView = useInView(titleRef, { once: true, margin: '-80px' });
 
   useEffect(() => {
     let active = true;
@@ -99,11 +101,40 @@ export default function RealisationsVedettes() {
             <motion.p variants={item} className="rv-label">
               {t('Réalisations récentes', 'Recent work')}
             </motion.p>
-            <motion.h2 variants={item} className="rv-title">
-              {t('Des projets concrets,', 'Concrete projects,')}
-              <br />
-              <span>{t('des expériences qui marquent.', 'experiences that resonate.')}</span>
-            </motion.h2>
+            <h2 ref={titleRef} className="rv-title">
+              <span className="rv-title-line">
+                <motion.span
+                  className="rv-title-line-inner"
+                  initial={reduceMotion ? { opacity: 1 } : { clipPath: 'inset(100% 0 0 0)' }}
+                  animate={
+                    titleInView
+                      ? reduceMotion
+                        ? { opacity: 1 }
+                        : { clipPath: 'inset(0% 0 0 0)' }
+                      : undefined
+                  }
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0.1 }}
+                >
+                  {t('Des projets concrets,', 'Concrete projects,')}
+                </motion.span>
+              </span>
+              <span className="rv-title-line">
+                <motion.span
+                  className="rv-title-line-inner"
+                  initial={reduceMotion ? { opacity: 1 } : { clipPath: 'inset(100% 0 0 0)' }}
+                  animate={
+                    titleInView
+                      ? reduceMotion
+                        ? { opacity: 1 }
+                        : { clipPath: 'inset(0% 0 0 0)' }
+                      : undefined
+                  }
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: reduceMotion ? 0 : 0.28 }}
+                >
+                  <span className="rv-title-accent">{t('des expériences qui marquent.', 'experiences that resonate.')}</span>
+                </motion.span>
+              </span>
+            </h2>
           </div>
 
           <motion.div variants={item}>
@@ -123,7 +154,14 @@ export default function RealisationsVedettes() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.15 }}
-            variants={{ hidden: {}, show: { transition: { delayChildren: 0.15 } } }}
+            variants={{
+              hidden: { opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.985 },
+              show: {
+                opacity: 1,
+                scale: 1,
+                transition: { duration: reduceMotion ? 0.3 : 1.0, ease: [0.22, 1, 0.36, 1] },
+              },
+            }}
             className="rv-carousel"
             role="region"
             aria-roledescription="carrousel"
@@ -238,7 +276,16 @@ export default function RealisationsVedettes() {
           max-width: 560px;
         }
 
-        .rv-title span {
+        .rv-title-line {
+          display: block;
+          overflow: hidden;
+        }
+
+        .rv-title-line-inner {
+          display: block;
+        }
+
+        .rv-title-accent {
           color: ${colors.gold};
           font-style: italic;
         }
