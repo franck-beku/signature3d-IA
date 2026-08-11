@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link as LinkIcon, QrCode, MapPin } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { colors, aiSignal } from '@/config/theme';
+import { colors } from '@/config/theme';
 
 type Feature = {
   key: string;
@@ -321,8 +321,8 @@ export default function NouvelleFacon() {
           margin-bottom: 10px;
           padding: 4px 11px;
           border-radius: 999px;
-          background: rgba(91,110,234,0.08);
-          color: ${aiSignal.indigo};
+          background: rgba(200,164,93,0.08);
+          color: ${colors.gold};
           font-size: 10px;
           font-weight: 600;
           letter-spacing: 0.14em;

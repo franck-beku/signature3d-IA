@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { MessageCircle, Compass, UserCheck, Clock, Send } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { colors, aiSignal } from '@/config/theme';
+import { colors } from '@/config/theme';
 
 const CAPABILITIES = [
   { key: 'answers', icon: MessageCircle, fr: 'Répond aux questions', en: 'Answers questions' },
@@ -18,7 +18,7 @@ const PERSONAS = [
   {
     key: 'aria',
     name: 'Aria',
-    color: aiSignal.indigo,
+    color: colors.goldDark,
     questionFr: 'Quelles sont les disponibilités cette semaine ?',
     questionEn: 'What availability is there this week?',
     answerFr: 'Je peux vérifier ça pour vous immédiatement.',
@@ -79,7 +79,7 @@ export default function Luxedia() {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(circle at 50% 0%, rgba(91,110,234,0.16) 0%, transparent 48%)',
+          background: 'radial-gradient(circle at 50% 0%, rgba(200,164,93,0.16) 0%, transparent 48%)',
           pointerEvents: 'none',
         }}
       />
@@ -218,7 +218,7 @@ export default function Luxedia() {
           font-weight: 700;
           letter-spacing: 0.34em;
           text-transform: uppercase;
-          color: ${aiSignal.indigo};
+          color: ${colors.gold};
           margin-bottom: 20px;
         }
 
@@ -242,7 +242,7 @@ export default function Luxedia() {
         }
 
         .luxedia-title span {
-          color: ${aiSignal.indigo};
+          color: ${colors.gold};
           font-style: italic;
         }
 
@@ -268,8 +268,8 @@ export default function Luxedia() {
           gap: 10px;
           padding: 10px 18px;
           border-radius: 999px;
-          background: rgba(91,110,234,0.10);
-          border: 1px solid rgba(91,110,234,0.28);
+          background: rgba(200,164,93,0.10);
+          border: 1px solid rgba(200,164,93,0.28);
           color: rgba(247,245,242,0.88);
           font-size: 13px;
           font-weight: 500;
@@ -277,7 +277,7 @@ export default function Luxedia() {
 
         .luxedia-cap-icon {
           display: inline-flex;
-          color: ${aiSignal.indigo};
+          color: ${colors.gold};
         }
 
         .luxedia-demo {
