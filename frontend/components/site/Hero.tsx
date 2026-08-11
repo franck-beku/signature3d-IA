@@ -277,23 +277,6 @@ export default function Hero() {
             )}
           </p>
 
-          {/* Bande de mots-clés — discrète, ne doit pas concurrencer la phrase produit */}
-          <p
-            style={{
-              marginTop: '20px',
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.28em',
-              textTransform: 'uppercase',
-              color: 'rgba(247,245,242,0.42)',
-            }}
-          >
-            {t(
-              'Immersion • Innovation • Intelligence artificielle • Expérience • Visibilité',
-              'Immersion • Innovation • Artificial Intelligence • Experience • Visibility'
-            )}
-          </p>
-
           {/* CTA */}
           <div
             style={{
@@ -327,32 +310,6 @@ export default function Hero() {
             >
               {t('Demander une démonstration', 'Request a demonstration')}
               <span aria-hidden="true">→</span>
-            </Link>
-
-            {/* Secondaire — verre */}
-            <Link
-              href="/realisations"
-              className="hero-cta-ghost"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: 'rgba(255,255,255,0.06)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.22)',
-                color: '#F7F5F2',
-                borderRadius: '10px',
-                padding: '15px 30px',
-                fontSize: '12px',
-                fontWeight: 500,
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              {t('Découvrir nos réalisations', 'Discover our work')}
             </Link>
           </div>
           </div>
@@ -462,10 +419,6 @@ export default function Hero() {
         .hero-cta-primary:hover {
           box-shadow: 0 0 32px rgba(200,164,93,0.45);
           transform: translateY(-2px);
-        }
-        .hero-cta-ghost:hover {
-          background: rgba(255,255,255,0.12) !important;
-          border-color: rgba(200,164,93,0.6) !important;
         }
         @media (max-width: 640px) {
           .hero-progress { display: none !important; }

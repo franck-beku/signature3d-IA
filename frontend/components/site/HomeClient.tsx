@@ -51,9 +51,9 @@ export default function HomeClient() {
       <Hero />
       <NouvelleFacon />
       <NosUnivers />
+      <RealisationsVedettes />
       <Luxedia />
       <CommentCaMarche />
-      <RealisationsVedettes />
       <Temoignages />
       <OffresVedettes />
       <Final />

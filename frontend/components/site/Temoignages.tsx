@@ -81,7 +81,7 @@ export default function Temoignages() {
         borderBottom: `1px solid ${colors.border}`,
       }}
     >
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '150px 32px' }} className="tm-wrap">
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '115px 32px' }} className="tm-wrap">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -183,7 +183,7 @@ export default function Temoignages() {
         }
 
         .tm-slide {
-          min-height: 280px;
+          min-height: 220px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -307,7 +307,7 @@ export default function Temoignages() {
 
         @media (max-width: 640px) {
           .tm-wrap {
-            padding: 110px 24px !important;
+            padding: 85px 24px !important;
           }
           .tm-arrow {
             display: none;
