@@ -1,16 +1,87 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Aperture, Layers, Sparkles, QrCode, MapPin } from 'lucide-react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { Aperture, Layers, Sparkles, QrCode, MapPin, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { colors } from '@/config/theme';
 
 const BORDER = '#E2D8C8';
 
+/* Largeur (en fraction de la progression 0-1) de la fenêtre de transition de couleur
+   autour du seuil d'activation d'un marqueur — très courte et subtile, comme validé. */
+const MARKER_TRANSITION_WINDOW = 0.025;
+
+type Step = {
+  icon: LucideIcon;
+  num: string;
+  title: string;
+  desc: string;
+};
+
+const item = {
+  hidden: { opacity: 0, y: 24 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
+
+/* Marqueur individuel — sa couleur d'activation est dérivée de la MÊME valeur de
+   progression que la ligne (scrollYProgress), donc toujours parfaitement synchronisée
+   avec elle. Le seuil est mesuré (pas deviné) : voir la mesure de géométrie plus bas. */
+function TimelineMarker({
+  step,
+  threshold,
+  scrollYProgress,
+  reduceMotion,
+  markerRef,
+}: {
+  step: Step;
+  threshold: number;
+  scrollYProgress: MotionValue<number>;
+  reduceMotion: boolean;
+  markerRef: (el: HTMLDivElement | null) => void;
+}) {
+  const Icon = step.icon;
+  const range: [number, number] = [
+    Math.max(0, threshold - MARKER_TRANSITION_WINDOW),
+    Math.min(1, threshold + MARKER_TRANSITION_WINDOW),
+  ];
+
+  const bg = useTransform(scrollYProgress, range, [colors.white, colors.gold]);
+  const border = useTransform(scrollYProgress, range, ['rgba(200,164,93,0.6)', colors.gold]);
+  const iconColor = useTransform(scrollYProgress, range, [colors.gold, '#FFFFFF']);
+
+  return (
+    <motion.div variants={item} className="ccm-step">
+      <motion.div
+        ref={markerRef}
+        className="ccm-marker"
+        style={
+          reduceMotion
+            ? { backgroundColor: colors.gold, borderColor: colors.gold, color: '#FFFFFF' }
+            : { backgroundColor: bg, borderColor: border, color: iconColor }
+        }
+      >
+        <Icon size={18} strokeWidth={1.6} />
+      </motion.div>
+
+      <p className="ccm-num">{step.num}</p>
+
+      <h3>{step.title}</h3>
+
+      <p className="ccm-desc">{step.desc}</p>
+    </motion.div>
+  );
+}
+
 export default function CommentCaMarche() {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
 
-  const steps = [
+  const steps: Step[] = [
     {
       icon: Aperture,
       num: '01',
@@ -54,14 +125,46 @@ export default function CommentCaMarche() {
     show: { transition: { staggerChildren: 0.14, delayChildren: 0.1 } },
   };
 
-  const item = {
-    hidden: { opacity: 0, y: 24 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
-    },
-  };
+  /* ── Timeline scroll-liée ──
+     La ligne (scaleX desktop / scaleY mobile) suit scrollYProgress sans transition ni
+     easing : c'est une simple lecture directe de la position de scroll. Les seuils des
+     marqueurs sont MESURÉS sur le vrai DOM (position du centre de chaque marqueur / taille
+     totale de la timeline), recalculés au montage et au redimensionnement — jamais des
+     fractions devinées. */
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const markerAnchorRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [thresholds, setThresholds] = useState<number[]>([0.02, 0.28, 0.54, 0.79]);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const timeline = timelineRef.current;
+      if (!timeline) return;
+
+      const isMobile = window.matchMedia('(max-width: 760px)').matches;
+      const timelineRect = timeline.getBoundingClientRect();
+      const total = isMobile ? timelineRect.height : timelineRect.width;
+      if (!total) return;
+
+      const next = markerAnchorRefs.current.map((el) => {
+        if (!el) return 0;
+        const r = el.getBoundingClientRect();
+        const center = isMobile
+          ? r.top + r.height / 2 - timelineRect.top
+          : r.left + r.width / 2 - timelineRect.left;
+        return Math.min(1, Math.max(0, center / total));
+      });
+
+      setThresholds(next);
+    };
+
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  const { scrollYProgress } = useScroll({ target: timelineRef, offset: ['start end', 'end start'] });
+  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
     <section
@@ -106,6 +209,7 @@ export default function CommentCaMarche() {
         </motion.div>
 
         <motion.div
+          ref={timelineRef}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.25 }}
@@ -115,29 +219,25 @@ export default function CommentCaMarche() {
           <motion.div
             className="ccm-axis"
             aria-hidden="true"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
+            style={
+              reduceMotion
+                ? { opacity: 1, scaleX: 1, scaleY: 1 }
+                : { opacity: 1, scaleX, scaleY }
+            }
           />
 
-          {steps.map((s) => {
-            const Icon = s.icon;
-
-            return (
-              <motion.div key={s.num} variants={item} className="ccm-step">
-                <div className="ccm-marker">
-                  <Icon size={18} strokeWidth={1.6} />
-                </div>
-
-                <p className="ccm-num">{s.num}</p>
-
-                <h3>{s.title}</h3>
-
-                <p className="ccm-desc">{s.desc}</p>
-              </motion.div>
-            );
-          })}
+          {steps.map((s, i) => (
+            <TimelineMarker
+              key={s.num}
+              step={s}
+              threshold={thresholds[i] ?? 0}
+              scrollYProgress={scrollYProgress}
+              reduceMotion={!!reduceMotion}
+              markerRef={(el) => {
+                markerAnchorRefs.current[i] = el;
+              }}
+            />
+          ))}
         </motion.div>
 
         <motion.p
@@ -207,6 +307,7 @@ export default function CommentCaMarche() {
           right: 0;
           height: 1px;
           background: linear-gradient(to right, rgba(200,164,93,0.7), rgba(200,164,93,0.3));
+          transform-origin: left top;
         }
 
         .ccm-step {
