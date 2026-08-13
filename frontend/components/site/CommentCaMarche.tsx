@@ -268,6 +268,29 @@ export default function CommentCaMarche() {
         </motion.div>
       </div>
 
+      {/* ── Fil doré en écho — reprend la continuité amorcée en bas de Luxedia.
+           Indépendant : aucun état ni composant partagé avec Luxedia.tsx, l'alignement
+           (left:50%) est garanti par la géométrie des deux sections pleine largeur.
+           Fondu d'opacité pur, sans variation de longueur, pour rester discret. ── */}
+      <motion.div
+        aria-hidden="true"
+        className="ccm-thread"
+        initial={{ opacity: reduceMotion ? 1 : 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: reduceMotion ? 0 : 1.1, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: 0,
+          x: '-50%',
+          width: '1px',
+          height: '56px',
+          background: `linear-gradient(to bottom, ${colors.gold}, transparent)`,
+          pointerEvents: 'none',
+        }}
+      />
+
       <style>{`
         .ccm-label {
           font-size: 11px;
@@ -410,6 +433,10 @@ export default function CommentCaMarche() {
             padding-top: 0;
             padding-left: 60px;
             min-height: 44px;
+          }
+
+          .ccm-thread {
+            display: none;
           }
         }
       `}</style>

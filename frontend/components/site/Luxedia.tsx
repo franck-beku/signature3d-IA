@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { MessageCircle, Compass, UserCheck, Clock, Send } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { colors } from '@/config/theme';
@@ -46,6 +46,7 @@ const PERSONAS = [
 
 export default function Luxedia() {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
   const activePersona = PERSONAS[active];
 
@@ -210,6 +211,30 @@ export default function Luxedia() {
           )}
         </motion.p>
       </div>
+
+      {/* ── Fil doré en écho — amorce la continuité vers Comment ça marche.
+           Indépendant : aucun état ni composant partagé avec CommentCaMarche.tsx,
+           l'alignement (left:50%) est garanti par la géométrie des deux sections
+           pleine largeur, pas par une coordination en code. Fondu d'opacité pur,
+           sans variation de longueur, pour rester discret. ── */}
+      <motion.div
+        aria-hidden="true"
+        className="luxedia-thread"
+        initial={{ opacity: reduceMotion ? 1 : 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: reduceMotion ? 0 : 1.1, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          bottom: 0,
+          x: '-50%',
+          width: '1px',
+          height: '56px',
+          background: `linear-gradient(to top, ${colors.gold}, transparent)`,
+          pointerEvents: 'none',
+        }}
+      />
 
       <style>{`
         .luxedia-label {
@@ -453,6 +478,9 @@ export default function Luxedia() {
           }
           .luxedia-tabs {
             flex-wrap: wrap;
+          }
+          .luxedia-thread {
+            display: none;
           }
         }
       `}</style>
