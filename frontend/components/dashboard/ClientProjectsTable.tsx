@@ -17,6 +17,14 @@ const thStyle = {
   whiteSpace: 'nowrap' as const,
 }
 
+/* Libellé basé sur experienceType — jamais sur la seule présence de matterportId,
+   qui reste renseigné pour un projet Matterport désactivé (visite conservée mais inactive). */
+function experienceLabel(project: ProjectDto): string {
+  if (project.experienceType === 'IAOnly') return 'IA seule'
+  if (project.experienceType === 'Tour360') return project.experienceUrl?.trim() ? 'Visite 360°' : 'Visite 360° (URL manquante)'
+  return project.matterportId?.trim() ? project.matterportId : 'Matterport (ID manquant)'
+}
+
 /* ── Tableau Projets (+ confirmation suppression inline) ── */
 export default function ClientProjectsTable({
   projects, slug, deleteConfirm, generatingStickerId,
@@ -63,7 +71,7 @@ export default function ClientProjectsTable({
                     <tr style={{ borderBottom: deleteConfirm === project.id ? 'none' : (i < projects.length - 1 ? '1px solid var(--dash-border)' : 'none') }} className="proj-row">
                       <td style={{ padding: '14px 16px' }}>
                         <p style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', margin: 0 }}>{project.name}</p>
-                        <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '2px 0 0' }}>{project.matterportId || 'IA seule'}</p>
+                        <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '2px 0 0' }}>{experienceLabel(project)}</p>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: st.bg, color: st.color }}>{project.status}</span>

@@ -51,6 +51,14 @@ public class ChatService : IChatService
         if (project is null)
             return Result<ChatResponseDto>.Fail("Projet introuvable.");
 
+        // Luxedia désactivée pour ce projet (widget masqué côté UI) — un appel direct à cet
+        // endpoint ne doit pas continuer à répondre comme si elle était active. Un projet
+        // IAOnly a toujours LuxediaEnabled=true (garde-fou à l'écriture dans ProjectService),
+        // donc cette vérification unique couvre aussi bien "IAOnly ⇒ toujours actif" que
+        // "immersif + Luxedia désactivée ⇒ chat refusé", sans avoir à distinguer ExperienceType.
+        if (!project.LuxediaEnabled)
+            return Result<ChatResponseDto>.Fail("Assistant Luxedia désactivé pour ce projet.");
+
         // Récupérer ou créer la session
         ChatSession session;
         if (!string.IsNullOrEmpty(dto.SessionToken))

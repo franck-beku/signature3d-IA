@@ -246,11 +246,17 @@ export default function ProjetDetailPage({ params }: { params: Promise<{ slug: s
             {/* Preview */}
             <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
               <div style={{ height: '240px' }}>
-                {project.matterportId ? (
+                {project.experienceType === 'Matterport' && project.matterportId ? (
                   <iframe src={`https://my.matterport.com/show/?m=${project.matterportId}&play=1&qs=1`} style={{ width: '100%', height: '100%', border: 'none' }} title={project.name} />
-                ) : (
+                ) : project.experienceType === 'Tour360' && project.experienceUrl ? (
+                  <iframe src={project.experienceUrl} style={{ width: '100%', height: '100%', border: 'none' }} title={project.name} />
+                ) : project.experienceType === 'IAOnly' ? (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--dash-input)' }}>
                     <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>Aperçu non disponible — expérience IA seule</p>
+                  </div>
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--dash-input)' }}>
+                    <p style={{ color: 'var(--dash-text-muted)', fontSize: '13px' }}>Configuration de la visite incomplète</p>
                   </div>
                 )}
               </div>

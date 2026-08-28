@@ -72,6 +72,12 @@ export default function ProjectForm({ projectId }: Props) {
   const [matterportId, setMatterportId]       = useState('')
   const [experienceType, setExperienceType]   = useState('Matterport')
   const [experienceUrl, setExperienceUrl]     = useState('')
+  // Produit immersif de référence du projet (calculé une seule fois au chargement, en édition
+  // uniquement) — verrouillé pour toute la durée de vie du projet : Matterport ne peut jamais
+  // devenir 360° ni l'inverse. null = projet né "IA seule" (aucun produit à réactiver).
+  // 'ambigu' = MatterportId ET experienceUrl tous deux renseignés (anomalie, ne devrait jamais
+  // arriver après ce chantier — signalé sans tentative de résolution automatique).
+  const [produitOrigine, setProduitOrigine]   = useState<'Matterport' | 'Tour360' | 'ambigu' | null>(null)
   const [luxediaEnabled, setLuxediaEnabled]   = useState(true)
   const [ambassadorName, setAmbassadorName]   = useState('Luxedia')
   const [welcomeMessage, setWelcomeMessage]   = useState('')
@@ -119,6 +125,19 @@ export default function ProjectForm({ projectId }: Props) {
             setMatterportId(p.matterportId ?? '')
             setExperienceType(p.experienceType ?? 'Matterport')
             setExperienceUrl(p.experienceUrl ?? '')
+
+            // Produit d'origine : experienceType fait foi s'il n'est pas IAOnly (sans ambiguïté).
+            // S'il est IAOnly, on déduit depuis le champ conservé — jamais en devinant si les
+            // deux champs sont renseignés (configuration anormale, signalée telle quelle).
+            const hasMid = !!p.matterportId?.trim()
+            const hasUrl = !!p.experienceUrl?.trim()
+            if (p.experienceType === 'Matterport') setProduitOrigine('Matterport')
+            else if (p.experienceType === 'Tour360') setProduitOrigine('Tour360')
+            else if (hasMid && hasUrl) setProduitOrigine('ambigu')
+            else if (hasMid) setProduitOrigine('Matterport')
+            else if (hasUrl) setProduitOrigine('Tour360')
+            else setProduitOrigine(null)
+
             setLuxediaEnabled(p.luxediaEnabled ?? true)
             setAmbassadorName(p.ambassadorName)
             setWelcomeMessage(p.welcomeMessage ?? '')
@@ -170,6 +189,13 @@ export default function ProjectForm({ projectId }: Props) {
   const removeDetail = (i: number) => setDetails((prev) => prev.filter((_, idx) => idx !== i))
   const updateDetail = (i: number, field: keyof DetailRow, value: string | number | boolean) =>
     setDetails((prev) => prev.map((d, idx) => idx === i ? { ...d, [field]: value } : d))
+
+  // Bascule ON/OFF de la visite immersive d'un projet existant — ne touche jamais matterportId
+  // ni experienceUrl, seulement experienceType (IAOnly ↔ produitOrigine).
+  const handleToggleVisite = () => {
+    if (!produitOrigine || produitOrigine === 'ambigu') return
+    setExperienceType((current) => (current === 'IAOnly' ? produitOrigine : 'IAOnly'))
+  }
 
   const handleSave = async () => {
     if (!name.trim()) { setError('Le nom du projet est obligatoire.'); return }
@@ -325,27 +351,104 @@ export default function ProjectForm({ projectId }: Props) {
         <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
           <p style={sectionTitle}>Expérience immersive</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Type d'expérience</label>
-              <select value={experienceType} onChange={(e) => setExperienceType(e.target.value)} style={inputStyle} className="dash-input">
-                <option value="Matterport">Matterport (jumeau numérique 3D)</option>
-                <option value="Tour360">360° (Glo3D, Kuula...)</option>
-                <option value="IAOnly">IA seule (chat plein écran)</option>
-              </select>
-            </div>
+            {!isEdit ? (
+              <>
+                {/* Création : choix libre du produit initial — pas une "bascule" d'un projet existant */}
+                <div>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Type d'expérience</label>
+                  <select
+                    value={experienceType}
+                    onChange={(e) => {
+                      const next = e.target.value
+                      setExperienceType(next)
+                      // Avant la première sauvegarde, un seul des deux champs doit rester rempli.
+                      if (next !== 'Matterport') setMatterportId('')
+                      if (next !== 'Tour360') setExperienceUrl('')
+                    }}
+                    style={inputStyle} className="dash-input"
+                  >
+                    <option value="Matterport">Matterport (jumeau numérique 3D)</option>
+                    <option value="Tour360">360° (Glo3D, Kuula...)</option>
+                    <option value="IAOnly">IA seule (chat plein écran)</option>
+                  </select>
+                </div>
 
-            {experienceType === 'Matterport' && (
-              <div>
-                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Matterport ID</label>
-                <input type="text" value={matterportId} onChange={(e) => setMatterportId(e.target.value)} placeholder="WJzvgHF44zq" style={inputStyle} className="dash-input" />
-              </div>
-            )}
+                {experienceType === 'Matterport' && (
+                  <div>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Matterport ID</label>
+                    <input type="text" value={matterportId} onChange={(e) => setMatterportId(e.target.value)} placeholder="WJzvgHF44zq" style={inputStyle} className="dash-input" />
+                  </div>
+                )}
 
-            {experienceType === 'Tour360' && (
-              <div>
-                <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>URL de l'expérience 360°</label>
-                <input type="text" value={experienceUrl} onChange={(e) => setExperienceUrl(e.target.value)} placeholder="https://glo3d.net/xxxxx" style={inputStyle} className="dash-input" />
-              </div>
+                {experienceType === 'Tour360' && (
+                  <div>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>URL de l'expérience 360°</label>
+                    <input type="text" value={experienceUrl} onChange={(e) => setExperienceUrl(e.target.value)} placeholder="https://glo3d.net/xxxxx" style={inputStyle} className="dash-input" />
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Édition : le produit immersif de référence est verrouillé — seule son
+                    activation/désactivation est permise, jamais son remplacement. */}
+                {produitOrigine === 'ambigu' && (
+                  <div style={{ padding: '10px 14px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '8px' }}>
+                    <p style={{ color: 'var(--dash-error)', fontSize: '12px', margin: 0 }}>
+                      Configuration ambiguë : ce projet a à la fois un Matterport ID et une URL 360° enregistrés. Vérification manuelle nécessaire avant de modifier la visite immersive.
+                    </p>
+                  </div>
+                )}
+
+                {produitOrigine && produitOrigine !== 'ambigu' && (
+                  <div>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>
+                      Visite {produitOrigine === 'Matterport' ? 'Matterport' : '360°'}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleToggleVisite}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '8px',
+                        border: '1px solid var(--dash-border-input)', backgroundColor: 'var(--dash-input)',
+                        color: experienceType !== 'IAOnly' ? 'var(--dash-success)' : 'var(--dash-text-subtle)',
+                        cursor: 'pointer', fontSize: '13px',
+                      }}
+                    >
+                      {experienceType !== 'IAOnly' ? <Eye size={14} /> : <EyeOff size={14} />}
+                      {experienceType !== 'IAOnly'
+                        ? `Visite ${produitOrigine === 'Matterport' ? 'Matterport' : '360°'} activée`
+                        : `Visite ${produitOrigine === 'Matterport' ? 'Matterport' : '360°'} désactivée`}
+                    </button>
+                    {experienceType === 'IAOnly' && (
+                      <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '8px 0 0' }}>
+                        {produitOrigine === 'Matterport'
+                          ? `Matterport ID conservé (${matterportId || '—'}) — réactivez pour le republier.`
+                          : `URL 360° conservée (${experienceUrl || '—'}) — réactivez pour la republier.`}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {!produitOrigine && (
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: 0 }}>
+                    Ce projet ne comporte pas de visite immersive (Matterport/360°) — Luxedia est le cœur de l'expérience.
+                  </p>
+                )}
+
+                {produitOrigine === 'Matterport' && experienceType === 'Matterport' && (
+                  <div>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Matterport ID</label>
+                    <input type="text" value={matterportId} onChange={(e) => setMatterportId(e.target.value)} placeholder="WJzvgHF44zq" style={inputStyle} className="dash-input" />
+                  </div>
+                )}
+
+                {produitOrigine === 'Tour360' && experienceType === 'Tour360' && (
+                  <div>
+                    <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>URL de l'expérience 360°</label>
+                    <input type="text" value={experienceUrl} onChange={(e) => setExperienceUrl(e.target.value)} placeholder="https://glo3d.net/xxxxx" style={inputStyle} className="dash-input" />
+                  </div>
+                )}
+              </>
             )}
 
             <div>

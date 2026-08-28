@@ -3,6 +3,7 @@
  * Version: 4.0 — Connecté au backend PostgreSQL + Groq IA + experienceType (Matterport/Tour360/IAOnly)
  */
 
+import { notFound } from 'next/navigation'
 import EmbedInterface from '@/components/embed/EmbedInterface'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
@@ -42,55 +43,40 @@ interface EmbedData {
   luxediaLanguage?:        string | null
 }
 
+/**
+ * Retourne null uniquement pour un vrai 404 (slug inexistant OU projet non publié —
+ * EmbedsController renvoie la même forme de réponse pour les deux). Toute autre erreur
+ * (5xx, réseau, timeout) est volontairement laissée se propager : c'est une panne
+ * technique, pas une absence d'expérience — app/embed/error.tsx la prendra en charge,
+ * distinctement de app/embed/not-found.tsx.
+ */
 async function getEmbedData(slug: string): Promise<EmbedData | null> {
-  try {
-    const res = await fetch(`${API_URL}/api/embeds/${slug}`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return null
-    return res.json()
-  } catch {
-    return null
-  }
+  const res = await fetch(`${API_URL}/api/embeds/${slug}`, {
+    cache: 'no-store',
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`Échec du chargement de l'expérience embed (HTTP ${res.status}).`)
+  return res.json()
 }
 
 export default async function EmbedSlugPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { slug }  = await params
+  const { mode }  = await searchParams
   const project   = await getEmbedData(slug)
 
   if (!project) {
-    return (
-      <div style={{
-        minHeight: '100vh', backgroundColor: '#0d0d0d',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexDirection: 'column', gap: '16px',
-      }}>
-        <div style={{
-          width: '48px', height: '48px', borderRadius: '12px',
-          backgroundColor: 'rgba(212,175,55,0.1)',
-          border: '1px solid rgba(212,175,55,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" stroke="#d4af37" strokeWidth="1.5" fill="none"/>
-          </svg>
-        </div>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>
-          Expérience introuvable
-        </p>
-        <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '12px' }}>
-          Le lien que vous avez utilisé n&apos;est pas valide.
-        </p>
-      </div>
-    )
+    notFound()
   }
 
   return (
     <EmbedInterface
+      mode={typeof mode === 'string' ? mode : undefined}
       matterportId={project.matterportId ?? ''}
       experienceType={project.experienceType}
       experienceUrl={project.experienceUrl}

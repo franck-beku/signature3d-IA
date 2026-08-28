@@ -47,6 +47,7 @@ interface EmbedInterfaceProps {
   luxediaUserMessageColor?: string
   luxediaLanguage?:        string
   luxediaEnabled?:         boolean // false = widget désactivé (défaut true, rétro-compatible)
+  mode?: string // 'widget' = iframe compacte pilotée par le script d'amorçage (voir public/luxedia-widget.js)
 }
 
 /**
@@ -72,7 +73,7 @@ export default function EmbedInterface({
   luxediaAvatarUrl, luxediaClientLogoUrl,
   luxediaPrimaryColor, luxediaWidgetBgColor,
   luxediaBotMessageColor, luxediaUserMessageColor,
-  luxediaLanguage, luxediaEnabled,
+  luxediaLanguage, luxediaEnabled, mode,
 }: EmbedInterfaceProps) {
   const [isMobileAIOpen, setIsMobileAIOpen] = useState(false)
 
@@ -130,44 +131,93 @@ export default function EmbedInterface({
   }, [projectSlug])
 
   /* ── Choix du viewer ──
-     Priorité : Tour360 (si type Tour360 + URL) → Matterport (si matterportId) → IA seule.
-     Repli robuste : si experienceType absent, on déduit par matterportId comme avant. */
-  const hasTour360    = experienceType === 'Tour360' && !!experienceUrl && experienceUrl.trim() !== ''
-  const hasMatterport = !!matterportId && matterportId.trim() !== ''
-  const isIAOnly      = !hasTour360 && !hasMatterport
-  const onlineLabel   = luxediaLanguage === 'en' ? 'Online' : 'En ligne'
+     Priorité : experienceType fait foi (jamais la présence des champs — un projet IAOnly
+     peut conserver un ancien matterportId/experienceUrl désactivé, cf. réversibilité dashboard).
+     Repli défensif : si experienceType est absent ou pointe vers un champ requis manquant
+     (donnée legacy malformée), on retombe sur IA seule plutôt que d'afficher un viewer cassé. */
+  const hasTour360    = experienceType === 'Tour360' && !!experienceUrl?.trim()
+  const hasMatterport = experienceType === 'Matterport' && !!matterportId?.trim()
+  const isIAOnly       = experienceType === 'IAOnly' || (!hasTour360 && !hasMatterport)
 
   /* ── Widget Luxedia visible aux côtés de la visite ──
      Piloté par le flag explicite du projet, indépendamment de la présence d'une
      visite. undefined → true (rétro-compatible tant que le backend ne l'envoie pas). */
   const showLuxediaWidget = luxediaEnabled !== false
 
-  /* ── IA seule — pas de visite immersive → chatbot plein écran ── */
-  if (isIAOnly) {
-    return (
-      <div style={{ position: 'fixed', inset: 0, backgroundColor: '#0d0d0d', display: 'flex', flexDirection: 'column' }}>
-        {/* Header */}
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: `${luxediaPrimaryColor ?? '#d4af37'}1A`, border: `1px solid ${luxediaPrimaryColor ?? '#d4af37'}33`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
-              <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="1.5" fill="none"/>
-              <line x1="11" y1="2" x2="11" y2="11" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="0.8"/>
-              <line x1="2" y1="7" x2="11" y2="11" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="0.8"/>
-              <line x1="20" y1="7" x2="11" y2="11" stroke={luxediaPrimaryColor ?? '#d4af37'} strokeWidth="0.8"/>
-            </svg>
-          </div>
-          <div>
-            <p style={{ color: luxediaPrimaryColor ?? '#d4af37', fontSize: '14px', fontWeight: 600, margin: 0 }}>{ambassadorName}</p>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', margin: 0 }}>{projectName}</p>
-          </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#4ade80', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-            <span style={{ color: '#4ade80', fontSize: '11px', fontWeight: 500 }}>{onlineLabel}</span>
-          </div>
-        </div>
+  /* ── Mode widget — signal de branding vers le script d'amorçage du site client ──
+     Le script (public/luxedia-widget.js) ne doit jamais appeler notre API lui-même ; c'est
+     cette page, chargée dans SA PROPRE iframe sur notre domaine, qui lui transmet la couleur/
+     l'avatar réels du projet via postMessage, pour que la bulle flottante soit à l'identité du
+     client dès son affichage. '*' est nécessaire ici (le site hôte peut être n'importe quel
+     domaine, inconnu à l'avance) — les données transmises sont déjà publiques (mêmes
+     informations que /api/embeds/{slug}), aucune donnée sensible n'est en jeu. */
+  useEffect(() => {
+    if (mode !== 'widget' || typeof window === 'undefined' || window.parent === window) return
+    window.parent.postMessage(
+      showLuxediaWidget
+        ? { type: 'luxedia:ready', ambassadorName, primaryColor: luxediaPrimaryColor ?? null, avatarUrl: luxediaAvatarUrl ?? null }
+        : { type: 'luxedia:disabled' },
+      '*'
+    )
+  }, [mode, showLuxediaWidget, ambassadorName, luxediaPrimaryColor, luxediaAvatarUrl])
 
-        {/* Chatbot plein écran */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
+  /* ── Mode widget — rendu ──
+     Contenant minimal : AmbassadeurIA occupe 100% de l'iframe créée par le script hôte.
+     Aucune bulle, aucun bouton de fermeture ici — c'est la responsabilité du script sur le
+     site client, hors de cette page. Si Luxedia est désactivée, rien à afficher : le script
+     a déjà reçu 'luxedia:disabled' ci-dessus et ne montrera jamais la bulle. */
+  if (mode === 'widget') {
+    if (!showLuxediaWidget) return null
+    return (
+      <div style={{ position: 'fixed', inset: 0 }}>
+        <AmbassadeurIA
+          ambassadorName={ambassadorName}
+          welcomeMessage={welcomeMessage}
+          welcomeMessageEn={welcomeMessageEn}
+          buttons={buttons}
+          suggestions={suggestions}
+          projectSlug={projectSlug}
+          luxediaAvatarUrl={luxediaAvatarUrl}
+          luxediaClientLogoUrl={luxediaClientLogoUrl}
+          luxediaPrimaryColor={luxediaPrimaryColor}
+          luxediaWidgetBgColor={luxediaWidgetBgColor}
+          luxediaBotMessageColor={luxediaBotMessageColor}
+          luxediaUserMessageColor={luxediaUserMessageColor}
+          language={luxediaLanguage as 'fr' | 'en' | undefined}
+        />
+      </div>
+    )
+  }
+
+  /* ── IA seule — "Salon centré" ──
+     Luxedia comme expérience principale : sur desktop, un panneau cadré (largeur/hauteur
+     maximales, marge de respiration, fond travaillé) plutôt qu'un simple agrandissement
+     du chat à toute la fenêtre. Sur mobile, le panneau redevient plein écran (aucune
+     marge, aucun cadrage) — voir la media query plus bas.
+     Le header dédié précédent (avatar+nom+statut) a été retiré : AmbassadeurIA rend déjà
+     son propre header complet (avatar, nom, statut, sélecteur FR/EN, logo) — le conserver
+     ici en plus créait un doublon visuel. */
+  if (isIAOnly) {
+    const standaloneBg = luxediaWidgetBgColor ?? '#0d0d0d'
+    return (
+      <div
+        className="embed-standalone-stage"
+        style={{
+          position: 'fixed', inset: 0, backgroundColor: standaloneBg,
+          backgroundImage: `radial-gradient(ellipse at center, ${luxediaPrimaryColor ?? '#d4af37'}14 0%, transparent 60%)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '5vh 24px', boxSizing: 'border-box',
+        }}
+      >
+        <div
+          className="embed-standalone-panel"
+          style={{
+            width: '100%', maxWidth: '760px', height: 'min(84vh, 860px)',
+            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            borderRadius: '20px', border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 30px 80px rgba(0,0,0,0.45)',
+          }}
+        >
           <AmbassadeurIA
             ambassadorName={ambassadorName}
             welcomeMessage={welcomeMessage}
@@ -187,6 +237,13 @@ export default function EmbedInterface({
 
         <style>{`
           @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+          @media (max-width: 767px) {
+            .embed-standalone-stage { padding: 0 !important; }
+            .embed-standalone-panel {
+              max-width: none !important; height: 100% !important;
+              border-radius: 0 !important; border: none !important; box-shadow: none !important;
+            }
+          }
         `}</style>
       </div>
     )

@@ -39,6 +39,13 @@ public class EmbedsController : ControllerBase
 
         var project = result.Data!;
 
+        // Un projet non publié doit rester invisible publiquement — même réponse que
+        // "introuvable" pour ne pas révéler son existence à un visiteur externe. Le
+        // dashboard (authentifié) passe par GetBySlugAsync sans jamais transiter par ce
+        // contrôleur, donc ce filtre n'affecte que l'accès public.
+        if (!project.IsPublished)
+            return NotFound(new { message = "Expérience introuvable." });
+
         return Ok(new
         {
             projectId      = project.Id,        // ← ajouté pour les leads

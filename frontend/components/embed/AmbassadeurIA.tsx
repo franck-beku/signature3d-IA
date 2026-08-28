@@ -103,6 +103,7 @@ export default function AmbassadeurIA({
   // sur la langue par défaut (LuxediaLanguage) transmise via la prop `language`.
   const [langOverridden, setLangOverridden] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { if (!langOverridden) setLang(language) }, [language, langOverridden])
 
@@ -242,10 +243,12 @@ export default function AmbassadeurIA({
       <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(26,26,26,0.3)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#222', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '8px 12px' }}>
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+            onFocus={() => inputRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })}
             placeholder={currentT.placeholder}
             style={{ flex: 1, background: 'transparent', color: 'white', fontSize: '13px', outline: 'none', border: 'none', padding: 0, fontFamily: 'inherit' }}
           />

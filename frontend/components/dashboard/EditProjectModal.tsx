@@ -18,7 +18,7 @@ const inputStyle = {
 
 interface EditProject {
   id: string; name: string; matterportId: string; status: string
-  buttons: { id: string; label: string; url: string; action: string; order: number }[]
+  buttons: { id: string; label: string; labelEn?: string; url?: string; action: string; order: number }[]
   details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
   suggestions: { label: string; labelEn?: string; answer?: string; answerEn?: string; order: number }[]
 }

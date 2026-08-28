@@ -70,6 +70,17 @@ public class ProjectService : IProjectService
         if (client is null)
             return Result<ProjectDto>.Fail("Client introuvable.");
 
+        var expType = Enum.TryParse<ExperienceType>(dto.ExperienceType, true, out var parsedExpType)
+            ? parsedExpType : Domain.Enums.ExperienceType.Matterport;
+
+        // Garde-fou : IA seule sans Luxedia = plus aucune expérience à présenter.
+        if (expType == Domain.Enums.ExperienceType.IAOnly && !dto.LuxediaEnabled)
+            return Result<ProjectDto>.Fail("Un projet en IA seule doit conserver l'assistant Luxedia actif.");
+
+        // Garde-fou : un projet ne peut référencer qu'un seul produit immersif à la fois.
+        if (!string.IsNullOrWhiteSpace(dto.MatterportId) && !string.IsNullOrWhiteSpace(dto.ExperienceUrl))
+            return Result<ProjectDto>.Fail("Un projet ne peut pas avoir à la fois un Matterport ID et une URL 360°.");
+
         // Générer le slug
         var slug = GenerateSlug(dto.Name);
         if (await _db.Projects.AnyAsync(p => p.Slug == slug))
@@ -80,9 +91,8 @@ public class ProjectService : IProjectService
             Name = dto.Name,
             Slug = slug,
             MatterportId = dto.MatterportId,
-            ExperienceType = Enum.TryParse<ExperienceType>(dto.ExperienceType, true, out var expType)
-                ? expType : Domain.Enums.ExperienceType.Matterport,
-            ExperienceUrl = dto.ExperienceUrl,   
+            ExperienceType = expType,
+            ExperienceUrl = dto.ExperienceUrl,
             AmbassadorName = dto.AmbassadorName,
             WelcomeMessage = dto.WelcomeMessage ?? AppConstants.DefaultWelcomeMessage,
             WelcomeMessageEn = dto.WelcomeMessageEn ?? AppConstants.DefaultWelcomeMessageEn,
@@ -163,13 +173,34 @@ public class ProjectService : IProjectService
         if (project is null)
             return Result<ProjectDto>.Fail("Projet introuvable.");
 
+        var expType = Enum.TryParse<ExperienceType>(dto.ExperienceType, true, out var parsedExpType)
+            ? parsedExpType : Domain.Enums.ExperienceType.Matterport;
+
+        // Garde-fou : IA seule sans Luxedia = plus aucune expérience à présenter.
+        if (expType == Domain.Enums.ExperienceType.IAOnly && !dto.LuxediaEnabled)
+            return Result<ProjectDto>.Fail("Un projet en IA seule doit conserver l'assistant Luxedia actif.");
+
+        // Garde-fou : un projet ne peut référencer qu'un seul produit immersif à la fois.
+        if (!string.IsNullOrWhiteSpace(dto.MatterportId) && !string.IsNullOrWhiteSpace(dto.ExperienceUrl))
+            return Result<ProjectDto>.Fail("Un projet ne peut pas avoir à la fois un Matterport ID et une URL 360°.");
+
+        // Garde-fou : le produit immersif de référence d'un projet existant ne peut pas changer
+        // (Matterport ↔ 360°) — seule son activation/désactivation (→ IAOnly et retour) est permise.
+        bool isReactivatingSameProduct =
+            expType == project.ExperienceType ||
+            expType == Domain.Enums.ExperienceType.IAOnly ||
+            (expType == Domain.Enums.ExperienceType.Matterport && !string.IsNullOrWhiteSpace(project.MatterportId)) ||
+            (expType == Domain.Enums.ExperienceType.Tour360 && !string.IsNullOrWhiteSpace(project.ExperienceUrl));
+
+        if (!isReactivatingSameProduct)
+            return Result<ProjectDto>.Fail("Impossible de changer le produit immersif de référence d'un projet existant (Matterport ↔ 360°).");
+
         // Mettre à jour les champs
         bool wasPublished = project.IsPublished;
         project.Name = dto.Name;
         project.MatterportId = dto.MatterportId;
-        project.ExperienceType = Enum.TryParse<ExperienceType>(dto.ExperienceType, true, out var expType)
-            ? expType : Domain.Enums.ExperienceType.Matterport;
-        project.ExperienceUrl = dto.ExperienceUrl;    
+        project.ExperienceType = expType;
+        project.ExperienceUrl = dto.ExperienceUrl;
         project.AmbassadorName = dto.AmbassadorName;
         project.WelcomeMessage = dto.WelcomeMessage;
         project.WelcomeMessageEn = dto.WelcomeMessageEn;

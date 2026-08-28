@@ -1,16 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { ExternalLink, Code, Check, Copy, X } from 'lucide-react'
+import { ExternalLink, Code, MessageCircle, Check, Copy, X } from 'lucide-react'
 import type { ProjectDto } from '@/lib/api'
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'https://signature3dia.com'
 
-/* ── Modal Lien + iframe ── */
+/* ── Modal Lien + iframe + widget ── */
 export default function ProjectLinkModal({ project, onClose }: { project: ProjectDto; onClose: () => void }) {
   const [copied, setCopied] = useState<string | null>(null)
   const directUrl  = `${BASE_URL}/embed/${project.slug}`
   const iframeCode = `<iframe\n  src="${directUrl}"\n  width="420"\n  height="620"\n  style="border: none; border-radius: 12px;"\n  title="${project.name}"\n></iframe>`
+  const widgetCode = `<script src="${BASE_URL}/luxedia-widget.js" data-project="${project.slug}"></script>`
 
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text)
@@ -60,6 +61,25 @@ export default function ProjectLinkModal({ project, onClose }: { project: Projec
               {copied === 'iframe' ? 'Copié !' : 'Copier le code iframe'}
             </button>
           </div>
+
+          {project.luxediaEnabled && (
+            <div style={{ backgroundColor: 'var(--dash-input)', border: '1px solid var(--dash-border)', borderRadius: '12px', padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                <MessageCircle size={14} style={{ color: 'var(--dash-gold)' }} />
+                <p style={{ color: 'var(--dash-text)', fontSize: '13px', fontWeight: 600, margin: 0 }}>Widget Luxedia pour site web</p>
+              </div>
+              <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', marginBottom: '12px', lineHeight: 1.5 }}>
+                Ajoutez Luxedia comme assistant flottant sur le site web du client. Une bulle discrète ouvre une fenêtre de conversation sans remplacer le site.
+              </p>
+              <div style={{ backgroundColor: 'var(--dash-bg)', border: '1px solid var(--dash-border)', borderRadius: '6px', padding: '12px', marginBottom: '10px' }}>
+                <pre style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'monospace', lineHeight: 1.6 }}>{widgetCode}</pre>
+              </div>
+              <button onClick={() => copy(widgetCode, 'widget')} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', padding: '8px 14px', borderRadius: '6px', border: `1px solid ${copied === 'widget' ? 'var(--dash-success-ring)' : 'var(--dash-border-input)'}`, color: copied === 'widget' ? 'var(--dash-success)' : 'var(--dash-text-subtle)', background: 'none', cursor: 'pointer' }} className="copy-btn">
+                {copied === 'widget' ? <Check size={12} /> : <Copy size={12} />}
+                {copied === 'widget' ? 'Copié !' : "Copier le code d'intégration"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
