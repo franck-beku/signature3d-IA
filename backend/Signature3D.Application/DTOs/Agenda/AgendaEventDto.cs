@@ -10,6 +10,7 @@ public class AgendaEventDto
     public string? Location { get; set; }
     public string? Notes { get; set; }
     public string? CustomType { get; set; }
+    public string Color { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

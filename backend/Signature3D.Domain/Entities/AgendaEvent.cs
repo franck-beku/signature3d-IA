@@ -12,6 +12,11 @@ public class AgendaEvent : BaseEntity
     public string? Notes { get; set; }
     public string? CustomType { get; set; }
 
+    /* Couleur choisie parmi une palette prédéfinie (dashboard) — code hex libre en base,
+       validation de la palette faite côté UI. Null pour les événements créés avant
+       l'introduction de ce champ ; AgendaService applique alors une couleur par défaut. */
+    public string? Color { get; set; }
+
     /* Relations optionnelles — OnDelete: SetNull (l'événement survit à la suppression du lié) */
     public Guid? ClientId { get; set; }
     public Client? Client { get; set; }

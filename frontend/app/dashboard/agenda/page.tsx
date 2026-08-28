@@ -1,15 +1,15 @@
 'use client'
 
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Sidebar from '@/components/dashboard/Sidebar'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Check } from 'lucide-react'
 import {
   agendaApi, clientsApi, projectsApi, contactsApi,
-  type AgendaEventDto, type AgendaEventType, type CreateAgendaEventDto,
+  type AgendaEventDto, type CreateAgendaEventDto,
   type ClientDto, type ProjectDto, type ContactDto,
 } from '@/lib/api'
 
@@ -21,39 +21,19 @@ const localizer = dateFnsLocalizer({
   locales: { fr },
 })
 
-const EVENT_TYPES: AgendaEventType[] = [
-  'RendezVousCommercial', 'CaptationMatterport', 'Captation360',
-  'Livraison', 'Urgent', 'ReunionInterne', 'AppelClient',
-  'SuiviClient', 'Presentation', 'Validation', 'Autre',
-]
-
-const TYPE_LABELS: Record<AgendaEventType, string> = {
-  RendezVousCommercial: 'Rendez-vous commercial',
-  CaptationMatterport:  'Captation 3D Matterport',
-  Captation360:         'Captation 360°',
-  Livraison:            'Livraison du projet',
-  Urgent:               'Urgent',
-  ReunionInterne:       'Réunion interne',
-  AppelClient:          'Appel client',
-  SuiviClient:          'Suivi client',
-  Presentation:         'Présentation du projet',
-  Validation:           'Validation client',
-  Autre:                'Autre',
-}
-
-const TYPE_COLORS: Record<AgendaEventType, string> = {
-  RendezVousCommercial: '#22c55e',
-  CaptationMatterport:  '#3b82f6',
-  Captation360:         '#06b6d4',
-  Livraison:            '#f97316',
-  Urgent:               '#ef4444',
-  ReunionInterne:       '#6b7280',
-  AppelClient:          '#a855f7',
-  SuiviClient:          '#eab308',
-  Presentation:         '#6366f1',
-  Validation:           '#15803d',
-  Autre:                '#9ca3af',
-}
+/* Palette fixe — 6 couleurs, cohérentes avec l'identité visuelle du dashboard (l'or reprend
+   l'accent principal --dash-gold). Remplace TYPE_COLORS : la couleur d'un rendez-vous est
+   désormais choisie librement par l'utilisateur, indépendamment du Type technique (conservé
+   en base pour compatibilité mais retiré du formulaire). */
+const AGENDA_COLORS = [
+  { value: '#d4af37', label: 'Or' },
+  { value: '#22c55e', label: 'Émeraude' },
+  { value: '#3b82f6', label: 'Azur' },
+  { value: '#ef4444', label: 'Corail' },
+  { value: '#a855f7', label: 'Violet' },
+  { value: '#6b7280', label: 'Ardoise' },
+] as const
+const DEFAULT_AGENDA_COLOR = AGENDA_COLORS[0].value
 
 interface CalEvent {
   title: string
@@ -62,15 +42,33 @@ interface CalEvent {
   resource: AgendaEventDto
 }
 
-const toCalEvent = (dto: AgendaEventDto): CalEvent => ({
-  title: dto.title,
-  start: new Date(dto.startDateTime),
-  end:   new Date(dto.endDateTime ?? dto.startDateTime),
-  resource: dto,
-})
+// Un rendez-vous est un instant, pas une plage : react-big-calendar a néanmoins besoin d'un
+// intervalle start/end pour calculer la hauteur d'un événement dans les vues Semaine/Jour.
+// On ne réutilise JAMAIS endDateTime (données historiques à +7 jours possibles) — seulement
+// une durée visuelle technique fixe, jamais persistée, jamais demandée à l'utilisateur, et
+// bornée à la fin de la journée pour ne jamais produire un événement à cheval sur deux jours.
+const VISUAL_EVENT_DURATION_MS = 30 * 60 * 1000
 
+const toCalEvent = (dto: AgendaEventDto): CalEvent => {
+  const start = new Date(dto.startDateTime)
+  const endOfDay = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999)
+  const end = new Date(Math.min(start.getTime() + VISUAL_EVENT_DURATION_MS, endOfDay.getTime()))
+  return { title: dto.title, start, end, resource: dto }
+}
+
+// UTC (reçu de l'API, ex. "2026-08-26T19:30:00Z") → composantes LOCALES du navigateur,
+// au format attendu par <input type="datetime-local">. `format` (date-fns) lit les
+// composantes locales de l'objet Date — jamais toISOString(), qui reviendrait en UTC.
 function toLocalInput(iso: string): string {
-  return iso.slice(0, 16)
+  return format(new Date(iso), "yyyy-MM-dd'T'HH:mm")
+}
+
+// Valeur locale d'un <input type="datetime-local"> (ex. "2026-08-26T15:30", sans fuseau)
+// → véritable instant UTC. new Date(valeur-sans-fuseau) interprète nativement cette chaîne
+// comme une heure locale du navigateur ; toISOString() convertit ensuite correctement en UTC
+// (aucun décalage codé en dur, DST géré automatiquement par le moteur JS).
+function localInputToIso(value: string): string {
+  return new Date(value).toISOString()
 }
 
 const EMPTY_FORM: CreateAgendaEventDto = {
@@ -80,6 +78,7 @@ const EMPTY_FORM: CreateAgendaEventDto = {
   type: 'RendezVousCommercial',
   notes: '',
   customType: '',
+  color: DEFAULT_AGENDA_COLOR,
   clientId: undefined,
   projectId: undefined,
   contactId: undefined,
@@ -95,6 +94,20 @@ const inputStyle: React.CSSProperties = {
 
 const hintStyle: React.CSSProperties = {
   fontSize: '11px', color: 'var(--dash-text-muted)', margin: '6px 0 0',
+}
+
+// Vue Mois : react-big-calendar n'affiche que le titre par défaut — on ajoute l'heure et un
+// repère visuel pour obtenir "● 14:00 Titre" sans toucher aux vues Semaine/Jour (déjà lisibles
+// via leur propre grille horaire).
+function MonthEvent({ event }: { event: CalEvent }) {
+  return (
+    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden' }}>
+      <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#fff', flexShrink: 0 }} />
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {format(event.start, 'HH:mm')} {event.title}
+      </span>
+    </span>
+  )
 }
 
 export default function AgendaPage() {
@@ -136,6 +149,16 @@ export default function AgendaPage() {
     contactsApi.getByClient(form.clientId).then(setContacts).catch(() => setContacts([]))
   }, [form.clientId])
 
+  // "Prochains rendez-vous" — dérivé des événements déjà chargés en mémoire (events),
+  // aucun appel API supplémentaire. Passés exclus ici uniquement pour cette colonne ;
+  // ils restent visibles normalement dans le calendrier (events n'est pas filtré).
+  const upcomingEvents = useMemo(() => {
+    const now = new Date()
+    return events
+      .filter(e => e.start >= now)
+      .sort((a, b) => a.start.getTime() - b.start.getTime())
+  }, [events])
+
   const resetForm = () => {
     setForm(EMPTY_FORM)
     setEditingId(null)
@@ -151,6 +174,7 @@ export default function AgendaPage() {
       type:          dto.type,
       notes:         dto.notes ?? '',
       customType:    dto.customType ?? '',
+      color:         dto.color || DEFAULT_AGENDA_COLOR,
       clientId:      dto.clientId,
       projectId:     dto.projectId,
       contactId:     dto.contactId,
@@ -163,7 +187,8 @@ export default function AgendaPage() {
     if (!form.title || !form.startDateTime) return
     const payload = {
       ...form,
-      endDateTime: form.endDateTime  || undefined,
+      startDateTime: localInputToIso(form.startDateTime),
+      endDateTime: form.endDateTime ? localInputToIso(form.endDateTime) : undefined,
       customType:  form.type === 'Autre' ? (form.customType || undefined) : undefined,
       clientId:    form.clientId  || undefined,
       projectId:   form.projectId || undefined,
@@ -239,40 +264,42 @@ export default function AgendaPage() {
                 {editingId ? 'Modifier l\'événement' : 'Nouvel événement'}
               </h3>
 
-              {/* Ligne 1 : Titre + Type */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
-                <div>
-                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Titre *</label>
-                  <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Rendez-vous Mercedes" style={inputStyle} />
-                  <p style={hintStyle}>Ce qui s&apos;affiche dans le calendrier</p>
-                </div>
-                <div>
-                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Type</label>
-                  <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value as AgendaEventType })} style={inputStyle}>
-                    {EVENT_TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
-                  </select>
-                  <p style={hintStyle}>La catégorie de l&apos;événement</p>
-                  {form.type === 'Autre' && (
-                    <input
-                      type="text"
-                      value={form.customType ?? ''}
-                      onChange={e => setForm({ ...form, customType: e.target.value })}
-                      placeholder="Ex: Formation, Maintenance, Audit…"
-                      style={{ ...inputStyle, marginTop: '8px' }}
-                    />
-                  )}
-                </div>
+              {/* Ligne 1 : Titre */}
+              <div style={{ marginBottom: '14px' }}>
+                <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Titre *</label>
+                <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Présentation Mercedes" style={inputStyle} />
+                <p style={hintStyle}>Ce qui s&apos;affiche dans le calendrier</p>
               </div>
 
-              {/* Ligne 2 : Début + Fin */}
+              {/* Ligne 2 : Date et heure + Couleur */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }} className="form-row">
                 <div>
-                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Début *</label>
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Date et heure *</label>
                   <input type="datetime-local" value={form.startDateTime} onChange={e => setForm({ ...form, startDateTime: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
-                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Fin</label>
-                  <input type="datetime-local" value={form.endDateTime ?? ''} onChange={e => setForm({ ...form, endDateTime: e.target.value })} style={inputStyle} />
+                  <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Couleur</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', height: '38px' }}>
+                    {AGENDA_COLORS.map(c => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        onClick={() => setForm({ ...form, color: c.value })}
+                        title={c.label}
+                        aria-label={c.label}
+                        aria-pressed={form.color === c.value}
+                        style={{
+                          width: '26px', height: '26px', borderRadius: '50%', backgroundColor: c.value,
+                          border: form.color === c.value ? '2px solid var(--dash-text)' : '2px solid transparent',
+                          boxShadow: form.color === c.value ? `0 0 0 2px ${c.value}55` : 'none',
+                          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 0, flexShrink: 0,
+                        }}
+                      >
+                        {form.color === c.value && <Check size={13} color="#fff" strokeWidth={3} />}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -364,48 +391,105 @@ export default function AgendaPage() {
             </div>
           )}
 
-          {/* Calendrier */}
+          {/* Calendrier | Prochains rendez-vous */}
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--dash-gold-ring)', borderTopColor: 'var(--dash-gold)', animation: 'spin 0.8s linear infinite' }} />
             </div>
           ) : (
-            <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '20px' }} className="rbc-wrapper">
-              <Calendar
-                localizer={localizer}
-                events={events}
-                defaultView={Views.MONTH}
-                views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
-                culture="fr"
-                style={{ height: 650 }}
-                onSelectEvent={handleSelectEvent}
-                eventPropGetter={(event) => {
-                  const color = TYPE_COLORS[(event as CalEvent).resource.type] ?? 'var(--dash-gold)'
-                  return {
-                    style: {
-                      backgroundColor: color,
-                      borderColor: color,
-                      color: '#fff',
-                      borderRadius: '4px',
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                    },
-                  }
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }} className="agenda-layout">
+              <div style={{ flex: 1, minWidth: 0, backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '20px' }} className="rbc-wrapper">
+                <Calendar
+                  localizer={localizer}
+                  events={events}
+                  defaultView={Views.MONTH}
+                  views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
+                  culture="fr"
+                  style={{ height: 650 }}
+                  popup
+                  onSelectEvent={handleSelectEvent}
+                  components={{ month: { event: MonthEvent } }}
+                  eventPropGetter={(event: CalEvent) => {
+                    const color = event.resource.color || DEFAULT_AGENDA_COLOR
+                    return {
+                      style: {
+                        backgroundColor: color,
+                        borderColor: color,
+                        color: '#fff',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                      },
+                    }
+                  }}
+                  messages={{
+                    today:    "Aujourd'hui",
+                    previous: 'Précédent',
+                    next:     'Suivant',
+                    month:    'Mois',
+                    week:     'Semaine',
+                    day:      'Jour',
+                    agenda:   'Agenda',
+                    noEventsInRange: 'Aucun événement sur cette période.',
+                    date:     'Date',
+                    time:     'Heure',
+                    event:    'Événement',
+                  }}
+                />
+              </div>
+
+              {/* Prochains rendez-vous — dérivé de `events`, aucun appel API dédié */}
+              <div
+                className="agenda-upcoming"
+                style={{
+                  width: '300px', flexShrink: 0, backgroundColor: 'var(--dash-surface)',
+                  border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)',
+                  borderRadius: '14px', padding: '20px', maxHeight: '650px',
+                  display: 'flex', flexDirection: 'column',
                 }}
-                messages={{
-                  today:    "Aujourd'hui",
-                  previous: 'Précédent',
-                  next:     'Suivant',
-                  month:    'Mois',
-                  week:     'Semaine',
-                  day:      'Jour',
-                  agenda:   'Agenda',
-                  noEventsInRange: 'Aucun événement sur cette période.',
-                  date:     'Date',
-                  time:     'Heure',
-                  event:    'Événement',
-                }}
-              />
+              >
+                <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', margin: '0 0 16px' }}>
+                  Prochains rendez-vous
+                </h2>
+                {upcomingEvents.length === 0 ? (
+                  <p style={{ color: 'var(--dash-text-muted)', fontSize: '12px', margin: 0 }}>
+                    Aucun rendez-vous à venir.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
+                    {upcomingEvents.map((event, i) => {
+                      const dto = event.resource
+                      return (
+                        <button
+                          key={dto.id}
+                          onClick={() => handleSelectEvent(event)}
+                          style={{
+                            display: 'flex', alignItems: 'flex-start', gap: '10px', textAlign: 'left',
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '10px 4px',
+                            borderTop: i === 0 ? 'none' : '1px solid var(--dash-border)', width: '100%',
+                          }}
+                          className="upcoming-row"
+                        >
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: dto.color || DEFAULT_AGENDA_COLOR, marginTop: '5px', flexShrink: 0 }} />
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0, textTransform: 'capitalize' }}>
+                              {format(event.start, 'd MMM', { locale: fr })} · {format(event.start, 'HH:mm')}
+                            </p>
+                            <p style={{ color: 'var(--dash-text)', fontSize: '13px', fontWeight: 500, margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {dto.title}
+                            </p>
+                            {(dto.clientName || dto.projectName) && (
+                              <p style={{ color: 'var(--dash-text-subtle)', fontSize: '11px', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {[dto.clientName, dto.projectName].filter(Boolean).join(' — ')}
+                              </p>
+                            )}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -415,7 +499,13 @@ export default function AgendaPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .new-btn:hover { background-color: #b8943d !important; }
         .del-btn:hover { background-color: var(--dash-error-bg) !important; border-color: var(--dash-error) !important; }
+        .upcoming-row:hover { background-color: var(--dash-hover); border-radius: 8px; }
         @media (max-width: 540px) { .form-row { grid-template-columns: 1fr !important; } }
+        /* Tablette/mobile : Calendrier puis Prochains rendez-vous empilés, jamais compressés côte à côte */
+        @media (max-width: 900px) {
+          .agenda-layout { flex-direction: column; }
+          .agenda-upcoming { width: 100% !important; max-height: 360px !important; }
+        }
 
         /* Intégration light du calendrier react-big-calendar */
         .rbc-wrapper .rbc-calendar { color: var(--dash-text); }

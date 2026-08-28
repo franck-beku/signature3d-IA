@@ -11,10 +11,11 @@ public class AgendaService : IAgendaService
 {
     private readonly AppDbContext _db;
 
-    public AgendaService(AppDbContext db) => _db = db;
+    // Couleur appliquée aux événements créés avant l'introduction du champ Color (Color = null
+    // en base) — même valeur que la première pastille proposée par le dashboard.
+    private const string DefaultColor = "#d4af37";
 
-    private static DateTime AsUtc(DateTime dt) =>
-        DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+    public AgendaService(AppDbContext db) => _db = db;
 
     public async Task<IEnumerable<AgendaEventDto>> GetAllAsync(
         Guid? clientId = null,
@@ -62,12 +63,16 @@ public class AgendaService : IAgendaService
         var e = new AgendaEvent
         {
             Title = dto.Title,
-            StartDateTime = AsUtc(dto.StartDateTime),
-            EndDateTime   = dto.EndDateTime.HasValue ? AsUtc(dto.EndDateTime.Value) : null,
+            // Le frontend envoie désormais un instant UTC réel (Date.toISOString()) — le JSON
+            // désérialise une chaîne à suffixe "Z" en DateTime de Kind=Utc automatiquement,
+            // exactement ce qu'exige Npgsql pour une colonne timestamptz. Aucun relabelling.
+            StartDateTime = dto.StartDateTime,
+            EndDateTime   = dto.EndDateTime,
             Type = eventType,
             Location = dto.Location,
             Notes = dto.Notes,
             CustomType = customType,
+            Color = dto.Color,
             ClientId = dto.ClientId,
             ProjectId = dto.ProjectId,
             ContactId = dto.ContactId
@@ -92,12 +97,13 @@ public class AgendaService : IAgendaService
             throw new ArgumentException($"Type d'événement invalide : '{dto.Type}'.");
 
         e.Title = dto.Title;
-        e.StartDateTime = AsUtc(dto.StartDateTime);
-        e.EndDateTime   = dto.EndDateTime.HasValue ? AsUtc(dto.EndDateTime.Value) : null;
+        e.StartDateTime = dto.StartDateTime;
+        e.EndDateTime   = dto.EndDateTime;
         e.Type = eventType;
         e.Location = dto.Location;
         e.Notes = dto.Notes;
         e.CustomType = eventType == EventType.Autre ? dto.CustomType : null;
+        e.Color = dto.Color;
         e.ClientId = dto.ClientId;
         e.ProjectId = dto.ProjectId;
         e.ContactId = dto.ContactId;
@@ -132,6 +138,7 @@ public class AgendaService : IAgendaService
         Location = e.Location,
         Notes = e.Notes,
         CustomType = e.CustomType,
+        Color = e.Color ?? DefaultColor,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt,
         ClientId = e.ClientId,
