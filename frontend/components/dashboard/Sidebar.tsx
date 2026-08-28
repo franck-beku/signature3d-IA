@@ -10,6 +10,8 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { LayoutDashboard, Users, Box, Inbox, Layers, Sparkles, HelpCircle, Quote, BarChart2, Calendar, Bell, Settings, LogOut } from 'lucide-react'
+import { clientsApi } from '@/lib/api'
+import { getContractState } from '@/lib/contractStatus'
 
 const navItems = [
   { label: 'Vue globale',   href: '/dashboard',               icon: LayoutDashboard },
@@ -35,10 +37,24 @@ export default function Sidebar() {
   const pathname = usePathname()
   const router   = useRouter()
   const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null)
+  const [contractsToWatch, setContractsToWatch] = useState(0)
 
   useEffect(() => {
     const stored = localStorage.getItem('user')
     if (stored) setUser(JSON.parse(stored))
+  }, [])
+
+  useEffect(() => {
+    /* Dérivé de getContractState — aucune nouvelle logique d'échéance, aucun endpoint dédié. */
+    clientsApi.getAll(1, 100)
+      .then((result) => {
+        const count = result.items.filter((c) => {
+          const info = getContractState(c.contractEndDate)
+          return info !== null && info.state !== 'active'
+        }).length
+        setContractsToWatch(count)
+      })
+      .catch(console.error)
   }, [])
 
   const handleLogout = () => {
@@ -83,7 +99,20 @@ export default function Sidebar() {
               className="sidebar-link"
             >
               <item.icon size={15} />
-              {item.label}
+              <span style={{ flex: 1 }}>{item.label}</span>
+              {item.href === '/dashboard/clients' && contractsToWatch > 0 && (
+                <span
+                  title="Contrats à surveiller"
+                  style={{
+                    fontSize: '10px', fontWeight: 600, lineHeight: 1,
+                    padding: '3px 6px', borderRadius: '999px',
+                    backgroundColor: 'rgba(176,65,62,0.15)', color: '#d97a77',
+                    flexShrink: 0,
+                  }}
+                >
+                  {contractsToWatch}
+                </span>
+              )}
             </Link>
           )
         })}

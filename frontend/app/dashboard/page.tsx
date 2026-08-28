@@ -6,11 +6,38 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
-import { Bell, Plus, Users, FolderOpen, TrendingUp, Clock } from 'lucide-react'
+import { Bell, Plus, Users, FolderOpen, TrendingUp, Clock, AlertTriangle, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { clientsApi, leadsApi, statsApi, type ClientDto } from '@/lib/api'
+import { getContractState, formatContractDate, type ContractStateInfo } from '@/lib/contractStatus'
+
+/* Rang d'urgence pour le tri du bloc "Contrats à surveiller" — repose uniquement sur l'état
+   déjà calculé par getContractState, aucune nouvelle logique d'échéance. */
+const URGENCY_RANK: Record<string, number> = {
+  expired: 0,
+  'expiring-today': 1,
+  urgent: 2,
+  'expiring-soon': 3,
+}
+
+/** Texte lisible pour une ligne du bloc — purement présentationnel, ne recalcule aucun seuil. */
+function contractWarningLabel(info: ContractStateInfo): string {
+  const n = Math.abs(info.daysUntil)
+  switch (info.state) {
+    case 'expired':
+      return `Expiré depuis ${n} jour${n > 1 ? 's' : ''}`
+    case 'expiring-today':
+      return "Expire aujourd'hui"
+    case 'urgent':
+      return n === 1 ? 'Urgent — expire demain' : `Urgent — expire dans ${n} jours`
+    case 'expiring-soon':
+      return `Expire dans ${n} jours`
+    default:
+      return info.label
+  }
+}
 
 export default function DashboardPage() {
   const [userName, setUserName]   = useState('...')
@@ -50,6 +77,19 @@ export default function DashboardPage() {
   }, [])
 
   const actifs = clients.filter((c) => c.status === 'Actif').length
+
+  /* Dérivé du state `clients` déjà chargé — aucun appel API supplémentaire. */
+  const contractsWatch = useMemo(() => {
+    return clients
+      .map((c) => ({ client: c, info: getContractState(c.contractEndDate) }))
+      .filter((x): x is { client: ClientDto; info: ContractStateInfo } => x.info !== null && x.info.state !== 'active')
+      .sort((a, b) => {
+        const rankDiff = URGENCY_RANK[a.info.state] - URGENCY_RANK[b.info.state]
+        if (rankDiff !== 0) return rankDiff
+        const dir = a.info.state === 'expired' ? -1 : 1
+        return dir * (a.info.daysUntil - b.info.daysUntil)
+      })
+  }, [clients])
 
   const kpis = [
     { icon: Users,      value: loading ? '...' : String(clients.length), label: 'Clients',     sub: `${actifs} actifs`        },
@@ -155,6 +195,50 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Contrats à surveiller — dérivé de `clients`, aucun appel API supplémentaire */}
+          <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h2 style={{ color: 'var(--dash-text)', fontWeight: 500, fontSize: '13px', margin: 0 }}>Contrats à surveiller</h2>
+              <Link href="/dashboard/clients" style={{ color: 'var(--dash-gold)', fontSize: '12px', textDecoration: 'none' }}>Voir tous les clients →</Link>
+            </div>
+
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '32px', color: 'var(--dash-text-muted)', fontSize: '13px' }}>
+                Chargement...
+              </div>
+            ) : contractsWatch.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 20px', textAlign: 'center' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--dash-success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+                  <AlertTriangle size={17} style={{ color: 'var(--dash-success)' }} />
+                </div>
+                <p style={{ color: 'var(--dash-text-subtle)', fontSize: '13px', margin: 0, fontWeight: 500 }}>Aucun contrat à surveiller</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                {contractsWatch.map(({ client: c, info }, i) => (
+                  <Link
+                    key={c.id}
+                    href={`/dashboard/clients/${c.slug}`}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: i < contractsWatch.length - 1 ? '1px solid var(--dash-border)' : 'none', textDecoration: 'none' }}
+                    className="client-row"
+                  >
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: info.bgColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <AlertTriangle size={13} style={{ color: info.color }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</p>
+                      <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0 }}>Fin de contrat : {formatContractDate(c.contractEndDate)}</p>
+                    </div>
+                    <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: info.bgColor, color: info.color, whiteSpace: 'nowrap' }}>
+                      {contractWarningLabel(info)}
+                    </span>
+                    <ChevronRight size={14} style={{ color: 'var(--dash-text-muted)', flexShrink: 0 }} />
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>
