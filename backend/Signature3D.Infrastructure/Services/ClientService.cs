@@ -63,6 +63,40 @@ public class ClientService : IClientService
         return Result<ClientDto>.Ok(MapToDto(client));
     }
 
+    /// <summary>
+    /// Valide les trois dates contractuelles selon le statut, indépendamment de Create/Update :
+    /// - Prospect/Inactif : aucune exigence (NULL autorisé, historique conservé tel quel).
+    /// - EnCours/Actif : les trois dates sont obligatoires.
+    /// - Chronologie ContractDate ≤ DeliveryDate ≤ ContractEndDate vérifiée dès que les deux
+    ///   valeurs comparées sont présentes, même si la troisième est absente (donnée historique
+    ///   partielle possible pour un Prospect redescendu depuis un statut supérieur).
+    /// Comparaison au niveau de la date seule (.Date) pour ignorer toute composante horaire.
+    /// </summary>
+    private static Result<ClientDto>? ValidateContractDates(
+        ClientStatus status, DateTime? contractDate, DateTime? deliveryDate, DateTime? contractEndDate)
+    {
+        if ((status == ClientStatus.EnCours || status == ClientStatus.Actif) &&
+            (contractDate is null || deliveryDate is null || contractEndDate is null))
+        {
+            return Result<ClientDto>.Fail(
+                "Un client \"En cours\" ou \"Actif\" doit avoir une date de contrat, une date de livraison et une date de fin de contrat.");
+        }
+
+        if (contractDate.HasValue && deliveryDate.HasValue && contractDate.Value.Date > deliveryDate.Value.Date)
+            return Result<ClientDto>.Fail("La date de livraison ne peut pas être antérieure à la date de contrat.");
+
+        if (deliveryDate.HasValue && contractEndDate.HasValue && deliveryDate.Value.Date > contractEndDate.Value.Date)
+            return Result<ClientDto>.Fail("La date de fin de contrat ne peut pas être antérieure à la date de livraison.");
+
+        if (contractDate.HasValue && contractEndDate.HasValue && contractDate.Value.Date > contractEndDate.Value.Date)
+            return Result<ClientDto>.Fail("La date de fin de contrat ne peut pas être antérieure à la date de contrat.");
+
+        return null;
+    }
+
+    private static DateTime? AsUtcOrNull(DateTime? dt) =>
+        dt.HasValue ? DateTime.SpecifyKind(dt.Value, DateTimeKind.Utc) : null;
+
     /// <summary>Crée un nouveau client depuis le dashboard.</summary>
     public async Task<Result<ClientDto>> CreateAsync(CreateClientDto dto)
     {
@@ -74,18 +108,23 @@ public class ClientService : IClientService
         if (!Enum.TryParse<ClientStatus>(dto.Status, out var status))
             status = ClientStatus.Prospect;
 
+        var validationError = ValidateContractDates(status, dto.ContractDate, dto.DeliveryDate, dto.ContractEndDate);
+        if (validationError is not null)
+            return validationError;
+
         var client = new Client
         {
-            Name         = dto.Name,
-            Slug         = slug,
-            Email        = dto.Email,
-            Phone        = dto.Phone,
-            Notes        = dto.Notes,
-            ContractDate = DateTime.SpecifyKind(dto.ContractDate, DateTimeKind.Utc),
-            DeliveryDate = DateTime.SpecifyKind(dto.DeliveryDate, DateTimeKind.Utc),
-            Status       = status,
-            Priority     = dto.Priority,
-            SectorId     = dto.SectorId
+            Name            = dto.Name,
+            Slug            = slug,
+            Email           = dto.Email,
+            Phone           = dto.Phone,
+            Notes           = dto.Notes,
+            ContractDate    = AsUtcOrNull(dto.ContractDate),
+            DeliveryDate    = AsUtcOrNull(dto.DeliveryDate),
+            ContractEndDate = AsUtcOrNull(dto.ContractEndDate),
+            Status          = status,
+            Priority        = dto.Priority,
+            SectorId        = dto.SectorId
         };
 
         _db.Clients.Add(client);
@@ -110,16 +149,24 @@ public class ClientService : IClientService
         if (!Enum.TryParse<ClientStatus>(dto.Status, out var status))
             status = client.Status;
 
-        client.Name         = dto.Name;
-        client.Email        = dto.Email;
-        client.Phone        = dto.Phone;
-        client.Notes        = dto.Notes;
-        client.ContractDate = DateTime.SpecifyKind(dto.ContractDate, DateTimeKind.Utc);
-        client.DeliveryDate = DateTime.SpecifyKind(dto.DeliveryDate, DateTimeKind.Utc);
-        client.Status       = status;
-        client.Priority     = dto.Priority;
-        client.SectorId     = dto.SectorId;
-        client.UpdatedAt    = DateTime.UtcNow;
+        var validationError = ValidateContractDates(status, dto.ContractDate, dto.DeliveryDate, dto.ContractEndDate);
+        if (validationError is not null)
+            return validationError;
+
+        client.Name            = dto.Name;
+        client.Email           = dto.Email;
+        client.Phone           = dto.Phone;
+        client.Notes           = dto.Notes;
+        // Le frontend est responsable de retransmettre les dates existantes inchangées quand
+        // ses champs sont masqués (ex. statut Prospect) — voir ClientEditForm/nouveau-client.
+        // Le backend ne fait jamais d'hypothèse : il persiste exactement ce qui est envoyé.
+        client.ContractDate    = AsUtcOrNull(dto.ContractDate);
+        client.DeliveryDate    = AsUtcOrNull(dto.DeliveryDate);
+        client.ContractEndDate = AsUtcOrNull(dto.ContractEndDate);
+        client.Status          = status;
+        client.Priority        = dto.Priority;
+        client.SectorId        = dto.SectorId;
+        client.UpdatedAt       = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
         await _db.Entry(client).Reference(c => c.Sector).LoadAsync();
@@ -193,6 +240,7 @@ public class ClientService : IClientService
         Notes           = c.Notes,
         ContractDate    = c.ContractDate,
         DeliveryDate    = c.DeliveryDate,
+        ContractEndDate = c.ContractEndDate,
         Status          = c.Status.ToString(),
         Priority        = c.Priority,
         SectorId        = c.SectorId,

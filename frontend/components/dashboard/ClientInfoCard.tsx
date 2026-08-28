@@ -3,10 +3,13 @@
 import { Mail, Phone, Calendar, Check, Upload, ExternalLink as OpenIcon } from 'lucide-react'
 import type { ClientDto } from '@/lib/api'
 import type { PriorityLevel } from '@/lib/priority'
+import { formatContractDate, getContractState } from '@/lib/contractStatus'
 
 const clientStatusStyle = (s: string) => {
   if (s === 'Actif')   return { bg: 'var(--dash-success-bg)',  color: 'var(--dash-success)' }
   if (s === 'EnCours') return { bg: 'var(--dash-gold-muted)',  color: 'var(--dash-gold)' }
+  if (s === 'Prospect') return { bg: 'rgba(59,130,246,0.1)',   color: 'var(--dash-info)' }
+  if (s === 'Inactif') return { bg: 'var(--dash-border)',      color: 'var(--dash-text-subtle)' }
   return                      { bg: 'var(--dash-border)',      color: 'var(--dash-text-subtle)' }
 }
 
@@ -20,6 +23,7 @@ export default function ClientInfoCard({
   onOpenContractModal: () => void
 }) {
   const contractSt = clientStatusStyle(client.status)
+  const contractState = getContractState(client.contractEndDate)
 
   return (
     <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
@@ -28,7 +32,7 @@ export default function ClientInfoCard({
         {[
           { icon: Mail,     label: 'Email',        value: client.email },
           { icon: Phone,    label: 'Téléphone',    value: client.phone ?? '—' },
-          { icon: Calendar, label: 'Date contrat', value: new Date(client.contractDate).toLocaleDateString('fr-CA') },
+          { icon: Calendar, label: 'Date contrat', value: formatContractDate(client.contractDate) },
         ].map((info) => (
           <div key={info.label} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
             <info.icon size={14} style={{ color: 'var(--dash-gold)', flexShrink: 0, marginTop: '2px' }} />
@@ -45,13 +49,15 @@ export default function ClientInfoCard({
           <div>
             <p className="dash-micro-label" style={{ marginBottom: '4px' }}>Date livraison</p>
             <p style={{ color: urgent ? 'var(--dash-error)' : 'var(--dash-text)', fontSize: '13px', margin: 0 }}>
-              {new Date(client.deliveryDate).toLocaleDateString('fr-CA')}{urgent && ' ⚠️'}
+              {formatContractDate(client.deliveryDate)}{urgent && ' ⚠️'}
             </p>
           </div>
         </div>
         <div>
           <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Statut</p>
-          <span style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '999px', backgroundColor: contractSt.bg, color: contractSt.color }}>{client.status}</span>
+          <span style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '999px', backgroundColor: contractSt.bg, color: contractSt.color }}>
+            {client.status === 'EnCours' ? 'En cours' : client.status}
+          </span>
         </div>
         <div>
           <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Entente / Contrat</p>
@@ -72,6 +78,26 @@ export default function ClientInfoCard({
           </div>
         </div>
       </div>
+      {/* Fin de contrat + état calculé — jamais un statut client, voir lib/contractStatus.ts */}
+      {(client.contractEndDate || contractState) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '20px' }} className="info-grid">
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <Calendar size={14} style={{ color: 'var(--dash-gold)', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <p className="dash-micro-label" style={{ marginBottom: '4px' }}>Fin de contrat</p>
+              <p style={{ color: 'var(--dash-text)', fontSize: '13px', margin: 0 }}>{formatContractDate(client.contractEndDate)}</p>
+            </div>
+          </div>
+          {contractState && (
+            <div>
+              <p className="dash-micro-label" style={{ marginBottom: '8px' }}>État du contrat</p>
+              <span style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '999px', backgroundColor: contractState.bgColor, color: contractState.color }}>
+                {contractState.label}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
       {client.notes && (
         <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--dash-border)' }}>
           <p className="dash-micro-label" style={{ marginBottom: '8px' }}>Notes internes</p>

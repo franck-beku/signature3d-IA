@@ -38,18 +38,27 @@ public class TimelineService : ITimelineService
             Type  = nameof(TimelineEventType.ClientCree),
             Title = "Dossier client créé",
         };
-        yield return new TimelineItemDto
+
+        // ContractDate/DeliveryDate sont désormais nullables (Prospect sans contrat) —
+        // aucune fausse date n'est inventée : l'événement n'existe simplement pas encore.
+        if (client.ContractDate.HasValue)
         {
-            Date  = client.ContractDate,
-            Type  = nameof(TimelineEventType.ContratSigne),
-            Title = "Contrat signé",
-        };
-        yield return new TimelineItemDto
+            yield return new TimelineItemDto
+            {
+                Date  = client.ContractDate.Value,
+                Type  = nameof(TimelineEventType.ContratSigne),
+                Title = "Contrat signé",
+            };
+        }
+        if (client.DeliveryDate.HasValue)
         {
-            Date  = client.DeliveryDate,
-            Type  = nameof(TimelineEventType.LivraisonPrevue),
-            Title = "Livraison prévue",
-        };
+            yield return new TimelineItemDto
+            {
+                Date  = client.DeliveryDate.Value,
+                Type  = nameof(TimelineEventType.LivraisonPrevue),
+                Title = "Livraison prévue",
+            };
+        }
     }
 
     private async Task<IEnumerable<TimelineItemDto>> CollectContactMoments(Guid clientId)

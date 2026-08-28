@@ -76,6 +76,30 @@ public class LeadService : ILeadService
     /// </summary>
     public async Task<Result<LeadDto>> CreateAsync(CreateLeadDto dto)
     {
+        // 0) Validation serveur — tous les champs restent optionnels (null/vide/whitespace
+        //    accepté sans erreur) ; seule une valeur RÉELLEMENT fournie est contrôlée en
+        //    longueur, et l'email en plus en format. Jamais de troncature silencieuse :
+        //    une valeur trop longue est refusée, pas coupée.
+        if (!string.IsNullOrWhiteSpace(dto.Name) && dto.Name.Length > 200)
+            return Result<LeadDto>.Fail("Le nom dépasse la longueur maximale autorisée (200 caractères).");
+
+        if (!string.IsNullOrWhiteSpace(dto.Email))
+        {
+            if (dto.Email.Length > 254)
+                return Result<LeadDto>.Fail("L'adresse courriel dépasse la longueur maximale autorisée (254 caractères).");
+            if (!IsValidEmail(dto.Email))
+                return Result<LeadDto>.Fail("L'adresse courriel n'est pas valide.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.Phone) && dto.Phone.Length > 30)
+            return Result<LeadDto>.Fail("Le numéro de téléphone dépasse la longueur maximale autorisée (30 caractères).");
+
+        if (!string.IsNullOrWhiteSpace(dto.Message) && dto.Message.Length > 5000)
+            return Result<LeadDto>.Fail("Le message dépasse la longueur maximale autorisée (5000 caractères).");
+
+        if (dto.ButtonLabel.Length > 200)
+            return Result<LeadDto>.Fail("Le libellé du bouton dépasse la longueur maximale autorisée (200 caractères).");
+
         // 1) Résoudre le projet SEULEMENT si un ProjectId est fourni.
         Project? project = null;
 
@@ -183,6 +207,21 @@ public class LeadService : ILeadService
         await _db.SaveChangesAsync();
 
         return Result.Ok();
+    }
+
+    /// <summary>Validation de forme uniquement — s'appuie sur le parseur .NET existant,
+    /// aucune nouvelle dépendance.</summary>
+    private static bool IsValidEmail(string email)
+    {
+        try
+        {
+            _ = new System.Net.Mail.MailAddress(email);
+            return true;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
     }
 
     private static LeadDto MapToDto(Lead l) => new()

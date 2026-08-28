@@ -45,8 +45,9 @@ export default function NouveauClientPage() {
     email:        '',
     phone:        '',
     phoneExt:     '',
-    contractDate: '',
-    deliveryDate: '',
+    contractDate:    '',
+    deliveryDate:    '',
+    contractEndDate: '',
     status:       'Prospect',
     priority:     2,
     notes:        '',
@@ -95,12 +96,15 @@ export default function NouveauClientPage() {
         : undefined
 
       await clientsApi.create({
-        name:         form.name,
-        email:        form.email,
+        name:            form.name,
+        email:           form.email,
         phone,
-        notes:        form.notes || undefined,
-        contractDate: form.contractDate,
-        deliveryDate: form.deliveryDate,
+        notes:           form.notes || undefined,
+        // Prospect : jamais de date inventée — undefined (omis du JSON) plutôt qu'une
+        // chaîne vide, qu'un DateTime? backend ne saurait pas parser.
+        contractDate:    form.contractDate || undefined,
+        deliveryDate:    form.deliveryDate || undefined,
+        contractEndDate: form.contractEndDate || undefined,
         status:       form.status,
         priority:     form.priority,
         sectorId,
@@ -115,13 +119,16 @@ export default function NouveauClientPage() {
     }
   }
 
+  // Prospect : aucune date contractuelle exigée (pas encore de contrat).
+  // En cours / Actif : les trois dates sont obligatoires (validé aussi côté backend).
+  const datesRequired = form.status === 'EnCours' || form.status === 'Actif'
+
   const isValid =
     form.name &&
     form.sectorId &&
     (form.sectorId !== AUTRE_SECTEUR || form.sectorCustom.trim()) &&
     form.email &&
-    form.contractDate &&
-    form.deliveryDate
+    (!datesRequired || (form.contractDate && form.deliveryDate && form.contractEndDate))
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -214,21 +221,43 @@ export default function NouveauClientPage() {
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }} className="form-grid">
                   <div>
-                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Date de contrat *</label>
-                    <input type="date" required value={form.contractDate} onChange={(e) => set('contractDate', e.target.value)} style={inputStyle} className="dash-input" />
-                  </div>
-                  <div>
-                    <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Date de livraison *</label>
-                    <input type="date" required value={form.deliveryDate} onChange={(e) => set('deliveryDate', e.target.value)} style={inputStyle} className="dash-input" />
-                  </div>
-                  <div>
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Statut</label>
                     <select value={form.status} onChange={(e) => set('status', e.target.value)} style={inputStyle} className="dash-input">
                       <option value="Prospect">Prospect</option>
                       <option value="EnCours">En cours</option>
                       <option value="Actif">Actif</option>
+                      <option value="Inactif">Inactif</option>
                     </select>
+                    {form.status === 'Prospect' && (
+                      <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: '6px 0 0' }}>
+                        Pas encore de contrat — les dates apparaîtront une fois le client passé à &quot;En cours&quot;.
+                      </p>
+                    )}
                   </div>
+                  <div />
+
+                  {form.status !== 'Prospect' && (
+                    <>
+                      <div>
+                        <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>
+                          Date de contrat {datesRequired && '*'}
+                        </label>
+                        <input type="date" required={datesRequired} value={form.contractDate} onChange={(e) => set('contractDate', e.target.value)} style={inputStyle} className="dash-input" />
+                      </div>
+                      <div>
+                        <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>
+                          Date de livraison {datesRequired && '*'}
+                        </label>
+                        <input type="date" required={datesRequired} value={form.deliveryDate} onChange={(e) => set('deliveryDate', e.target.value)} style={inputStyle} className="dash-input" />
+                      </div>
+                      <div>
+                        <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>
+                          Date de fin de contrat {datesRequired && '*'}
+                        </label>
+                        <input type="date" required={datesRequired} value={form.contractEndDate} onChange={(e) => set('contractEndDate', e.target.value)} style={inputStyle} className="dash-input" />
+                      </div>
+                    </>
+                  )}
                   <div>
                     <label className="dash-label" style={{ display: 'block', marginBottom: '8px' }}>Priorité</label>
                     <div style={{ display: 'flex', gap: '8px' }}>

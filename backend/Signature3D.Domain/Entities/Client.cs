@@ -10,8 +10,11 @@ public class Client : BaseEntity
     public string? Phone { get; set; }
     public string? Notes { get; set; }
 
-    public DateTime ContractDate { get; set; }
-    public DateTime DeliveryDate { get; set; }
+    // Null pour un Prospect (pas encore de contrat) — obligatoires en pratique pour
+    // EnCours/Actif, validé dans ClientService, pas au niveau du modèle.
+    public DateTime? ContractDate { get; set; }
+    public DateTime? DeliveryDate { get; set; }
+    public DateTime? ContractEndDate { get; set; }
     public ClientStatus Status { get; set; } = ClientStatus.Prospect;
     public int Priority { get; set; } = 3;
 

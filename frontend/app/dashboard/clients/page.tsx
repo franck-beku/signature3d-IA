@@ -11,12 +11,14 @@ import { Plus, Search, ChevronUp, ChevronDown, ChevronRight, Trash2, Pencil, Ale
 import Link from 'next/link'
 import { clientsApi, sectorsApi, type ClientDto, type SectorDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
+import { formatContractDate } from '@/lib/contractStatus'
 
 const statusLabel = (s: string) => {
   if (s === 'Actif')     return { label: 'Actif',      bg: 'var(--dash-success-bg)',   color: 'var(--dash-success)' }
   if (s === 'EnCours')   return { label: 'En cours',   bg: 'var(--dash-gold-muted)',   color: 'var(--dash-gold)' }
   if (s === 'Prospect')  return { label: 'Prospect',   bg: 'rgba(59,130,246,0.1)',     color: 'var(--dash-info)' }
-  return                        { label: 'En attente', bg: 'var(--dash-border)',        color: 'var(--dash-text-subtle)' }
+  if (s === 'Inactif')   return { label: 'Inactif',    bg: 'var(--dash-border)',       color: 'var(--dash-text-subtle)' }
+  return                        { label: s,            bg: 'var(--dash-border)',        color: 'var(--dash-text-subtle)' }
 }
 
 const thStyle = {
@@ -37,7 +39,8 @@ const inputStyle = {
 
 interface EditForm {
   id: string; name: string; email: string; phone: string
-  contractDate: string; status: string; priority: number; sectorId: string
+  contractDate: string; deliveryDate: string; contractEndDate: string
+  status: string; priority: number; sectorId: string
 }
 
 export default function ClientsPage() {
@@ -82,14 +85,19 @@ export default function ClientsPage() {
 
   const openEdit = (c: ClientDto) => {
     setEditClient({
-      id:           c.id,
-      name:         c.name,
-      email:        c.email,
-      phone:        c.phone ?? '',
-      contractDate: c.contractDate.split('T')[0],
-      status:       c.status,
-      priority:     c.priority,
-      sectorId:     c.sectorId,
+      id:              c.id,
+      name:            c.name,
+      email:           c.email,
+      phone:           c.phone ?? '',
+      // Découpage brut de la chaîne ISO — pas de new Date(...).toLocaleDateString ici, pour
+      // ne jamais glisser d'un jour selon le fuseau du navigateur (ces dates n'ont pas d'heure
+      // significative). '' si absente : le formulaire ne doit jamais inventer de date.
+      contractDate:    c.contractDate?.split('T')[0] ?? '',
+      deliveryDate:    c.deliveryDate?.split('T')[0] ?? '',
+      contractEndDate: c.contractEndDate?.split('T')[0] ?? '',
+      status:          c.status,
+      priority:        c.priority,
+      sectorId:        c.sectorId,
     })
   }
 
@@ -99,14 +107,17 @@ export default function ClientsPage() {
     try {
       const sector = sectors.find((s) => s.name === editClient.sectorId || s.id === editClient.sectorId)
       const updated = await clientsApi.update(editClient.id, {
-        name:         editClient.name,
-        email:        editClient.email,
-        phone:        editClient.phone,
-        contractDate: editClient.contractDate,
-        deliveryDate: editClient.contractDate,
-        status:       editClient.status,
-        priority:     editClient.priority,
-        sectorId:     sector?.id ?? editClient.sectorId,
+        name:            editClient.name,
+        email:           editClient.email,
+        phone:           editClient.phone,
+        // undefined (jamais '') pour une date vide — un Prospect n'a pas de date inventée,
+        // et un DateTime? backend ne parserait pas une chaîne vide.
+        contractDate:    editClient.contractDate || undefined,
+        deliveryDate:    editClient.deliveryDate || undefined,
+        contractEndDate: editClient.contractEndDate || undefined,
+        status:          editClient.status,
+        priority:        editClient.priority,
+        sectorId:        sector?.id ?? editClient.sectorId,
       })
       setClients((prev) => prev.map((c) => c.id === editClient.id ? updated as ClientDto : c))
       setEditClient(null)
@@ -117,6 +128,9 @@ export default function ClientsPage() {
     }
   }
 
+  // En cours / Actif : les trois dates redeviennent obligatoires à l'édition, comme à la création.
+  const editDatesRequired = editClient?.status === 'EnCours' || editClient?.status === 'Actif'
+
   const filtered = clients
     .filter((c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -125,6 +139,11 @@ export default function ClientsPage() {
     )
     .sort((a, b) => {
       if (sortBy === 'contractDate') {
+        // Un Prospect sans date de contrat n'a rien à trier significativement — toujours
+        // relégué en fin de liste, quel que soit le sens du tri.
+        if (!a.contractDate && !b.contractDate) return 0
+        if (!a.contractDate) return 1
+        if (!b.contractDate) return -1
         return sortDir === 'asc'
           ? new Date(a.contractDate).getTime() - new Date(b.contractDate).getTime()
           : new Date(b.contractDate).getTime() - new Date(a.contractDate).getTime()
@@ -208,7 +227,7 @@ export default function ClientsPage() {
                           </td>
                           <td style={{ padding: '14px 16px' }}><span style={{ color: 'var(--dash-text-subtle)', fontSize: '13px' }}>{c.sectorName}</span></td>
                           <td style={{ padding: '14px 16px' }}><span style={{ color: 'var(--dash-text-subtle)', fontSize: '13px' }}>{c.email}</span></td>
-                          <td style={{ padding: '14px 16px' }}><span style={{ color: 'var(--dash-text)', fontSize: '13px' }}>{new Date(c.contractDate).toLocaleDateString('fr-CA')}</span></td>
+                          <td style={{ padding: '14px 16px' }}><span style={{ color: 'var(--dash-text)', fontSize: '13px' }}>{formatContractDate(c.contractDate)}</span></td>
                           <td style={{ padding: '14px 16px' }}>
                             <span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '999px', backgroundColor: status.bg, color: status.color }}>{status.label}</span>
                           </td>
@@ -292,18 +311,43 @@ export default function ClientsPage() {
                   <input type="tel" value={editClient.phone} onChange={(e) => setEditClient({ ...editClient, phone: e.target.value })} style={inputStyle} className="dash-input" />
                 </div>
                 <div>
-                  <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Date contrat</label>
-                  <input type="date" value={editClient.contractDate} onChange={(e) => setEditClient({ ...editClient, contractDate: e.target.value })} style={inputStyle} className="dash-input" />
-                </div>
-                <div>
                   <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Statut</label>
                   <select value={editClient.status} onChange={(e) => setEditClient({ ...editClient, status: e.target.value })} style={inputStyle} className="dash-input">
                     <option value="Prospect">Prospect</option>
-                    <option value="EnAttente">En attente</option>
                     <option value="EnCours">En cours</option>
                     <option value="Actif">Actif</option>
+                    <option value="Inactif">Inactif</option>
                   </select>
                 </div>
+                <div />
+
+                {editClient.status !== 'Prospect' && (
+                  <>
+                    <div>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>
+                        Date contrat {editDatesRequired && '*'}
+                      </label>
+                      <input type="date" required={editDatesRequired} value={editClient.contractDate} onChange={(e) => setEditClient({ ...editClient, contractDate: e.target.value })} style={inputStyle} className="dash-input" />
+                    </div>
+                    <div>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>
+                        Date livraison {editDatesRequired && '*'}
+                      </label>
+                      <input type="date" required={editDatesRequired} value={editClient.deliveryDate} onChange={(e) => setEditClient({ ...editClient, deliveryDate: e.target.value })} style={inputStyle} className="dash-input" />
+                    </div>
+                    <div>
+                      <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>
+                        Fin de contrat {editDatesRequired && '*'}
+                      </label>
+                      <input type="date" required={editDatesRequired} value={editClient.contractEndDate} onChange={(e) => setEditClient({ ...editClient, contractEndDate: e.target.value })} style={inputStyle} className="dash-input" />
+                    </div>
+                  </>
+                )}
+                {editClient.status === 'Prospect' && (editClient.contractDate || editClient.deliveryDate || editClient.contractEndDate) && (
+                  <p style={{ gridColumn: '1 / -1', color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0 }}>
+                    Ce client conserve des dates contractuelles déjà renseignées (masquées tant qu&apos;il reste Prospect) — elles ne seront pas effacées.
+                  </p>
+                )}
                 <div>
                   <label className="dash-label" style={{ display: 'block', marginBottom: '6px' }}>Priorité</label>
                   <select value={editClient.priority} onChange={(e) => setEditClient({ ...editClient, priority: Number(e.target.value) })} style={inputStyle} className="dash-input">

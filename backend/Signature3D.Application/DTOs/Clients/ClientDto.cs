@@ -11,8 +11,9 @@ public class ClientDto
     public string Email { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Notes { get; set; }
-    public DateTime ContractDate { get; set; }
-    public DateTime DeliveryDate { get; set; }
+    public DateTime? ContractDate { get; set; }
+    public DateTime? DeliveryDate { get; set; }
+    public DateTime? ContractEndDate { get; set; }
     public string Status { get; set; } = string.Empty;
     public int Priority { get; set; }
     public Guid SectorId { get; set; }        // ← ajouté
@@ -32,8 +33,9 @@ public class CreateClientDto
     public string Email { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Notes { get; set; }
-    public DateTime ContractDate { get; set; }
-    public DateTime DeliveryDate { get; set; }
+    public DateTime? ContractDate { get; set; }
+    public DateTime? DeliveryDate { get; set; }
+    public DateTime? ContractEndDate { get; set; }
     public string Status { get; set; } = "Prospect";
     public int Priority { get; set; } = 3;
     public Guid SectorId { get; set; }
@@ -48,8 +50,9 @@ public class UpdateClientDto
     public string Email { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Notes { get; set; }
-    public DateTime ContractDate { get; set; }
-    public DateTime DeliveryDate { get; set; }
+    public DateTime? ContractDate { get; set; }
+    public DateTime? DeliveryDate { get; set; }
+    public DateTime? ContractEndDate { get; set; }
     public string Status { get; set; } = string.Empty;
     public int Priority { get; set; }
     public Guid SectorId { get; set; }

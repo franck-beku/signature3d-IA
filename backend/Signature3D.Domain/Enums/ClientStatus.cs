@@ -5,6 +5,5 @@ public enum ClientStatus
     Prospect,
     EnCours,
     Actif,
-    Livre,
-    Suspendu
+    Inactif
 }

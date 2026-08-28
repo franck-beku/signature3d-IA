@@ -24,17 +24,27 @@ import Link from 'next/link'
 import { ArrowLeft, Plus, AlertTriangle } from 'lucide-react'
 import { clientsApi, projectsApi, contactsApi, timelineApi, type ClientDto, type ProjectDto, type ContactDto, type CreateContactDto, type TimelineItemDto } from '@/lib/api'
 import { getPriority } from '@/lib/priority'
+import { formatContractDate } from '@/lib/contractStatus'
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? 'https://signature3dia.com'
 
-function isDeliveryUrgent(date: string) {
-  const diff = new Date(date).getTime() - Date.now()
-  return diff > 0 && diff < 14 * 24 * 60 * 60 * 1000
+// Null désormais possible (Prospect sans date de livraison) — aucune urgence à signaler
+// dans ce cas. Comparaison au niveau du jour calendaire (composantes UTC, la date vient
+// d'un <input type="date"> stocké à minuit UTC) pour éviter un décalage d'un jour pour
+// un navigateur à l'ouest de l'UTC.
+function isDeliveryUrgent(date?: string | null) {
+  if (!date) return false
+  const d = new Date(date)
+  const dateOnly = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  const today = new Date()
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const diffDays = Math.round((dateOnly.getTime() - todayOnly.getTime()) / 86_400_000)
+  return diffDays >= 0 && diffDays < 14
 }
 
 interface EditProject {
   id: string; name: string; matterportId: string; status: string
-  buttons: { id: string; label: string; url: string; action: string; order: number }[]
+  buttons: { id: string; label: string; labelEn?: string; url?: string; action: string; order: number }[]
   details: { label: string; value: string; displayOrder: number; isVisible: boolean }[]
   suggestions: { label: string; labelEn?: string; answer?: string; answerEn?: string; order: number }[]
 }
@@ -142,14 +152,65 @@ export default function ClientDetailPage() {
 
   const handleSaveProject = async () => {
     if (!editProject) return
+
+    // Source de vérité pour tout champ non éditable dans cette modale — jamais
+    // editProject, qui ne porte que name/matterportId/buttons réellement modifiés.
+    const original = projects.find((p) => p.id === editProject.id)
+    if (!original) {
+      setError('Projet introuvable — sauvegarde annulée.')
+      return
+    }
+
     setSaving(true)
     try {
       const updated = await projectsApi.update(editProject.id, {
-        name: editProject.name, matterportId: editProject.matterportId,
-        ambassadorName: 'Luxedia', status: editProject.status,
-        buttons: editProject.buttons.map((b, i) => ({ label: b.label, url: b.url, action: b.action, order: i })),
-        details: editProject.details,
-        suggestions: editProject.suggestions,
+        // Champs réellement éditables dans cette modale.
+        name: editProject.name,
+        matterportId: editProject.matterportId,
+        buttons: editProject.buttons.map((b, i) => ({
+          label: b.label,
+          // Aucun contrôle de traduction dans cette modale : on préserve la valeur
+          // existante par correspondance d'id, jamais d'invention pour un bouton
+          // déjà connu, et rien pour un bouton nouvellement ajouté.
+          labelEn: original.buttons.find((ob) => ob.id === b.id)?.labelEn,
+          url: b.url,
+          action: b.action,
+          order: i,
+        })),
+
+        // Tout le reste : préservé tel quel depuis le projet original, jamais
+        // depuis editProject, pour ne jamais écraser une donnée non affichée ici.
+        ambassadorName: original.ambassadorName,
+        experienceType: original.experienceType,
+        experienceUrl: original.experienceUrl,
+        welcomeMessage: original.welcomeMessage,
+        welcomeMessageEn: original.welcomeMessageEn,
+        notes: original.notes,
+        contactPhone: original.contactPhone,
+        contactUrl: original.contactUrl,
+        status: original.status,
+        shortDescription: original.shortDescription,
+        shortDescriptionEn: original.shortDescriptionEn,
+        coverImage: original.coverImage,
+        isPublished: original.isPublished,
+        isFeatured: original.isFeatured,
+        displayOrder: original.displayOrder,
+        sectorId: original.sectorId,
+        offeringId: original.offeringId,
+        luxediaEnabled: original.luxediaEnabled,
+        luxediaAvatarUrl: original.luxediaAvatarUrl,
+        luxediaClientLogoUrl: original.luxediaClientLogoUrl,
+        luxediaPrimaryColor: original.luxediaPrimaryColor,
+        luxediaWidgetBgColor: original.luxediaWidgetBgColor,
+        luxediaBotMessageColor: original.luxediaBotMessageColor,
+        luxediaUserMessageColor: original.luxediaUserMessageColor,
+        luxediaWidgetPosition: original.luxediaWidgetPosition,
+        luxediaButtonIcon: original.luxediaButtonIcon,
+        luxediaLanguage: original.luxediaLanguage,
+        luxediaTone: original.luxediaTone,
+        luxediaPersonalityInstructions: original.luxediaPersonalityInstructions,
+        suggestions: original.suggestions,
+        details: original.details,
       })
       setProjects((prev) => prev.map((p) => p.id === editProject.id ? updated as ProjectDto : p))
       setEditProject(null)
@@ -249,7 +310,7 @@ export default function ClientDetailPage() {
           {urgent && (
             <div style={{ padding: '12px 16px', backgroundColor: 'var(--dash-error-bg)', border: '1px solid var(--dash-error-ring)', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <AlertTriangle size={15} style={{ color: 'var(--dash-error)', flexShrink: 0 }} />
-              <p style={{ color: 'var(--dash-error)', fontSize: '13px', margin: 0 }}>Date de livraison proche — {new Date(client.deliveryDate).toLocaleDateString('fr-CA')}</p>
+              <p style={{ color: 'var(--dash-error)', fontSize: '13px', margin: 0 }}>Date de livraison proche — {formatContractDate(client.deliveryDate)}</p>
             </div>
           )}
 

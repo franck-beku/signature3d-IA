@@ -142,13 +142,16 @@ export interface ClientDto {
   email: string
   phone?: string
   notes?: string
-  contractDate: string
-  deliveryDate: string
+  contractDate: string | null
+  deliveryDate: string | null
+  contractEndDate: string | null
   status: string
   priority: number
+  sectorId: string
   sectorName: string
   sectorSlug: string
   projectCount: number
+  contractFileUrl?: string
   createdAt: string
 }
 
@@ -173,7 +176,7 @@ export const clientsApi = {
   /** Crée un nouveau client */
   create: (data: {
     name: string; email: string; phone?: string; notes?: string
-    contractDate: string; deliveryDate: string; status: string
+    contractDate?: string; deliveryDate?: string; contractEndDate?: string; status: string
     priority: number; sectorId: string
   }) => apiFetch<ClientDto>('/api/clients', { method: 'POST', body: JSON.stringify(data) }),
 
@@ -246,7 +249,11 @@ export interface ProjectDto {
   luxediaUserMessageColor?: string
   luxediaAvatarUrl?: string
   luxediaClientLogoUrl?: string
+  luxediaWidgetPosition?: string
+  luxediaButtonIcon?: string
   luxediaLanguage?: string
+  luxediaTone?: string
+  luxediaPersonalityInstructions?: string
   luxediaEnabled: boolean
 }
 
@@ -326,7 +333,11 @@ export const projectsApi = {
     luxediaUserMessageColor?: string
     luxediaAvatarUrl?: string
     luxediaClientLogoUrl?: string
+    luxediaWidgetPosition?: string
+    luxediaButtonIcon?: string
     luxediaLanguage?: string
+    luxediaTone?: string
+    luxediaPersonalityInstructions?: string
     luxediaEnabled: boolean
   }) => apiFetch<ProjectDto>(`/api/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   /** Supprime un projet */
@@ -920,6 +931,7 @@ export interface AgendaEventDto {
   location?: string
   notes?: string
   customType?: string
+  color: string
   createdAt: string
   updatedAt: string
   clientId?: string
@@ -938,6 +950,7 @@ export interface CreateAgendaEventDto {
   location?: string
   notes?: string
   customType?: string
+  color?: string
   clientId?: string
   projectId?: string
   contactId?: string

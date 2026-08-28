@@ -8,14 +8,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 import { useLanguage } from '@/context/LanguageContext'
-import { projectsApi, sectorsApi, type ProjectCardDto, type SectorDto } from '@/lib/api'
+import { projectsApi, sectorsApi, ApiError, type ProjectCardDto, type SectorDto } from '@/lib/api'
 import { colors } from '@/config/theme'
 
 /** Génère l'URL de la vignette d'un espace Matterport. */
@@ -34,26 +34,54 @@ export default function SecteurPage() {
   const [sector, setSector] = useState<SectorDto | null>(null)
   const [projects, setProjects] = useState<ProjectCardDto[]>([])
   const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+  // Renommé (était `notFound`) pour ne pas entrer en conflit avec la fonction
+  // `notFound()` importée de next/navigation, utilisée plus bas.
+  const [sectorNotFound, setSectorNotFound] = useState(false)
+  // Panne API/réseau réelle — distincte d'un secteur inexistant (404) ET distincte
+  // d'un secteur valide sans réalisation publiée.
+  const [apiError, setApiError] = useState(false)
 
   useEffect(() => {
+    let active = true
     const load = async () => {
-      try {
-        const [sectorRes, projectsRes] = await Promise.all([
-          sectorsApi.getBySlug(secteurSlug).catch(() => null),
-          projectsApi.getBySector(secteurSlug),
-        ])
-        if (!sectorRes) { setNotFound(true) }
-        else setSector(sectorRes as SectorDto)
-        setProjects(projectsRes as ProjectCardDto[])
-      } catch {
-        setNotFound(true)
-      } finally {
-        setLoading(false)
+      setLoading(true)
+      setSectorNotFound(false)
+      setApiError(false)
+
+      const [sectorResult, projectsResult] = await Promise.allSettled([
+        sectorsApi.getBySlug(secteurSlug),
+        projectsApi.getBySector(secteurSlug),
+      ])
+      if (!active) return
+
+      if (sectorResult.status === 'fulfilled') {
+        setSector(sectorResult.value as SectorDto)
+      } else if (sectorResult.reason instanceof ApiError && sectorResult.reason.status === 404) {
+        // Vrai 404 backend : le secteur n'existe réellement pas.
+        setSectorNotFound(true)
+      } else {
+        // Toute autre erreur (réseau, 500, timeout…) : panne, pas une absence de secteur.
+        setApiError(true)
       }
+
+      if (projectsResult.status === 'fulfilled') {
+        setProjects(projectsResult.value as ProjectCardDto[])
+      } else {
+        // Un échec ici ne doit jamais être lu comme « aucune réalisation ».
+        setApiError(true)
+      }
+
+      setLoading(false)
     }
     load()
+    return () => { active = false }
   }, [secteurSlug])
+
+  // notFound() ne fonctionne correctement que déclenché pendant le rendu — jamais
+  // depuis l'effet ci-dessus. Tous les hooks sont déjà appelés à ce stade.
+  if (sectorNotFound) {
+    notFound()
+  }
 
   const secteurNom = sector?.name ?? secteurSlug
   const totalExp = projects.length
@@ -101,7 +129,7 @@ export default function SecteurPage() {
                   {t('Expériences', 'Experiences')} {secteurNom.toLowerCase()}
                 </motion.h1>
               </div>
-              {!loading && (
+              {!loading && !apiError && (
                 <motion.p
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }}
                   style={{ fontSize: '14px', color: '#9A8E78', fontWeight: 400, margin: 0 }}
@@ -121,6 +149,13 @@ export default function SecteurPage() {
           <div className="container-main">
             {loading ? (
               <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78', fontSize: '15px' }}>{t('Chargement…', 'Loading…')}</div>
+            ) : apiError ? (
+              <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78' }}>
+                <p style={{ fontSize: '16px' }}>{t('Une erreur est survenue. Veuillez réessayer.', 'Something went wrong. Please try again.')}</p>
+                <Link href="/realisations" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '16px', color: colors.gold, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+                  <ArrowLeft size={14} /> {t('Retour aux réalisations', 'Back to our work')}
+                </Link>
+              </div>
             ) : projects.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '80px 0', color: '#9A8E78' }}>
                 <p style={{ fontSize: '16px' }}>{t('Expériences bientôt disponibles.', 'Experiences coming soon.')}</p>
