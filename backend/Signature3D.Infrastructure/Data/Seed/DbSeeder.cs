@@ -7,12 +7,17 @@ namespace Signature3D.Infrastructure.Data.Seed;
 
 /// <summary>
 /// Seeder de la base de données.
-/// Crée les données initiales : utilisateurs Alain et Franck + secteurs de base.
+/// Crée les données initiales : utilisateurs Alain et Franck + secteurs de base — toujours,
+/// y compris en production. Le client de démonstration "Mercedes Québec" et ses projets
+/// Matterport factices ne sont créés que si <paramref name="includeDemoData"/> vaut true
+/// (environnement Development uniquement — voir l'appel dans Program.cs) : ils ne doivent
+/// jamais apparaître automatiquement sur une base de production (audit pré-déploiement,
+/// point critique n°1).
 /// À exécuter une seule fois au démarrage si la base est vide.
 /// </summary>
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext db)
+    public static async Task SeedAsync(AppDbContext db, bool includeDemoData)
     {
         // Vérifier si le seed a déjà été fait
         if (await db.Users.AnyAsync())
@@ -60,79 +65,84 @@ public static class DbSeeder
 
         db.Sectors.AddRange(secteurs);
 
-        /* ── Client démo — Mercedes Québec ── */
-        var sectorAuto = secteurs[0];
-
-        var mercedes = new Client
+        /* ── Client + projets de démonstration — DÉVELOPPEMENT LOCAL UNIQUEMENT.
+             Ne doivent jamais être créés automatiquement sur une base de production
+             (audit pré-déploiement, point critique n°1). Les comptes admin et les
+             secteurs ci-dessus, eux, restent seedés dans tous les environnements. ── */
+        if (includeDemoData)
         {
-            Name           = "Mercedes Québec",
-            Slug           = "mercedes-quebec",
-            Email          = "contact@mercedesquebec.ca",
-            Phone          = "+1 (418) 000-0000",
-            Notes          = "Client prioritaire — prototype en cours.",
-            ContractDate   = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Utc),
-            DeliveryDate   = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc),
-            Status         = ClientStatus.Actif,
-            Priority       = 1,
-            Sector         = sectorAuto
-        };
+            var sectorAuto = secteurs[0];
 
-        db.Clients.Add(mercedes);
+            var mercedes = new Client
+            {
+                Name           = "Mercedes Québec",
+                Slug           = "mercedes-quebec",
+                Email          = "contact@mercedesquebec.ca",
+                Phone          = "+1 (418) 000-0000",
+                Notes          = "Client prioritaire — prototype en cours.",
+                ContractDate   = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+                DeliveryDate   = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                Status         = ClientStatus.Actif,
+                Priority       = 1,
+                Sector         = sectorAuto
+            };
 
-        /* ── Projets démo Mercedes ── */
-        var projets = new List<Project>
-        {
-            new()
-            {
-                Name           = "Mercedes CLE 53 AMG",
-                Slug           = "mercedes-voiture-1",
-                MatterportId   = "WJzvgHF44zq",
-                AmbassadorName = "Luxedia",
-                WelcomeMessage = "Bienvenue chez Mercedes Québec ! Je suis Luxedia, votre assistant intelligent. Comment puis-je vous aider ?",
-                Status         = ProjectStatus.Active,
-                Client         = mercedes,
-                Buttons        = new List<ProjectButton>
-                {
-                    new() { Label = "Réserver un essai",     Url = "https://mercedes.ca",       Action = ButtonActionType.Link, Order = 0 },
-                    new() { Label = "Demander un prix",       Url = "",                           Action = ButtonActionType.Form, Order = 1 },
-                    new() { Label = "Parler à un conseiller", Url = "tel:+15140000000",           Action = ButtonActionType.Call, Order = 2 },
-                    new() { Label = "Itinéraire concession",  Url = "https://maps.google.com",   Action = ButtonActionType.Link, Order = 3 },
-                }
-            },
-            new()
-            {
-                Name           = "Mercedes Showroom",
-                Slug           = "mercedes-voiture-2",
-                MatterportId   = "Fg8etsLyrWz",
-                AmbassadorName = "Luxedia",
-                WelcomeMessage = "Bienvenue dans notre showroom virtuel ! Je suis Luxedia. Que puis-je faire pour vous ?",
-                Status         = ProjectStatus.Active,
-                Client         = mercedes,
-                Buttons        = new List<ProjectButton>
-                {
-                    new() { Label = "Réserver un essai",     Url = "https://mercedes.ca", Action = ButtonActionType.Link, Order = 0 },
-                    new() { Label = "Demander un prix",       Url = "",                    Action = ButtonActionType.Form, Order = 1 },
-                    new() { Label = "Parler à un conseiller", Url = "tel:+15140000000",    Action = ButtonActionType.Call, Order = 2 },
-                }
-            },
-            new()
-            {
-                Name           = "Mercedes Collection",
-                Slug           = "mercedes-voiture-3",
-                MatterportId   = "gTHjEVgJEbZ",
-                AmbassadorName = "Luxedia",
-                WelcomeMessage = "Découvrez notre collection ! Je suis Luxedia, votre guide virtuel.",
-                Status         = ProjectStatus.Active,
-                Client         = mercedes,
-                Buttons        = new List<ProjectButton>
-                {
-                    new() { Label = "Réserver un essai", Url = "https://mercedes.ca", Action = ButtonActionType.Link, Order = 0 },
-                    new() { Label = "Demander un prix",   Url = "",                    Action = ButtonActionType.Form, Order = 1 },
-                }
-            },
-        };
+            db.Clients.Add(mercedes);
 
-        db.Projects.AddRange(projets);
+            var projets = new List<Project>
+            {
+                new()
+                {
+                    Name           = "Mercedes CLE 53 AMG",
+                    Slug           = "mercedes-voiture-1",
+                    MatterportId   = "WJzvgHF44zq",
+                    AmbassadorName = "Luxedia",
+                    WelcomeMessage = "Bienvenue chez Mercedes Québec ! Je suis Luxedia, votre assistant intelligent. Comment puis-je vous aider ?",
+                    Status         = ProjectStatus.Active,
+                    Client         = mercedes,
+                    Buttons        = new List<ProjectButton>
+                    {
+                        new() { Label = "Réserver un essai",     Url = "https://mercedes.ca",       Action = ButtonActionType.Link, Order = 0 },
+                        new() { Label = "Demander un prix",       Url = "",                           Action = ButtonActionType.Form, Order = 1 },
+                        new() { Label = "Parler à un conseiller", Url = "tel:+15140000000",           Action = ButtonActionType.Call, Order = 2 },
+                        new() { Label = "Itinéraire concession",  Url = "https://maps.google.com",   Action = ButtonActionType.Link, Order = 3 },
+                    }
+                },
+                new()
+                {
+                    Name           = "Mercedes Showroom",
+                    Slug           = "mercedes-voiture-2",
+                    MatterportId   = "Fg8etsLyrWz",
+                    AmbassadorName = "Luxedia",
+                    WelcomeMessage = "Bienvenue dans notre showroom virtuel ! Je suis Luxedia. Que puis-je faire pour vous ?",
+                    Status         = ProjectStatus.Active,
+                    Client         = mercedes,
+                    Buttons        = new List<ProjectButton>
+                    {
+                        new() { Label = "Réserver un essai",     Url = "https://mercedes.ca", Action = ButtonActionType.Link, Order = 0 },
+                        new() { Label = "Demander un prix",       Url = "",                    Action = ButtonActionType.Form, Order = 1 },
+                        new() { Label = "Parler à un conseiller", Url = "tel:+15140000000",    Action = ButtonActionType.Call, Order = 2 },
+                    }
+                },
+                new()
+                {
+                    Name           = "Mercedes Collection",
+                    Slug           = "mercedes-voiture-3",
+                    MatterportId   = "gTHjEVgJEbZ",
+                    AmbassadorName = "Luxedia",
+                    WelcomeMessage = "Découvrez notre collection ! Je suis Luxedia, votre guide virtuel.",
+                    Status         = ProjectStatus.Active,
+                    Client         = mercedes,
+                    Buttons        = new List<ProjectButton>
+                    {
+                        new() { Label = "Réserver un essai", Url = "https://mercedes.ca", Action = ButtonActionType.Link, Order = 0 },
+                        new() { Label = "Demander un prix",   Url = "",                    Action = ButtonActionType.Form, Order = 1 },
+                    }
+                },
+            };
+
+            db.Projects.AddRange(projets);
+        }
 
         /* ── Sauvegarder tout ── */
         await db.SaveChangesAsync();
@@ -142,7 +152,8 @@ public static class DbSeeder
         Console.WriteLine($"[Seed]   → alain@signature3d.ai / {alainPassword}");
         Console.WriteLine($"[Seed]   → franck@signature3d.ai / {franckPassword}");
         Console.WriteLine("[Seed] Secteurs créés : Automobile, Immobilier, Restaurant, Hôtellerie, Commerce, Événementiel");
-        Console.WriteLine("[Seed] Client démo : Mercedes Québec avec 3 projets");
+        if (includeDemoData)
+            Console.WriteLine("[Seed] Client démo : Mercedes Québec avec 3 projets");
     }
 
     /// <summary>Génère un mot de passe aléatoire sécurisé pour un compte admin créé au seed initial.</summary>

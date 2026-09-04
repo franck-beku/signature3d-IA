@@ -312,7 +312,10 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedAsync(db);
+        // Comptes admin + secteurs : toujours. Client/projets de démonstration ("Mercedes
+        // Québec") : uniquement en Development — jamais créés automatiquement en production
+        // (audit pré-déploiement, point critique n°1).
+        await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedAsync(db, app.Environment.IsDevelopment());
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedOfferingsAsync(db);
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.SeedFaqsAsync(db);
         await Signature3D.Infrastructure.Data.Seed.DbSeeder.UpdateProjectsV2Async(db);
