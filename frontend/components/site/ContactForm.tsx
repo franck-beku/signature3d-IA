@@ -10,6 +10,7 @@ import { motion } from 'framer-motion'
 import { Send, CheckCircle, Mail, Phone, MapPin, Clock, UserCheck, Handshake } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { sectorsApi, leadsApi, type SectorDto } from '@/lib/api'
+import { sectorPublicLabel } from '@/lib/sectorLabels'
 import { colors } from '@/config/theme'
 
 const content = {
@@ -249,7 +250,7 @@ export default function ContactForm() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {sectors.map((s) => (
                   <span key={s.id} style={{ backgroundColor: 'rgba(200,164,93,0.06)', border: '1.5px solid rgba(200,164,93,0.18)', borderRadius: '6px', padding: '5px 14px', fontSize: '11px', fontWeight: 600, color: colors.gold, letterSpacing: '0.06em' }}>
-                    {s.name}
+                    {sectorPublicLabel(s.name, lang)}
                   </span>
                 ))}
               </div>
@@ -287,7 +288,7 @@ export default function ContactForm() {
                     <label style={labelStyle}>{c.fields.sector}</label>
                     <select value={formData.sector} onChange={(e) => setFormData({ ...formData, sector: e.target.value })} style={inputStyle} className="form-input">
                       <option value="">{c.fields.sectorPh}</option>
-                      {sectors.map((s) => <option key={s.id} value={s.slug}>{s.name}</option>)}
+                      {sectors.map((s) => <option key={s.id} value={s.slug}>{sectorPublicLabel(s.name, lang)}</option>)}
                       <option value="autre">{c.fields.other}</option>
                     </select>
                   </div>

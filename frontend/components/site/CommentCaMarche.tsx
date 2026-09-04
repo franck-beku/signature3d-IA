@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
-import { Aperture, Layers, Sparkles, QrCode, MapPin, type LucideIcon } from 'lucide-react';
+import { Aperture, Layers, Sparkles, QrCode, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { colors } from '@/config/theme';
 
@@ -252,20 +252,6 @@ export default function CommentCaMarche() {
             'Full support, from the first conversation to launch.'
           )}
         </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.35 }}
-          className="ccm-streetview"
-        >
-          <MapPin size={15} strokeWidth={1.8} />
-          {t(
-            'Publication native sur Google Street View, directement depuis Matterport.',
-            'Native publishing to Google Street View, directly from Matterport.'
-          )}
-        </motion.div>
       </div>
 
       {/* ── Fil doré en écho — reprend la continuité amorcée en bas de Luxedia.
@@ -390,27 +376,6 @@ export default function CommentCaMarche() {
           line-height: 1.8;
           margin: 54px auto 0;
           max-width: 560px;
-        }
-
-        .ccm-streetview {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 9px;
-          width: fit-content;
-          margin: 22px auto 0;
-          padding: 9px 18px;
-          border-radius: 999px;
-          background: rgba(200,164,93,0.08);
-          border: 1px solid rgba(200,164,93,0.28);
-          color: ${colors.ink};
-          font-size: 13px;
-          font-weight: 500;
-        }
-
-        .ccm-streetview svg {
-          color: ${colors.gold};
-          flex-shrink: 0;
         }
 
         @media (max-width: 760px) {

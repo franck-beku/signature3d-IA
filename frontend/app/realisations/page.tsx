@@ -14,6 +14,7 @@ import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 import { useLanguage } from '@/context/LanguageContext'
 import { sectorsApi, type SectorDto } from '@/lib/api'
+import { sectorPublicLabel } from '@/lib/sectorLabels'
 import { colors } from '@/config/theme'
 
 /* Images de secours par nom de secteur (si coverImage vide en base) */
@@ -100,6 +101,9 @@ export default function RealisationsPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }} className="secteurs-grid">
                 {secteurs.map((secteur, index) => {
                   const image = secteur.coverImage || secteur.imageUrl || SECTEUR_IMAGES[secteur.name] || FALLBACK_IMAGE
+                  // Nom interne (secteur.name) inchangé — sert toujours de clé pour SECTEUR_IMAGES
+                  // ci-dessus. Seul le libellé affiché au visiteur passe par le mapping public.
+                  const displayName = sectorPublicLabel(secteur.name, lang)
                   return (
                     <motion.div
                       key={secteur.slug}
@@ -119,11 +123,11 @@ export default function RealisationsPage() {
                         className="secteur-card"
                       >
                         <div style={{ position: 'relative', height: '280px', overflow: 'hidden' }}>
-                          <img src={image} alt={secteur.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.6s ease' }} className="secteur-img" />
+                          <img src={image} alt={displayName} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.6s ease' }} className="secteur-img" />
                           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(11,11,11,0.66) 0%, rgba(11,11,11,0.1) 60%, transparent 100%)' }} />
                           <div style={{ position: 'absolute', bottom: '20px', left: '24px' }}>
                             <h2 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '2.2rem', fontWeight: 500, color: '#FFFFFF', margin: 0, letterSpacing: '0' }}>
-                              {secteur.name}
+                              {displayName}
                             </h2>
                           </div>
                         </div>

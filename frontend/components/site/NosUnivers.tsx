@@ -18,7 +18,7 @@ const UNIVERS: Univers[] = [
     slug: 'automobile',
     image: '/assets/univers/automobile-nouveau.jpeg',
     label: { fr: 'SHOWROOM', en: 'SHOWROOM' },
-    titre: { fr: 'Automobile', en: 'Automotive' },
+    titre: { fr: 'Automobile + Mobilité', en: 'Automotive + Mobility' },
     accroche: { fr: 'Chaque modèle, exploré en détail.', en: 'Every model, explored in detail.' },
   },
   {
@@ -39,7 +39,7 @@ const UNIVERS: Univers[] = [
     slug: 'hotellerie',
     image: '/assets/univers/hotellerie-nouveau.jpeg',
     label: { fr: 'CHAMBRES & ESPACES', en: 'ROOMS & SPACES' },
-    titre: { fr: 'Hôtellerie', en: 'Hospitality' },
+    titre: { fr: 'Hébergement + Tourisme', en: 'Accommodation + Tourism' },
     accroche: { fr: 'Réserver en connaissance de cause.', en: 'Book with confidence.' },
   },
   {

@@ -44,11 +44,20 @@ const PERSONAS = [
   },
 ];
 
+/* Bascule d'affichage — temporaire et totalement réversible. La section reste masquée
+   sur la homepage tant que ce flag est à `false`, mais tout son code (JSX, styles,
+   animations) reste intact ci-dessous, inchangé. Repasser à `true` la réaffiche
+   immédiatement, sans rien reconstruire. Exportée pour que StreetView.tsx puisse
+   masquer son fil de connexion du haut en même temps (voir StreetView.tsx). */
+export const SHOW_LUXEDIA = false;
+
 export default function Luxedia() {
   const { t } = useLanguage();
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
   const activePersona = PERSONAS[active];
+
+  if (!SHOW_LUXEDIA) return null;
 
   const container = {
     hidden: {},

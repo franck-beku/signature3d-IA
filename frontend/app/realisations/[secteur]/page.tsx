@@ -16,6 +16,7 @@ import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 import { useLanguage } from '@/context/LanguageContext'
 import { projectsApi, sectorsApi, ApiError, type ProjectCardDto, type SectorDto } from '@/lib/api'
+import { sectorPublicLabel } from '@/lib/sectorLabels'
 import { colors } from '@/config/theme'
 
 /** Génère l'URL de la vignette d'un espace Matterport. */
@@ -83,7 +84,10 @@ export default function SecteurPage() {
     notFound()
   }
 
+  // Nom interne (sert de repli si le secteur n'a pas encore chargé) — inchangé.
   const secteurNom = sector?.name ?? secteurSlug
+  // Libellé public affiché au visiteur — seul ce qui suit passe par le mapping.
+  const secteurNomPublic = sectorPublicLabel(secteurNom, lang)
   const totalExp = projects.length
 
   return (
@@ -111,7 +115,7 @@ export default function SecteurPage() {
                 <ArrowLeft size={14} /> {t('Réalisations', 'Our work')}
               </Link>
               <span style={{ color: '#D8CEBE' }}>/</span>
-              <span style={{ fontSize: '13px', color: colors.gold, fontWeight: 600 }}>{secteurNom}</span>
+              <span style={{ fontSize: '13px', color: colors.gold, fontWeight: 600 }}>{secteurNomPublic}</span>
             </motion.div>
 
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
@@ -120,13 +124,13 @@ export default function SecteurPage() {
                   initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.05 }}
                   style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.32em', color: colors.gold, marginBottom: '14px' }}
                 >
-                  {secteurNom}
+                  {secteurNomPublic}
                 </motion.span>
                 <motion.h1
                   initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
                   style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)', fontWeight: 500, color: colors.ink, letterSpacing: '-0.01em', lineHeight: 1.08, margin: 0 }}
                 >
-                  {t('Expériences', 'Experiences')} {secteurNom.toLowerCase()}
+                  {t('Expériences', 'Experiences')} {secteurNomPublic.toLowerCase()}
                 </motion.h1>
               </div>
               {!loading && !apiError && (

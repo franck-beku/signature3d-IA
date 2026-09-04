@@ -24,7 +24,7 @@ const content = {
     contact:  'Contact',
     demo:     'Demander une démo',
     rights:   `© ${new Date().getFullYear()} Signature Immersion. Tous droits réservés.`,
-    universes: ['Automobile', 'Immobilier', 'Restaurant', 'Hôtellerie', 'Commerce'],
+    universes: ['Automobile + Mobilité', 'Immobilier', 'Restaurant', 'Hébergement + Tourisme', 'Commerce'],
     exploreLinks: [
       { href: '/services',          label: 'Services'          },
       { href: '/realisations',      label: 'Réalisations'      },
@@ -48,7 +48,7 @@ const content = {
     contact:  'Contact',
     demo:     'Request a demo',
     rights:   `© ${new Date().getFullYear()} Signature Immersion. All rights reserved.`,
-    universes: ['Automotive', 'Real Estate', 'Restaurant', 'Hospitality', 'Retail'],
+    universes: ['Automotive + Mobility', 'Real Estate', 'Restaurant', 'Accommodation + Tourism', 'Retail'],
     exploreLinks: [
       { href: '/services',          label: 'Services'    },
       { href: '/realisations',      label: 'Portfolio'   },

@@ -54,6 +54,14 @@ const MATTERPORT_MIN_DISPLAY_DELAY = 800;
    Matterport à moitié chargé — le diaporama photo reste affiché normalement. */
 const MATTERPORT_LOAD_TIMEOUT = 7000;
 
+/* Bascule d'affichage — temporaire et totalement réversible. Le Hero public n'affiche
+   que le diaporama photo tant que ce flag est à `false` : l'iframe Matterport n'est
+   plus montée (donc plus chargée) et ses deux timers de crossfade sont neutralisés
+   pour ne plus jamais toucher l'état du Hero en arrière-plan. Repasser à `true`
+   restaure exactement le comportement précédent (diaporama → crossfade → Matterport),
+   sans rien reconstruire : tout le code ci-dessous reste intact et inchangé. */
+const SHOW_HERO_MATTERPORT = false;
+
 export default function Hero() {
   const { t } = useLanguage();
   const [index, setIndex] = useState(0);
@@ -65,6 +73,7 @@ export default function Hero() {
   const matterportVisible = matterportIframeLoaded && minDelayElapsed && !matterportGaveUp;
 
   useEffect(() => {
+    if (!SHOW_HERO_MATTERPORT) return; // neutralisé — rien ne dépend plus de ce timer tant que Matterport est masqué
     const id = setTimeout(() => setMinDelayElapsed(true), MATTERPORT_MIN_DISPLAY_DELAY);
     return () => clearTimeout(id);
   }, []);
@@ -74,6 +83,7 @@ export default function Hero() {
   }, [matterportIframeLoaded]);
 
   useEffect(() => {
+    if (!SHOW_HERO_MATTERPORT) return; // neutralisé — même raison que le timer ci-dessus
     const id = setTimeout(() => {
       if (!matterportIframeLoadedRef.current) setMatterportGaveUp(true);
     }, MATTERPORT_LOAD_TIMEOUT);
@@ -140,27 +150,31 @@ export default function Hero() {
       </div>
 
       {/* ── Visite Matterport en fond — crossfade depuis le diaporama photo une fois chargée.
-           Le diaporama continue de tourner derrière : filet de sécurité si l'iframe échoue. ── */}
-      <div
-        aria-hidden="true"
-        className="hero-matterport"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 0,
-          opacity: matterportVisible ? 1 : 0,
-          transition: 'opacity 1.2s ease',
-        }}
-      >
-        <iframe
-          src={MATTERPORT_EMBED_URL}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-          allow="xr-spatial-tracking"
-          title={t('Visite Mercedes CLE 53 AMG', 'Mercedes CLE 53 AMG tour')}
-          tabIndex={-1}
-          onLoad={() => setMatterportIframeLoaded(true)}
-        />
-      </div>
+           Le diaporama continue de tourner derrière : filet de sécurité si l'iframe échoue.
+           Non montée du tout tant que SHOW_HERO_MATTERPORT est à false, pour ne jamais
+           charger l'iframe inutilement (voir la constante plus haut dans ce fichier). ── */}
+      {SHOW_HERO_MATTERPORT && (
+        <div
+          aria-hidden="true"
+          className="hero-matterport"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            opacity: matterportVisible ? 1 : 0,
+            transition: 'opacity 1.2s ease',
+          }}
+        >
+          <iframe
+            src={MATTERPORT_EMBED_URL}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+            allow="xr-spatial-tracking"
+            title={t('Visite Mercedes CLE 53 AMG', 'Mercedes CLE 53 AMG tour')}
+            tabIndex={-1}
+            onLoad={() => setMatterportIframeLoaded(true)}
+          />
+        </div>
+      )}
 
       {/* ── Voile sombre constant (lisibilité du texte) ── */}
       <div
@@ -358,35 +372,38 @@ export default function Hero() {
 
       {/* ── Bouton "Explorer" — mobile uniquement (interaction tactile du Matterport désactivée
            sur mobile pour ne pas bloquer le scroll de la page ; ce bouton ouvre la visite en
-           plein sur sa propre page). Masqué par défaut, réaffiché par la media query ci-dessous. ── */}
-      <Link
-        href={`/embed/${MATTERPORT_SLUG}`}
-        className="hero-explore-btn"
-        style={{
-          position: 'absolute',
-          bottom: '32px',
-          right: '20px',
-          zIndex: 2,
-          display: 'none',
-          alignItems: 'center',
-          gap: '8px',
-          pointerEvents: 'auto',
-          background: 'rgba(11,11,11,0.6)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          border: '1px solid rgba(200,164,93,0.4)',
-          color: '#F7F5F2',
-          borderRadius: '999px',
-          padding: '10px 16px',
-          fontSize: '11px',
-          fontWeight: 600,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          textDecoration: 'none',
-        }}
-      >
-        {t('Explorer', 'Explore')} <span aria-hidden="true">→</span>
-      </Link>
+           plein sur sa propre page). Masqué par défaut, réaffiché par la media query ci-dessous.
+           N'a de raison d'être que si Matterport est effectivement dans le Hero. ── */}
+      {SHOW_HERO_MATTERPORT && (
+        <Link
+          href={`/embed/${MATTERPORT_SLUG}`}
+          className="hero-explore-btn"
+          style={{
+            position: 'absolute',
+            bottom: '32px',
+            right: '20px',
+            zIndex: 2,
+            display: 'none',
+            alignItems: 'center',
+            gap: '8px',
+            pointerEvents: 'auto',
+            background: 'rgba(11,11,11,0.6)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            border: '1px solid rgba(200,164,93,0.4)',
+            color: '#F7F5F2',
+            borderRadius: '999px',
+            padding: '10px 16px',
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            textDecoration: 'none',
+          }}
+        >
+          {t('Explorer', 'Explore')} <span aria-hidden="true">→</span>
+        </Link>
+      )}
 
       {/* ── Progression du diaporama : 5 traits fins en bas ── */}
       <div

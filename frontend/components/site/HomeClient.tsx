@@ -7,6 +7,7 @@ import Hero from '@/components/site/Hero'
 import NouvelleFacon from '@/components/site/NouvelleFacon'
 import NosUnivers from '@/components/site/NosUnivers'
 import Luxedia from '@/components/site/Luxedia'
+import StreetView from '@/components/site/StreetView'
 import CommentCaMarche from '@/components/site/CommentCaMarche'
 import RealisationsVedettes from '@/components/site/RealisationsVedettes'
 import Temoignages from '@/components/site/Temoignages'
@@ -53,6 +54,7 @@ export default function HomeClient() {
       <NosUnivers />
       <RealisationsVedettes />
       <Luxedia />
+      <StreetView />
       <CommentCaMarche />
       <Temoignages />
       <OffresVedettes />
