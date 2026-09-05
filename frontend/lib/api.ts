@@ -1,11 +1,9 @@
 /**
  * Client API — Signature Immersion
  * Centralise tous les appels vers le backend ASP.NET Core.
- * En développement : http://localhost:8080
- * En production : https://api.signature3dia.com
+ * URL du backend : voir lib/env.ts (dev = localhost:8080, prod = NEXT_PUBLIC_API_URL obligatoire).
  */
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
+import { API_URL } from './env'
 
 /** Erreur API — conserve le code HTTP pour permettre de distinguer les erreurs
  *  sûres à afficher (400 validation, 429 rate limit) des pannes techniques opaques. */
@@ -631,7 +629,7 @@ export const documentsApi = {
     formData.append('isInternal', String(isInternal ?? false))
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/documents/upload/${projectId}`,
+      `${API_URL}/api/documents/upload/${projectId}`,
       {
         method: 'POST',
         headers: {
@@ -829,7 +827,7 @@ export const uploadApi = {
     if (folder) formData.append('folder', folder)
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/upload/image`,
+      `${API_URL}/api/upload/image`,
       {
         method: 'POST',
         headers: {

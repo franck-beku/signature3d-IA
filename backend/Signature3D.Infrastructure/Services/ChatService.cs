@@ -29,7 +29,8 @@ public class ChatService : IChatService
     // de noyer un document plus petit mais plus pertinent, uniquement parce qu'il a plus
     // de chunks en lice dans un tri global par pertinence.
     private const int PerDocumentChunkLimit = 3;
-    private const int MaxContextChunks = 6;
+    // 3 = comportement RAG historique, testé (RagScoringTests) — limite le bruit contextuel.
+    private const int MaxContextChunks = 3;
 
     public ChatService(AppDbContext db, IAIProvider aiProvider, IMemoryCache cache, IEmbeddingProvider embeddingProvider)
     {

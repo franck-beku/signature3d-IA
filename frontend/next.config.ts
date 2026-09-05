@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
+import { API_URL } from "./lib/env";
 
 const isDev = process.env.NODE_ENV === "development";
-const backendOrigin = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const backendOrigin = API_URL;
 
 // Codebase utilise style={{}} partout (pas de nonces/rendu dynamique) → 'unsafe-inline'
 // nécessaire sur script-src/style-src, conformément à l'approche "Without Nonces" documentée

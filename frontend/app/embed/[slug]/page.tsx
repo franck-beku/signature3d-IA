@@ -5,8 +5,7 @@
 
 import { notFound } from 'next/navigation'
 import EmbedInterface from '@/components/embed/EmbedInterface'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
+import { API_URL } from '@/lib/env'
 
 interface EmbedData {
   slug:           string
