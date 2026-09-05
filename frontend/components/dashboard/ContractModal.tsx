@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Upload, X, FileText, ExternalLink as OpenIcon } from 'lucide-react'
 import { API_URL } from '@/lib/env'
+import { clientsApi } from '@/lib/api'
 
 /* ── Modal Contrat PDF ── */
 export default function ContractModal({
@@ -15,9 +16,23 @@ export default function ContractModal({
   onUploaded: (url: string) => void
 }) {
   const [uploading, setUploading] = useState(false)
+  const [opening, setOpening]     = useState(false)
   const [error, setError]         = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleOpen = async () => {
+    setOpening(true)
+    setError(null)
+    try {
+      const { url } = await clientsApi.getContractUrl(clientId)
+      window.open(url, '_blank', 'noreferrer')
+    } catch {
+      setError('Impossible d\'ouvrir le contrat pour le moment.')
+    } finally {
+      setOpening(false)
+    }
+  }
 
   const handleUpload = async (file: File) => {
     if (!file.name.endsWith('.pdf')) { setError('Seuls les fichiers PDF sont acceptés.'); return }
@@ -63,9 +78,9 @@ export default function ContractModal({
               <p style={{ color: 'var(--dash-success)', fontSize: '13px', margin: '0 0 2px', fontWeight: 500 }}>Contrat existant</p>
               <p style={{ color: 'var(--dash-text-muted)', fontSize: '11px', margin: 0 }}>Un contrat PDF est déjà uploadé</p>
             </div>
-            <a href={existingUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-success-ring)', color: 'var(--dash-success)', textDecoration: 'none' }}>
-              <OpenIcon size={11} /> Ouvrir
-            </a>
+            <button onClick={handleOpen} disabled={opening} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--dash-success-ring)', color: 'var(--dash-success)', background: 'none', cursor: opening ? 'not-allowed' : 'pointer' }}>
+              <OpenIcon size={11} /> {opening ? 'Ouverture...' : 'Ouvrir'}
+            </button>
           </div>
         )}
 

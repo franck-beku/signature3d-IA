@@ -1,7 +1,9 @@
+using System.Net;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -260,6 +262,52 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+/* ══════════════════════════════════════════
+   7bis. FORWARDED HEADERS — IP réelle du client derrière Railway
+
+   Railway termine TLS et route tout le trafic public via son proxy interne : aucune
+   requête publique n'atteint Kestrel autrement (voir section 0, UseUrls sur
+   http://0.0.0.0). Sans ceci, HttpContext.Connection.RemoteIpAddress verrait l'IP du
+   proxy Railway pour TOUS les visiteurs, ce qui casse le partitionnement par IP du
+   rate limiter (section 4) — audit sécurité pré-staging, point Forwarded Headers.
+   Placé avant toute autre middleware pour que RemoteIpAddress soit déjà correct au
+   moment de UseRateLimiter() et de toute journalisation basée sur l'IP.
+
+   Seul XForwardedFor est activé — pas XForwardedProto : Kestrel n'a ni HSTS ni
+   UseHttpsRedirection (TLS déjà terminé par Railway, voir 8bis plus bas), donc rien
+   ne dépend de Request.Scheme ici. Activer Proto sans ces mécanismes n'aurait aucun
+   effet utile et risquerait la boucle de redirection déjà documentée en 8bis.
+
+   X-Forwarded-For plutôt que X-Real-IP (réévalué explicitement — audit sécurité) :
+   Railway documente X-Real-IP mais son propre support technique reconnaît un bug
+   connu où ce header reflète l'IP du CDN plutôt que celle du visiteur quand un CDN
+   est actif devant Railway — X-Forwarded-For est le header que Railway recommande
+   explicitement pour cet usage.
+
+   KnownNetworks contient la plage interne documentée du proxy Railway (100.64.0.0/10,
+   RFC 6598/CGNAT) EN PLUS de la boucle locale déjà présente par défaut (utile en dev) —
+   plutôt qu'un Clear() qui ferait confiance à N'IMPORTE QUEL pair TCP immédiat.
+   Différence concrète : avec Clear(), le header serait honoré même si Kestrel devenait
+   un jour joignable autrement qu'via Railway (erreur de config réseau, appel interne
+   inattendu) ; avec cette plage, il ne l'est QUE si la connexion vient bien de Railway
+   — sinon repli silencieux et sûr sur l'IP de connexion brute (dégradation vers le
+   comportement actuel, jamais une ouverture). ForwardLimit = 1 ne traite qu'un seul
+   maillon : la valeur ajoutée par ce proxy de confiance immédiat, jamais une valeur
+   qu'un client aurait lui-même insérée plus tôt dans la chaîne.
+
+   Limite connue, à vérifier après le premier déploiement Railway réel (voir audit) :
+   si un CDN est actif devant Railway pour ce projet, la chaîne peut compter un maillon
+   de plus (CDN + Railway) — potentiellement à ajuster (ForwardLimit = 2) selon la
+   topologie réelle observée. Non vérifiable depuis ce code seul.
+   ══════════════════════════════════════════ */
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor,
+    ForwardLimit = 1,
+};
+forwardedHeadersOptions.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("100.64.0.0"), 10));
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -285,9 +333,11 @@ if (app.Environment.IsDevelopment())
 
    Pas de CSP ici : l'API ne sert que du JSON, la CSP n'a de sens que pour du
    HTML rendu (gérée côté frontend, next.config.ts). Pas de HSTS/HttpsRedirection
-   non plus pour l'instant — Kestrel écoute en HTTP nu (TLS terminé par Railway) et
-   il n'y a pas de UseForwardedHeaders() en place ; les ajouter sans ça provoquerait
-   une boucle de redirection (Kestrel ne verrait jamais X-Forwarded-Proto: https).
+   non plus pour l'instant — Kestrel écoute en HTTP nu (TLS terminé par Railway).
+   UseForwardedHeaders (voir section 7bis ci-dessus) n'active volontairement que
+   XForwardedFor, pas XForwardedProto : les activer sans HSTS/HttpsRedirection
+   n'aurait aucun effet utile et risquerait une boucle de redirection (Kestrel ne
+   verrait jamais X-Forwarded-Proto: https autrement que via ce header).
    ══════════════════════════════════════════ */
 app.Use(async (context, next) =>
 {

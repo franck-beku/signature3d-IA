@@ -185,6 +185,10 @@ export const clientsApi = {
   /** Supprime un client */
   delete: (id: string) =>
     apiFetch(`/api/clients/${id}`, { method: 'DELETE' }),
+
+  /** URL à jour pour consulter le contrat (signée et temporaire pour un contrat privé) */
+  getContractUrl: (id: string) =>
+    apiFetch<{ url: string }>(`/api/clients/${id}/contract-url`),
 }
 
 /* ══════════════════════════════════════

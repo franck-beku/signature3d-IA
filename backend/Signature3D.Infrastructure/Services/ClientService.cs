@@ -204,7 +204,9 @@ public class ClientService : IClientService
             return Result<ClientDto>.Fail("Le fichier ne doit pas dépasser 50 MB.");
 
         using var stream = file.OpenReadStream();
-        var uploadResult = await _storageService.UploadAsync(stream, $"{Guid.NewGuid()}.pdf", $"contracts/{id}");
+        // Bucket privé : le contrat est un document confidentiel, pas un fichier public
+        // (audit sécurité pré-staging — corrige l'URL publique permanente précédente).
+        var uploadResult = await _storageService.UploadAsync(stream, $"{Guid.NewGuid()}.pdf", $"contracts/{id}", isPrivate: true);
 
         if (!uploadResult.Success)
             return Result<ClientDto>.Fail("Erreur lors de l'upload du contrat.");
@@ -214,6 +216,27 @@ public class ClientService : IClientService
         await _db.SaveChangesAsync();
 
         return Result<ClientDto>.Ok(MapToDto(client));
+    }
+
+    /// <summary>
+    /// Résout une URL utilisable pour le contrat d'un client. Les contrats uploadés avant
+    /// cette correction ont une URL publique permanente stockée telle quelle (aucune migration
+    /// automatique — voir audit) ; les contrats uploadés depuis sont une référence privée
+    /// "documents-private/..." résolue à la demande en URL signée (300s).
+    /// </summary>
+    public async Task<Result<string>> GetContractUrlAsync(Guid id)
+    {
+        var client = await _db.Clients.FindAsync(id);
+        if (client is null)
+            return Result<string>.Fail("Client introuvable.");
+
+        if (string.IsNullOrEmpty(client.ContractFileUrl))
+            return Result<string>.Fail("Aucun contrat pour ce client.");
+
+        if (client.ContractFileUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            return Result<string>.Ok(client.ContractFileUrl);
+
+        return await _storageService.GetSignedUrlAsync(client.ContractFileUrl);
     }
 
     /// <summary>Supprime un client et tous ses projets (cascade).</summary>
@@ -247,7 +270,15 @@ public class ClientService : IClientService
         SectorName      = c.Sector?.Name ?? string.Empty,
         SectorSlug      = c.Sector?.Slug ?? string.Empty,
         ProjectCount    = c.Projects?.Count ?? 0,
-        ContractFileUrl = c.ContractFileUrl,
+        // Ne jamais renvoyer la référence privée brute ("documents-private/...") au frontend —
+        // seule sa présence importe côté dashboard ; l'URL réelle s'obtient via
+        // GET /api/clients/{id}/contract-url. Les URLs historiques (contrats publics
+        // pré-correction) restent renvoyées telles quelles, aucun changement pour elles.
+        ContractFileUrl = string.IsNullOrEmpty(c.ContractFileUrl)
+            ? null
+            : c.ContractFileUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                ? c.ContractFileUrl
+                : "private",
         CreatedAt       = c.CreatedAt
     };
 

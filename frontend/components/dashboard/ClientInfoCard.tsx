@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { Mail, Phone, Calendar, Check, Upload, ExternalLink as OpenIcon } from 'lucide-react'
-import type { ClientDto } from '@/lib/api'
+import { clientsApi, type ClientDto } from '@/lib/api'
 import type { PriorityLevel } from '@/lib/priority'
 import { formatContractDate, getContractState } from '@/lib/contractStatus'
 
@@ -24,6 +25,20 @@ export default function ClientInfoCard({
 }) {
   const contractSt = clientStatusStyle(client.status)
   const contractState = getContractState(client.contractEndDate)
+  const [openingContract, setOpeningContract] = useState(false)
+
+  const handleOpenContract = async () => {
+    setOpeningContract(true)
+    try {
+      const { url } = await clientsApi.getContractUrl(client.id)
+      window.open(url, '_blank', 'noreferrer')
+    } catch {
+      // Silencieux ici — pas d'emplacement d'erreur dans cette carte ; l'utilisateur peut
+      // réessayer, ou ouvrir la modale d'upload (ContractModal) qui affiche les erreurs.
+    } finally {
+      setOpeningContract(false)
+    }
+  }
 
   return (
     <div style={{ backgroundColor: 'var(--dash-surface)', border: '1px solid var(--dash-border)', boxShadow: 'var(--dash-shadow)', borderRadius: '14px', padding: '24px' }}>
@@ -71,9 +86,9 @@ export default function ClientInfoCard({
               {client.contractFileUrl ? 'Contrat uploadé' : 'Uploader PDF'}
             </button>
             {client.contractFileUrl && (
-              <a href={client.contractFileUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', textDecoration: 'none' }} className="action-btn" title="Ouvrir le contrat">
+              <button onClick={handleOpenContract} disabled={openingContract} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--dash-border-input)', color: 'var(--dash-text-subtle)', background: 'none', cursor: openingContract ? 'not-allowed' : 'pointer' }} className="action-btn" title="Ouvrir le contrat">
                 <OpenIcon size={11} />
-              </a>
+              </button>
             )}
           </div>
         </div>

@@ -111,4 +111,20 @@ public async Task<IActionResult> UploadContract(Guid id, IFormFile file)
 
     return Ok(result.Data);
 }
+
+/// <summary>
+/// Retourne une URL utilisable pour consulter le contrat (URL signée temporaire pour un
+/// contrat privé, URL existante pour un contrat historique encore public).
+/// GET /api/clients/{id}/contract-url
+/// </summary>
+[HttpGet("{id:guid}/contract-url")]
+public async Task<IActionResult> GetContractUrl(Guid id)
+{
+    var result = await _clientService.GetContractUrlAsync(id);
+
+    if (!result.Success)
+        return NotFound(new { message = result.Error });
+
+    return Ok(new { url = result.Data });
+}
 }

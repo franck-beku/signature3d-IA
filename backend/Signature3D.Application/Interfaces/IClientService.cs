@@ -15,4 +15,11 @@ public interface IClientService
     Task<Result<ClientDto>> UpdateAsync(Guid id, UpdateClientDto dto);
     Task<Result> DeleteAsync(Guid id);
     Task<Result<ClientDto>> UploadContractAsync(Guid id, IFormFile file);
+
+    /// <summary>
+    /// Retourne une URL utilisable pour consulter le contrat : URL signée temporaire pour
+    /// un contrat stocké de façon privée, ou URL existante telle quelle pour un contrat
+    /// historique encore sur le bucket public (audit sécurité, stockage des contrats PDF).
+    /// </summary>
+    Task<Result<string>> GetContractUrlAsync(Guid id);
 }
