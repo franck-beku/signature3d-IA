@@ -85,7 +85,7 @@ export async function generateStickerQrDataUrl(targetUrl: string): Promise<strin
       resolve()
     }
     img.onerror = () => resolve()
-    img.src = '/logo-dark.png'
+    img.src = '/Newlogo.png'
   })
 
   return canvas.toDataURL('image/png')

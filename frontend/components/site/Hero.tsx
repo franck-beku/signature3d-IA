@@ -213,11 +213,11 @@ export default function Hero() {
              évite qu'un centrage classique ne déborde symétriquement au-dessus ET en
              dessous de la zone réservée (paddingTop) sur les écrans très courts. */
           alignItems: 'safe center',
-          /* Réserve un espace minimum sous la navbar fixe (68px, cf. Navbar.tsx) avant
-             le centrage vertical. Sans ça, sur un écran large mais peu haut, le H1 (dont
-             la taille suit le vw, pas le vh) peut chevaucher la navbar une fois centré
-             dans les 100vh du Hero. */
-          paddingTop: 'calc(68px + 40px)',
+          /* Réserve un espace minimum sous la navbar fixe (86px, cf. Navbar.tsx — agrandie
+             lors de l'ajustement de taille du logo) avant le centrage vertical. Sans ça, sur
+             un écran large mais peu haut, le H1 (dont la taille suit le vw, pas le vh) peut
+             chevaucher la navbar une fois centré dans les 100vh du Hero. */
+          paddingTop: 'calc(86px + 40px)',
           pointerEvents: 'none',
         }}
       >

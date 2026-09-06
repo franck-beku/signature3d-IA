@@ -6,7 +6,7 @@ namespace Signature3D.Infrastructure.Configurations;
 public class GroqSettings
 {
     public string ApiKey { get; set; } = string.Empty;
-    public string Model { get; set; } = "llama3-8b-8192";
+    public string Model { get; set; } = "openai/gpt-oss-120b";
     public int MaxTokens { get; set; } = 700;
     public double Temperature { get; set; } = 0.7;
 }

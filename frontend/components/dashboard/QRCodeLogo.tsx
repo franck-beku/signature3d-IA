@@ -79,7 +79,7 @@ export default function QRCodeLogo({ url, projectName, onClose }: Props) {
         ctx.fillText('S3D', SIZE / 2, SIZE / 2)
         setReady(true)
       }
-      img.src = '/logo-dark.png'
+      img.src = '/Newlogo.png'
     })
   }, [url])
 

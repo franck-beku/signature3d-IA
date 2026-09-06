@@ -73,7 +73,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <Link href="/dashboard" style={{ display: 'block' }}>
-          <Image src="/logo-dark.png" alt="Signature Immersion" width={120} height={40} style={{ height: '32px', width: 'auto' }} />
+          <Image src="/Newlogo.png" alt="Signature Immersion" width={120} height={40} style={{ height: '32px', width: 'auto' }} />
         </Link>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', marginTop: '8px' }}>
           {user?.role === 'admin' ? 'Admin' : 'Développeur'}

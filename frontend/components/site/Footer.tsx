@@ -95,7 +95,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: 'inline-block', marginBottom: '20px' }}>
-              <Image src="/logo-signature-footer.png" alt="Signature Immersion" width={240} height={80} style={{ height: '104px', width: 'auto', display: 'block' }} />
+              <Image src="/newlogo-footer.png" alt="Signature Immersion" width={104} height={104} quality={100} style={{ height: '104px', width: 'auto', display: 'block' }} />
             </Link>
             <p style={{ fontSize: '12px', lineHeight: 1.8, color: 'rgba(255,255,255,0.35)', fontWeight: 300, maxWidth: '260px', marginBottom: '20px' }}>{c.desc}</p>
             <p style={{ fontSize: '9px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.4em', color: 'rgba(200,164,93,0.5)' }}>{c.tagline}</p>

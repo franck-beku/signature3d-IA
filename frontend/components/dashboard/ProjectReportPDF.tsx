@@ -181,7 +181,7 @@ export default function ReportDocument({ project, visitStats, buttonStats, leadS
     <Document>
       <Page size="A4" style={styles.page}>
         {/* En-tête */}
-        <Image src="/logo-signature.png" style={styles.logo} />
+        <Image src="/Newlogo.png" style={styles.logo} />
         <Text style={styles.title}>RAPPORT DE PERFORMANCE</Text>
         <Text style={styles.projectName}>{project.name}</Text>
         <Text style={styles.clientName}>{project.clientName}</Text>

@@ -90,7 +90,7 @@ export default function AmbassadeurIA({
   const botMsgColor  = luxediaBotMessageColor  ?? '#1a1a1a'
   const userMsgColor = luxediaUserMessageColor ?? '#d4af37'
   const avatarSrc    = luxediaAvatarUrl      ?? '/luxedia-avatar.png'
-  const logoSrc      = luxediaClientLogoUrl  ?? '/logo-dark.png'
+  const logoSrc      = luxediaClientLogoUrl  ?? '/Newlogo.png'
 
   const [messages, setMessages]         = useState<Message[]>([
     { role: 'assistant', content: welcomeMessage },

@@ -60,11 +60,14 @@ export default function Navbar() {
       transition: 'background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease',
     }}>
       <div className="container-main">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '68px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '86px' }}>
 
-          {/* Logo */}
+          {/* Logo — 78px (+30% vs 60px précédent), ratio réel 551×453 du fichier Newlogo.png
+              (200×64 précédent correspondait à l'ancien fichier, pas au nouveau). Hauteur de
+              la barre passée à 86px (68px trop juste pour un logo à 78px) — seul changement
+              de conteneur nécessaire pour cet ajustement. */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <Image src="/logo-signature.png" alt="Signature Immersion" width={200} height={64} priority style={{ height: '60px', width: 'auto', display: 'block' }} />
+            <Image src="/Newlogo.png" alt="Signature Immersion" width={95} height={78} priority style={{ height: '78px', width: 'auto', objectFit: 'contain', display: 'block' }} />
           </Link>
 
           {/* Desktop nav */}

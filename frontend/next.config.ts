@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "teumxzxubxirivjofxqm.supabase.co" },
     ],
+    // 100 ajouté uniquement pour le logo du footer (dégradé or/argent) — les navigateurs
+    // reçoivent la variante WebP re-encodée par l'optimiseur Next, et la qualité par défaut
+    // (75) compresse visiblement ce dégradé fin (vérifié : fichier ~42% plus léger qu'en
+    // qualité 100, à contenu identique). Le défaut (75) reste inchangé pour tout le reste.
+    qualities: [75, 100],
   },
   async redirects() {
     return [
