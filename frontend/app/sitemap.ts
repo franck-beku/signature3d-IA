@@ -4,6 +4,11 @@ import { sectorsApi } from '@/lib/api'
 /* Même variable que .env.local (voir robots.ts) — repli localhost en dev. */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
+// sitemap.js est mis en cache/prérendu statiquement par défaut (voir doc Next.js) — sans ceci,
+// PUBLIC_SITE_ENABLED ne serait lu qu'au build et non à chaque requête, rendant l'interrupteur
+// de staging inopérant à l'exécution (il faudrait rebuilder pour changer d'état).
+export const dynamic = 'force-dynamic'
+
 /* Pages statiques publiques réelles (un dossier par route sous app/) — /dashboard et /embed
    volontairement absents, cf. robots.ts. */
 const STATIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']; priority: number }[] = [
@@ -29,6 +34,12 @@ const STATIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[numb
  * faire échouer tout le build — un sitemap incomplet vaut mieux qu'un déploiement bloqué.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Mode staging (PUBLIC_SITE_ENABLED=false, voir proxy.ts) : le site public est masqué
+  // derrière une page d'attente — aucun sitemap publié tant que ce n'est pas rouvert,
+  // pour ne pas inviter son indexation.
+  const isPublicSiteEnabled = process.env.PUBLIC_SITE_ENABLED !== 'false'
+  if (!isPublicSiteEnabled) return []
+
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
     url: `${SITE_URL}${route.path}`,
     lastModified: new Date(),
