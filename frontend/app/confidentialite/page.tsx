@@ -41,7 +41,7 @@ export default function ConfidentialitePage() {
         personnels recueillis dans le cadre de ses activités.
       </p>
       <p>
-        Alain Dubé est désigné comme responsable de la protection des renseignements personnels
+        Le président de Signature Immersion est désigné comme responsable de la protection des renseignements personnels
         au sein de Signature Immersion.
       </p>
       <p>
